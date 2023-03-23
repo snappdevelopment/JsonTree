@@ -1,0 +1,37 @@
+plugins {
+    alias libs.plugins.android.library
+    alias libs.plugins.kotlin.android
+    alias libs.plugins.publish
+}
+
+apply from: "$rootProject.projectDir/common-android.gradle"
+
+android {
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        targetCompatibility JavaVersion.toVersion(libs.versions.java.get())
+        sourceCompatibility JavaVersion.toVersion(libs.versions.java.get())
+    }
+    kotlinOptions {
+        jvmTarget = libs.versions.java.get()
+        freeCompilerArgs += ["-Xexplicit-api=strict", "-Xjvm-default=all", "-opt-in=kotlin.RequiresOptIn"]
+    }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion libs.versions.androidx.compose.compiler.get()
+    }
+}
+
+dependencies {
+    implementation libs.androidx.compose.ui
+    implementation libs.androidx.compose.ui.tooling
+    implementation libs.androidx.compose.foundation
+    implementation libs.androidx.compose.material
+    implementation libs.androidx.compose.runtime
+
+    implementation libs.kotlinx.serialization.json
+
+    testImplementation libs.testing.junit
+}

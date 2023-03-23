@@ -1,0 +1,18 @@
+android {
+    namespace = 'com.sebastianneubauer.jsontree'
+
+    compileSdk libs.versions.android.target.get().toInteger()
+
+    defaultConfig {
+        minSdk libs.versions.android.min.get().toInteger()
+        targetSdk libs.versions.android.target.get().toInteger()
+
+        aarMetadata {
+            minCompileSdk = libs.versions.android.min.get().toInteger()
+        }
+    }
+
+    buildFeatures {
+        buildConfig = false
+    }
+}
