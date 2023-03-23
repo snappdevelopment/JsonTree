@@ -11,7 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.sebastianneubauer.jsontree.JsonColors
+import com.sebastianneubauer.jsontree.ElementColors
 import com.sebastianneubauer.jsontree.JsonTree
 import com.sebastianneubauer.jsontreedemo.ui.theme.JsonTreeTheme
 
@@ -30,7 +30,7 @@ internal class MainActivity : ComponentActivity() {
                 ) {
                     JsonTree(
                         json = jsonString,
-                        colors = JsonColors(
+                        colors = ElementColors(
                             keyColor = Color.Blue,
                             stringValueColor = Color.Red,
                             numberValueColor = Color.Green,

@@ -31,75 +31,10 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.longOrNull
 
-private val jsonString = """
-    {
-    	"_id": "ZTMREO26GOD0SUJV",
-    	"name": "Cara Mcpherson",
-    	"dob": "2020-08-12",
-    	"addressObject": {
-    		"street": "6410 Chislehurst Avenue",
-    		"town": "Gatehouse of Fleet",
-    		"postcode": 5555,
-            "nestedObject": {
-                "integer": 10,
-                "string": "words",
-                "double": 10.5,
-                "boolean": false,
-                "anotherArray": [
-                    "hello world"
-                ]
-            }
-    	},
-    	"telephone": "+353-0817-812-287",
-    	"petsArray": [
-    		"bandit",
-    		"Bentley"
-    	],
-    	"score": 7.5,
-    	"email": null,
-    	"url": "https://www.crucial.com",
-    	"description": "developing extraordinary exercises mall finnish oclc loading radios impressed outcome harvey reputation surround robinson fight hanging championship moreover kde ensures",
-    	"verified": true,
-    	"salary": 46078
-    }
-""".trimIndent()
-
-private enum class CollapsableType {
-    OBJECT,
-    ARRAY
-}
-
-public data class JsonColors(
-    val keyColor: Color,
-    val stringValueColor: Color,
-    val numberValueColor: Color,
-    val booleanValueColor: Color,
-    val nullValueColor: Color,
-    val symbolColor: Color,
-)
-
-@Preview
-@Composable
-private fun JsonTreePreview() {
-    Box(modifier = Modifier.background(color = Color.White)) {
-        JsonTree(
-            json = jsonString,
-            colors = JsonColors(
-                keyColor = Color.Blue,
-                stringValueColor = Color.Red,
-                numberValueColor = Color.Green,
-                booleanValueColor = Color.Yellow,
-                nullValueColor = Color.Cyan,
-                symbolColor = Color.Black
-            )
-        )
-    }
-}
-
 @Composable
 public fun JsonTree(
     json: String,
-    colors: JsonColors = JsonColors(
+    colors: ElementColors = ElementColors(
         keyColor = Color.Blue,
         stringValueColor = Color.Red,
         numberValueColor = Color.Green,
@@ -135,7 +70,7 @@ public fun JsonTree(
 private fun ElementResolver(
     key: String?,
     value: JsonElement,
-    colors: JsonColors,
+    colors: ElementColors,
     indent: Dp,
     isLastItem: Boolean,
     isOuterMostItem: Boolean = false
@@ -155,6 +90,15 @@ private fun ElementResolver(
                 value.isString -> colors.stringValueColor
                 else -> colors.nullValueColor
             },
+            indent = if (isOuterMostItem) 0.dp else indent,
+            isLastItem = isLastItem
+        )
+        is JsonNull -> PrimitiveElement(
+            key = key,
+            value = value.toString(),
+            keyColor = colors.keyColor,
+            valueColor = colors.nullValueColor,
+            symbolColor = colors.symbolColor,
             indent = if (isOuterMostItem) 0.dp else indent,
             isLastItem = isLastItem
         )
@@ -196,15 +140,6 @@ private fun ElementResolver(
                 )
             }
         }
-        is JsonNull -> PrimitiveElement(
-            key = key,
-            value = value.toString(),
-            keyColor = colors.keyColor,
-            valueColor = colors.nullValueColor,
-            symbolColor = colors.symbolColor,
-            indent = if (isOuterMostItem) 0.dp else indent,
-            isLastItem = isLastItem
-        )
     }
 }
 
@@ -271,3 +206,54 @@ private fun PrimitiveElement(
         Text(text = coloredText)
     }
 }
+
+@Preview
+@Composable
+private fun JsonTreePreview() {
+    Box(modifier = Modifier.background(color = Color.White)) {
+        JsonTree(
+            json = jsonString,
+            colors = ElementColors(
+                keyColor = Color.Blue,
+                stringValueColor = Color.Red,
+                numberValueColor = Color.Green,
+                booleanValueColor = Color.Yellow,
+                nullValueColor = Color.Cyan,
+                symbolColor = Color.Black
+            )
+        )
+    }
+}
+
+private val jsonString = """
+    {
+    	"_id": "ZTMREO26GOD0SUJV",
+    	"name": "Cara Mcpherson",
+    	"dob": "2020-08-12",
+    	"addressObject": {
+    		"street": "6410 Chislehurst Avenue",
+    		"town": "Gatehouse of Fleet",
+    		"postcode": 5555,
+            "nestedObject": {
+                "integer": 10,
+                "string": "words",
+                "double": 10.5,
+                "boolean": false,
+                "anotherArray": [
+                    "hello world"
+                ]
+            }
+    	},
+    	"telephone": "+353-0817-812-287",
+    	"petsArray": [
+    		"bandit",
+    		"Bentley"
+    	],
+    	"score": 7.5,
+    	"email": null,
+    	"url": "https://www.crucial.com",
+    	"description": "developing extraordinary exercises mall finnish oclc loading radios impressed outcome harvey reputation surround robinson fight hanging championship moreover kde ensures",
+    	"verified": true,
+    	"salary": 46078
+    }
+""".trimIndent()
