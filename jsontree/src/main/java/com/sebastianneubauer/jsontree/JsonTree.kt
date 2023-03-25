@@ -1,17 +1,30 @@
 package com.sebastianneubauer.jsontree
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,9 +44,12 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.longOrNull
 
+private val iconSize = 20.dp
+
 @Composable
 public fun JsonTree(
     json: String,
+    initialState: TreeState = TreeState.EXPANDED,
     colors: ElementColors = ElementColors(
         keyColor = Color.Blue,
         stringValueColor = Color.Red,
@@ -42,7 +58,7 @@ public fun JsonTree(
         nullValueColor = Color.Cyan,
         symbolColor = Color.Black
     ),
-    indent: Dp = 16.dp,
+    icon: ImageVector = ImageVector.vectorResource(R.drawable.ic_arrow_right),
     onError: (Throwable) -> Unit = {}
 ) {
     val jsonElement: JsonElement? = remember(json) {
@@ -58,8 +74,9 @@ public fun JsonTree(
         ElementResolver(
             key = null,
             value = it,
+            state = initialState,
             colors = colors,
-            indent = indent,
+            icon = icon,
             isLastItem = true,
             isOuterMostItem = true
         )
@@ -70,8 +87,9 @@ public fun JsonTree(
 private fun ElementResolver(
     key: String?,
     value: JsonElement,
+    state: TreeState,
     colors: ElementColors,
-    indent: Dp,
+    icon: ImageVector,
     isLastItem: Boolean,
     isOuterMostItem: Boolean = false
 ) {
@@ -90,7 +108,7 @@ private fun ElementResolver(
                 value.isString -> colors.stringValueColor
                 else -> colors.nullValueColor
             },
-            indent = if (isOuterMostItem) 0.dp else indent,
+            indent = if (isOuterMostItem) 0.dp else iconSize * 2,
             isLastItem = isLastItem
         )
         is JsonNull -> PrimitiveElement(
@@ -99,45 +117,55 @@ private fun ElementResolver(
             keyColor = colors.keyColor,
             valueColor = colors.nullValueColor,
             symbolColor = colors.symbolColor,
-            indent = if (isOuterMostItem) 0.dp else indent,
+            indent = if (isOuterMostItem) 0.dp else iconSize * 2,
             isLastItem = isLastItem
         )
         is JsonArray -> CollapsableElement(
             type = CollapsableType.ARRAY,
             key = key,
-            indent = if (isOuterMostItem) 0.dp else indent,
+            initialState = state,
+            indent = if (isOuterMostItem) 0.dp else iconSize,
             keyColor = colors.keyColor,
             symbolColor = colors.symbolColor,
+            icon = icon,
             isLastItem = isLastItem,
         ) {
-            val entries = value.jsonArray.toList()
-            entries.forEachIndexed { index, entry ->
-                ElementResolver(
-                    key = null,
-                    value = entry,
-                    colors = colors,
-                    indent = indent,
-                    isLastItem = index == entries.size - 1
-                )
+            Column {
+                val entries = value.jsonArray.toList()
+                entries.forEachIndexed { index, entry ->
+                    ElementResolver(
+                        key = null,
+                        value = entry,
+                        state = state,
+                        colors = colors,
+                        icon = icon,
+                        isLastItem = index == entries.size - 1
+                    )
+                }
             }
         }
         is JsonObject -> CollapsableElement(
             type = CollapsableType.OBJECT,
             key = key,
-            indent = if (isOuterMostItem) 0.dp else indent,
+            initialState = state,
+            indent = if (isOuterMostItem) 0.dp else iconSize,
             keyColor = colors.keyColor,
             symbolColor = colors.symbolColor,
+            icon = icon,
             isLastItem = isLastItem,
         ) {
-            val entries = value.jsonObject.entries
-            entries.forEachIndexed { index, entry ->
-                ElementResolver(
-                    key = entry.key,
-                    value = entry.value,
-                    colors = colors,
-                    indent = indent,
-                    isLastItem = index == entries.size - 1
-                )
+            Column {
+                val entries = value.jsonObject.entries
+                entries.forEachIndexed { index, entry ->
+                    ElementResolver(
+                        key = entry.key,
+                        value = entry.value,
+                        state = state,
+                        colors = colors,
+                        icon = icon,
+                        isLastItem = index == entries.size - 1
+                    )
+                }
             }
         }
     }
@@ -147,31 +175,70 @@ private fun ElementResolver(
 private fun CollapsableElement(
     type: CollapsableType,
     key: String?,
+    initialState: TreeState,
     indent: Dp,
     keyColor: Color,
     symbolColor: Color,
+    icon: ImageVector,
     isLastItem: Boolean,
     content: @Composable () -> Unit,
 ) {
-    // Implement collapse mechanism
+    var state by remember { mutableStateOf(initialState) }
     val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
     val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
 
-    Row(
-        modifier = Modifier.fillMaxWidth()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = indent)
     ) {
-        Spacer(modifier = Modifier.width(indent))
-
-        Column {
-            Row {
-                key?.let {
-                    Text(text = "\"$it\"", color = keyColor)
-                    Text(text = ": ", color = symbolColor)
-                }
-                Text(text = openBracket, color = symbolColor)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    state = when (state) {
+                        TreeState.COLLAPSED -> TreeState.EXPANDED
+                        TreeState.EXPANDED -> TreeState.COLLAPSED
+                    }
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = Modifier
+                    .size(iconSize)
+                    .rotate(if (state == TreeState.COLLAPSED) 0F else 90F),
+                imageVector = icon,
+                contentDescription = null
+            )
+            key?.let {
+                Text(text = "\"$it\"", color = keyColor)
+                Text(text = ": ", color = symbolColor)
             }
+            Text(text = openBracket, color = symbolColor)
+            if (state == TreeState.COLLAPSED) {
+                Text(
+                    text = if (!isLastItem) "$closingBracket," else closingBracket,
+                    color = symbolColor
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .animateContentSize()
+                .run {
+                    // Using height instead of visibility to avoid leaving composition
+                    // and thus losing the TreeState of child elements
+                    if (state == TreeState.COLLAPSED) height(0.dp) else this
+                }
+        ) {
             content()
-            Text(text = if (!isLastItem) "$closingBracket," else closingBracket, color = symbolColor)
+
+            Text(
+                modifier = Modifier.padding(start = indent),
+                text = if (!isLastItem) "$closingBracket," else closingBracket,
+                color = symbolColor
+            )
         }
     }
 }
@@ -227,33 +294,44 @@ private fun JsonTreePreview() {
 
 private val jsonString = """
     {
-    	"_id": "ZTMREO26GOD0SUJV",
-    	"name": "Cara Mcpherson",
-    	"dob": "2020-08-12",
-    	"addressObject": {
-    		"street": "6410 Chislehurst Avenue",
-    		"town": "Gatehouse of Fleet",
-    		"postcode": 5555,
+    	"string": "hello world",
+    	"int": 42,
+    	"float": 42.5,
+        "boolean": true,
+        "null": null,
+    	"object": {
+    		"string": "hello world",
+    	    "int": 42,
+    	    "float": 42.5,
+            "boolean": true,
+            "null": null,
             "nestedObject": {
-                "integer": 10,
-                "string": "words",
-                "double": 10.5,
-                "boolean": false,
-                "anotherArray": [
+                "string": "hello world",
+    	        "int": 42,
+    	        "float": 42.5,
+                "boolean": true,
+                "nestedArray": [
                     "hello world"
+                ],
+                "arrayOfObjects": [
+                    {
+                        "string": "hello world"
+                    },
+                    {
+                        "int": 42,
+                        "anotherInt": 52
+                    },
+                    {
+                    
+                    }
                 ]
             }
     	},
-    	"telephone": "+353-0817-812-287",
-    	"petsArray": [
-    		"bandit",
-    		"Bentley"
+    	"topLevelArray": [
+    		"hello",
+    		"world"
     	],
-    	"score": 7.5,
-    	"email": null,
-    	"url": "https://www.crucial.com",
-    	"description": "developing extraordinary exercises mall finnish oclc loading radios impressed outcome harvey reputation surround robinson fight hanging championship moreover kde ensures",
-    	"verified": true,
-    	"salary": 46078
+    	"longString": "developing extraordinary exercises mall finnish oclc loading radios impressed outcome harvey reputation surround robinson fight hanging championship moreover kde ensures",
+        "anotherBoolean": false
     }
 """.trimIndent()

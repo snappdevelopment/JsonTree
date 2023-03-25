@@ -45,38 +45,47 @@ internal class MainActivity : ComponentActivity() {
     }
 
     private val jsonString = """
-        {
-            "_id": "ZTMREO26GOD0SUJV",
-            "name": "Cara Mcpherson",
-            "dob": "2020-08-12",
-            "addressObject": {
-                "street": "6410 Chislehurst Avenue",
-                "town": "Gatehouse of Fleet",
-                "postcode": 5555,
-                "nestedObject": {
-                    "integer": 10,
-                    "string": "words",
-                    "double": 10.5,
-                    "boolean": false,
-                    "anotherArray": [
-                        "hello world"
-                    ]
-                }
-            },
-            "telephone": "+353-0817-812-287",
-            "petsArray": [
-                "bandit",
-                "Bentley"
-            ],
-            "score": 7.5,
-            "email": null,
-            "url": "https://www.crucial.com",
-            "description": "developing extraordinary exercises mall finnish oclc loading radios 
-            impressed outcome harvey reputation surround robinson fight hanging championship 
-            moreover kde ensures",
-            "verified": true,
-            "salary": 46078
-        }
-    """.trimIndent()
+    {
+    	"string": "hello world",
+    	"int": 42,
+    	"float": 42.5,
+        "boolean": true,
+        "null": null,
+    	"object": {
+    		"string": "hello world",
+    	    "int": 42,
+    	    "float": 42.5,
+            "boolean": true,
+            "null": null,
+            "nestedObject": {
+                "string": "hello world",
+    	        "int": 42,
+    	        "float": 42.5,
+                "boolean": true,
+                "nestedArray": [
+                    "hello world"
+                ],
+                "arrayOfObjects": [
+                    {
+                        "string": "hello world"
+                    },
+                    {
+                        "int": 42,
+                        "anotherInt": 52
+                    },
+                    {
+                    
+                    }
+                ]
+            }
+    	},
+    	"topLevelArray": [
+    		"hello",
+    		"world"
+    	],
+    	"longString": "developing extraordinary exercises mall finnish oclc loading radios impressed outcome harvey reputation surround robinson fight hanging championship moreover kde ensures",
+        "anotherBoolean": false
+    }
+""".trimIndent()
 
 }
