@@ -21,6 +21,13 @@ public final class com/sebastianneubauer/jsontree/ElementColors {
 }
 
 public final class com/sebastianneubauer/jsontree/JsonTreeKt {
-	public static final fun JsonTree-942rkJo (Ljava/lang/String;Lcom/sebastianneubauer/jsontree/ElementColors;FLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun JsonTree (Ljava/lang/String;Lcom/sebastianneubauer/jsontree/TreeState;Lcom/sebastianneubauer/jsontree/ElementColors;Landroidx/compose/ui/graphics/vector/ImageVector;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/sebastianneubauer/jsontree/TreeState : java/lang/Enum {
+	public static final field COLLAPSED Lcom/sebastianneubauer/jsontree/TreeState;
+	public static final field EXPANDED Lcom/sebastianneubauer/jsontree/TreeState;
+	public static fun valueOf (Ljava/lang/String;)Lcom/sebastianneubauer/jsontree/TreeState;
+	public static fun values ()[Lcom/sebastianneubauer/jsontree/TreeState;
 }
 
