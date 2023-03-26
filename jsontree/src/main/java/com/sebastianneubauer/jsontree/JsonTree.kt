@@ -1,6 +1,5 @@
 package com.sebastianneubauer.jsontree
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -97,97 +96,55 @@ private fun ElementResolver(
     when (value) {
         is JsonPrimitive -> PrimitiveElement(
             key = key,
-            value = value.toString(),
-            keyColor = colors.keyColor,
-            symbolColor = colors.symbolColor,
-            valueColor = when {
-                value.doubleOrNull != null ||
-                    value.intOrNull != null ||
-                    value.floatOrNull != null ||
-                    value.longOrNull != null -> colors.numberValueColor
-                value.booleanOrNull != null -> colors.booleanValueColor
-                value.isString -> colors.stringValueColor
-                else -> colors.nullValueColor
-            },
+            value = value,
+            colors = colors,
             textStyle = textStyle,
             indent = if (isOuterMostItem) 0.dp else iconSize * 2,
             isLastItem = isLastItem
         )
         is JsonNull -> PrimitiveElement(
             key = key,
-            value = value.toString(),
-            keyColor = colors.keyColor,
-            valueColor = colors.nullValueColor,
-            symbolColor = colors.symbolColor,
+            value = value,
+            colors = colors,
             textStyle = textStyle,
             indent = if (isOuterMostItem) 0.dp else iconSize * 2,
             isLastItem = isLastItem
         )
         is JsonArray -> {
-            val entries = value.jsonArray.toList()
+            val childElements = remember(value) {
+                value.jsonArray.associateBy { it.hashCode().toString() }
+            }
 
             CollapsableElement(
                 type = CollapsableType.ARRAY,
                 key = key,
+                childElements = childElements,
                 initialState = state,
                 indent = if (isOuterMostItem) 0.dp else iconSize,
-                keyColor = colors.keyColor,
-                symbolColor = colors.symbolColor,
+                colors = colors,
                 textStyle = textStyle,
                 icon = icon,
-                iconColor = colors.iconColor,
                 iconSize = iconSize,
-                entriesSize = entries.size,
                 isLastItem = isLastItem,
-            ) {
-                Column {
-                    entries.forEachIndexed { index, entry ->
-                        ElementResolver(
-                            key = null,
-                            value = entry,
-                            state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
-                            colors = colors,
-                            textStyle = textStyle,
-                            icon = icon,
-                            iconSize = iconSize,
-                            isLastItem = index == entries.size - 1
-                        )
-                    }
-                }
-            }
+            )
         }
         is JsonObject -> {
-            val entries = value.jsonObject.entries
+            val childElements = remember(value) {
+                value.jsonObject.entries.associate { it.toPair() }
+            }
 
             CollapsableElement(
                 type = CollapsableType.OBJECT,
                 key = key,
+                childElements = childElements,
                 initialState = state,
                 indent = if (isOuterMostItem) 0.dp else iconSize,
-                keyColor = colors.keyColor,
-                symbolColor = colors.symbolColor,
+                colors = colors,
                 textStyle = textStyle,
                 icon = icon,
-                iconColor = colors.iconColor,
                 iconSize = iconSize,
-                entriesSize = entries.size,
                 isLastItem = isLastItem,
-            ) {
-                Column {
-                    entries.forEachIndexed { index, entry ->
-                        ElementResolver(
-                            key = entry.key,
-                            value = entry.value,
-                            state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
-                            colors = colors,
-                            textStyle = textStyle,
-                            icon = icon,
-                            iconSize = iconSize,
-                            isLastItem = index == entries.size - 1
-                        )
-                    }
-                }
-            }
+            )
         }
     }
 }
@@ -196,17 +153,14 @@ private fun ElementResolver(
 private fun CollapsableElement(
     type: CollapsableType,
     key: String?,
+    childElements: Map<String, JsonElement>,
     initialState: TreeState,
     indent: Dp,
-    keyColor: Color,
-    symbolColor: Color,
-    iconColor: Color,
+    colors: TreeColors,
     textStyle: TextStyle,
     icon: ImageVector,
     iconSize: Dp,
-    entriesSize: Int,
     isLastItem: Boolean,
-    content: @Composable () -> Unit,
 ) {
     var state by remember { mutableStateOf(initialState) }
     val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
@@ -236,27 +190,27 @@ private fun CollapsableElement(
                     .size(iconSize)
                     .rotate(if (state == TreeState.COLLAPSED) 0F else 90F),
                 imageVector = icon,
-                tint = iconColor,
+                tint = colors.iconColor,
                 contentDescription = null
             )
 
             key?.let {
-                Text(text = "\"$it\"", color = keyColor, style = textStyle)
-                Text(text = ": ", color = symbolColor)
+                Text(text = "\"$it\"", color = colors.keyColor, style = textStyle)
+                Text(text = ": ", color = colors.symbolColor)
             }
 
-            Text(text = openBracket, color = symbolColor, style = textStyle)
+            Text(text = openBracket, color = colors.symbolColor, style = textStyle)
 
             if (state == TreeState.COLLAPSED) {
                 Row {
                     Text(
-                        text = stringResource(R.string.jsontree_collapsable_items, entriesSize),
-                        color = symbolColor,
+                        text = stringResource(R.string.jsontree_collapsable_items, childElements.size),
+                        color = colors.symbolColor,
                         style = textStyle
                     )
                     Text(
                         text = if (!isLastItem) "$closingBracket," else closingBracket,
-                        color = symbolColor,
+                        color = colors.symbolColor,
                         style = textStyle
                     )
                 }
@@ -265,19 +219,29 @@ private fun CollapsableElement(
 
         Column(
             modifier = Modifier
-                .animateContentSize()
                 .run {
                     // Using height instead of visibility to avoid leaving composition
                     // and thus losing the TreeState of child elements
                     if (state == TreeState.COLLAPSED) height(0.dp) else this
                 }
         ) {
-            content()
+            childElements.forEach { (key, entry) ->
+                ElementResolver(
+                    key = if (type == CollapsableType.ARRAY) null else key,
+                    value = entry,
+                    state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
+                    colors = colors,
+                    textStyle = textStyle,
+                    icon = icon,
+                    iconSize = iconSize,
+                    isLastItem = childElements.values.lastOrNull() == entry
+                )
+            }
 
             Text(
                 modifier = Modifier.padding(start = indent),
                 text = if (!isLastItem) "$closingBracket," else closingBracket,
-                color = symbolColor,
+                color = colors.symbolColor,
                 style = textStyle
             )
         }
@@ -287,33 +251,47 @@ private fun CollapsableElement(
 @Composable
 private fun PrimitiveElement(
     key: String?,
-    value: String,
-    keyColor: Color,
-    valueColor: Color,
-    symbolColor: Color,
+    value: JsonPrimitive,
+    colors: TreeColors,
     textStyle: TextStyle,
     indent: Dp,
     isLastItem: Boolean,
 ) {
+    val valueColor = remember(value) {
+        when {
+            value.doubleOrNull != null ||
+                value.intOrNull != null ||
+                value.floatOrNull != null ||
+                value.longOrNull != null -> colors.numberValueColor
+            value.booleanOrNull != null -> colors.booleanValueColor
+            value.isString -> colors.stringValueColor
+            else -> colors.nullValueColor
+        }
+    }
+
+    val coloredValueString = remember(value, colors) {
+        val valueString = value.toString()
+        buildAnnotatedString {
+            append(valueString)
+            addStyle(SpanStyle(color = valueColor), 0, valueString.length)
+            if (!isLastItem) {
+                append(",")
+                addStyle(SpanStyle(color = colors.symbolColor), valueString.length + 1, valueString.length + 1)
+            }
+        }
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth()
     ) {
         Spacer(modifier = Modifier.width(indent))
 
         key?.let {
-            Text(text = "\"$it\"", color = keyColor, style = textStyle)
-            Text(text = ": ", color = symbolColor, style = textStyle)
+            Text(text = "\"$it\"", color = colors.keyColor, style = textStyle)
+            Text(text = ": ", color = colors.symbolColor, style = textStyle)
         }
 
-        val coloredText = buildAnnotatedString {
-            append(value)
-            addStyle(SpanStyle(color = valueColor), 0, value.length)
-            if (!isLastItem) {
-                append(",")
-                addStyle(SpanStyle(color = symbolColor), value.length + 1, value.length + 1)
-            }
-        }
-        Text(text = coloredText, style = textStyle)
+        Text(text = coloredValueString, style = textStyle)
     }
 }
 
