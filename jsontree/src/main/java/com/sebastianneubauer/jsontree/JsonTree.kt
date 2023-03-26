@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -50,7 +51,7 @@ import kotlinx.serialization.json.longOrNull
 @Composable
 public fun JsonTree(
     json: String,
-    initialState: TreeState = TreeState.EXPANDED,
+    initialState: TreeState = TreeState.FIRST_ITEM_EXPANDED,
     colors: TreeColors = defaultLightColors,
     icon: ImageVector = ImageVector.vectorResource(R.drawable.ic_arrow_right),
     iconSize: Dp = 20.dp,
@@ -122,61 +123,69 @@ private fun ElementResolver(
             indent = if (isOuterMostItem) 0.dp else iconSize * 2,
             isLastItem = isLastItem
         )
-        is JsonArray -> CollapsableElement(
-            type = CollapsableType.ARRAY,
-            key = key,
-            initialState = state,
-            indent = if (isOuterMostItem) 0.dp else iconSize,
-            keyColor = colors.keyColor,
-            symbolColor = colors.symbolColor,
-            textStyle = textStyle,
-            icon = icon,
-            iconColor = colors.iconColor,
-            iconSize = iconSize,
-            isLastItem = isLastItem,
-        ) {
-            Column {
-                val entries = value.jsonArray.toList()
-                entries.forEachIndexed { index, entry ->
-                    ElementResolver(
-                        key = null,
-                        value = entry,
-                        state = state,
-                        colors = colors,
-                        textStyle = textStyle,
-                        icon = icon,
-                        iconSize = iconSize,
-                        isLastItem = index == entries.size - 1
-                    )
+        is JsonArray -> {
+            val entries = value.jsonArray.toList()
+
+            CollapsableElement(
+                type = CollapsableType.ARRAY,
+                key = key,
+                initialState = state,
+                indent = if (isOuterMostItem) 0.dp else iconSize,
+                keyColor = colors.keyColor,
+                symbolColor = colors.symbolColor,
+                textStyle = textStyle,
+                icon = icon,
+                iconColor = colors.iconColor,
+                iconSize = iconSize,
+                entriesSize = entries.size,
+                isLastItem = isLastItem,
+            ) {
+                Column {
+                    entries.forEachIndexed { index, entry ->
+                        ElementResolver(
+                            key = null,
+                            value = entry,
+                            state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
+                            colors = colors,
+                            textStyle = textStyle,
+                            icon = icon,
+                            iconSize = iconSize,
+                            isLastItem = index == entries.size - 1
+                        )
+                    }
                 }
             }
         }
-        is JsonObject -> CollapsableElement(
-            type = CollapsableType.OBJECT,
-            key = key,
-            initialState = state,
-            indent = if (isOuterMostItem) 0.dp else iconSize,
-            keyColor = colors.keyColor,
-            symbolColor = colors.symbolColor,
-            textStyle = textStyle,
-            icon = icon,
-            iconColor = colors.iconColor,
-            iconSize = iconSize,
-            isLastItem = isLastItem,
-        ) {
-            Column {
-                val entries = value.jsonObject.entries
-                entries.forEachIndexed { index, entry ->
-                    ElementResolver(
-                        key = entry.key,
-                        value = entry.value,
-                        state = state,
-                        colors = colors,
-                        textStyle = textStyle,
-                        icon = icon,
-                        iconSize = iconSize,
-                        isLastItem = index == entries.size - 1
-                    )
+        is JsonObject -> {
+            val entries = value.jsonObject.entries
+
+            CollapsableElement(
+                type = CollapsableType.OBJECT,
+                key = key,
+                initialState = state,
+                indent = if (isOuterMostItem) 0.dp else iconSize,
+                keyColor = colors.keyColor,
+                symbolColor = colors.symbolColor,
+                textStyle = textStyle,
+                icon = icon,
+                iconColor = colors.iconColor,
+                iconSize = iconSize,
+                entriesSize = entries.size,
+                isLastItem = isLastItem,
+            ) {
+                Column {
+                    entries.forEachIndexed { index, entry ->
+                        ElementResolver(
+                            key = entry.key,
+                            value = entry.value,
+                            state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
+                            colors = colors,
+                            textStyle = textStyle,
+                            icon = icon,
+                            iconSize = iconSize,
+                            isLastItem = index == entries.size - 1
+                        )
+                    }
                 }
             }
         }
@@ -195,6 +204,7 @@ private fun CollapsableElement(
     textStyle: TextStyle,
     icon: ImageVector,
     iconSize: Dp,
+    entriesSize: Int,
     isLastItem: Boolean,
     content: @Composable () -> Unit,
 ) {
@@ -216,7 +226,7 @@ private fun CollapsableElement(
                 ) {
                     state = when (state) {
                         TreeState.COLLAPSED -> TreeState.EXPANDED
-                        TreeState.EXPANDED -> TreeState.COLLAPSED
+                        TreeState.EXPANDED, TreeState.FIRST_ITEM_EXPANDED -> TreeState.COLLAPSED
                     }
                 },
             verticalAlignment = Alignment.CenterVertically
@@ -238,11 +248,18 @@ private fun CollapsableElement(
             Text(text = openBracket, color = symbolColor, style = textStyle)
 
             if (state == TreeState.COLLAPSED) {
-                Text(
-                    text = if (!isLastItem) "$closingBracket," else closingBracket,
-                    color = symbolColor,
-                    style = textStyle
-                )
+                Row {
+                    Text(
+                        text = stringResource(R.string.jsontree_collapsable_items, entriesSize),
+                        color = symbolColor,
+                        style = textStyle
+                    )
+                    Text(
+                        text = if (!isLastItem) "$closingBracket," else closingBracket,
+                        color = symbolColor,
+                        style = textStyle
+                    )
+                }
             }
         }
 
@@ -307,6 +324,7 @@ private fun JsonTreeDarkPreview() {
         JsonTree(
             json = jsonString,
             colors = defaultDarkColors,
+            initialState = TreeState.FIRST_ITEM_EXPANDED
         )
     }
 }
@@ -318,6 +336,7 @@ private fun JsonTreeLightPreview() {
         JsonTree(
             json = jsonString,
             colors = defaultLightColors,
+            initialState = TreeState.FIRST_ITEM_EXPANDED
         )
     }
 }
