@@ -47,12 +47,26 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.longOrNull
 
+/**
+ * Renders JSON data as a formatted tree with collapsable objects and arrays.
+ * Collapsed items display the amount of child items inside them.
+ *
+ * @param json The json data as a string.
+ * @param initialState The initial state of the tree before user interaction. One of [TreeState].
+ * @param colors The color palette the tree uses. [defaultLightColors], [defaultDarkColors] or a
+ * custom instance of [TreeColors].
+ * @param icon The icon which is shown in front of collapsable items. Default value is an arrow icon.
+ * @param iconSize The size of the [icon]. This size is also used to calculate indents.
+ * @param textStyle The style which is used for all texts in the tree.
+ * @param onError A callback which is called when the json can't be parsed and thus won't
+ * be rendered. Receives the throwable of the error.
+ */
 @Composable
 public fun JsonTree(
     json: String,
     initialState: TreeState = TreeState.FIRST_ITEM_EXPANDED,
     colors: TreeColors = defaultLightColors,
-    icon: ImageVector = ImageVector.vectorResource(R.drawable.ic_arrow_right),
+    icon: ImageVector = ImageVector.vectorResource(R.drawable.jsontree_arrow_right),
     iconSize: Dp = 20.dp,
     textStyle: TextStyle = LocalTextStyle.current,
     onError: (Throwable) -> Unit = {}
