@@ -13,11 +13,12 @@
 
 ## About
 
-
+`JsonTree` is an Android library to display formatted JSON data in Compose.
+Users can expand/collapse objects and arrays, and show counts of child items. JsonTree offers several customizations for visual appearance like syntax highlighting, text style and icons.
 
 ## Download
 
-See `maven-central` tag at the top for latest version.
+See `maven-central` tag at the top for the latest version.
 
 ```groovy
 dependencies {
@@ -27,9 +28,39 @@ dependencies {
 
 ## How to use
 
+Add `JsonTree` to your Compose UI and customize it with the following options. Get started by only providing your JSON data and using the default parameter.
+```kotlin
+JsonTree(
+    json = "{ "key": "value" }"
+)
+```
+For more customization, use the following parameter.
 
 ```kotlin
-
+JsonTree(
+    // Your json data
+    json = "{ \"key\": \"value\" }",
+    // The initial state of the tree. Expand the first item or expand/collapse all items
+    initialState = TreeState.FIRST_ITEM_EXPANDED,
+    // The color palette for your json tree
+    colors = TreeColors(
+        keyColor = Color.Blue,
+        stringValueColor = Color.Red,
+        numberValueColor = Color.Green,
+        booleanValueColor = Color.Yellow,
+        nullValueColor = Color.Yellow,
+        symbolColor = Color.Black,
+        iconColor = Color.Black,
+    ),
+    // The arrow icon for collapsable items
+    icon = ImageVector.vectorResource(R.drawable.my_arrow_icon),
+    // The size of the arrow icon
+    iconSize = 20.dp,
+    // The TextStyle to use for the json tree
+    textStyle = TextStyle(...),
+    // A callback method which is called when the provided json data can't be parsed.
+    onError = { throwable -> /* Do something */ }
+)
 ```
 
 ## Tech Stack
@@ -40,9 +71,6 @@ dependencies {
 - API validation
 - GitHub Actions
 - Gradle version catalog
-
-## Attribution
-
 
 ## License
 
