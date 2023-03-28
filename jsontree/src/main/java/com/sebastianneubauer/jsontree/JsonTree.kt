@@ -126,7 +126,12 @@ private fun ElementResolver(
         )
         is JsonArray -> {
             val childElements = remember(value) {
-                value.jsonArray.associateBy { it.hashCode().toString() }
+                buildMap {
+                    val items = value.jsonArray.mapIndexed { index, item ->
+                        Pair(index.toString(), item)
+                    }
+                    putAll(items)
+                }
             }
 
             CollapsableElement(
@@ -352,6 +357,7 @@ private val jsonString = """
     	        "float": 42.5,
                 "boolean": true,
                 "nestedArray": [
+                    "hello world",
                     "hello world"
                 ],
                 "arrayOfObjects": [
