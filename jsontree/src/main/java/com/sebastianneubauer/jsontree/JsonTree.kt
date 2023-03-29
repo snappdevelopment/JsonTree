@@ -30,6 +30,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -184,6 +185,34 @@ private fun CollapsableElement(
     var state by remember { mutableStateOf(initialState) }
     val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
     val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
+    val itemCount = stringResource(R.string.jsontree_collapsable_items, childElements.size)
+
+    val coloredText = remember(key, state, colors, isLastItem) {
+        buildAnnotatedString {
+            key?.let {
+                withStyle(SpanStyle(color = colors.keyColor)) {
+                    append("\"$it\"")
+                }
+                withStyle(SpanStyle(color = colors.symbolColor)) {
+                    append(": ")
+                }
+            }
+
+            withStyle(SpanStyle(color = colors.symbolColor)) {
+                append(openBracket)
+            }
+
+            if (state == TreeState.COLLAPSED) {
+                withStyle(SpanStyle(color = colors.symbolColor)) {
+                    append(itemCount)
+                }
+
+                withStyle(SpanStyle(color = colors.symbolColor)) {
+                    append(if (!isLastItem) "$closingBracket," else closingBracket)
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -213,27 +242,7 @@ private fun CollapsableElement(
                 contentDescription = null
             )
 
-            key?.let {
-                Text(text = "\"$it\"", color = colors.keyColor, style = textStyle)
-                Text(text = ": ", color = colors.symbolColor)
-            }
-
-            Text(text = openBracket, color = colors.symbolColor, style = textStyle)
-
-            if (state == TreeState.COLLAPSED) {
-                Row {
-                    Text(
-                        text = stringResource(R.string.jsontree_collapsable_items, childElements.size),
-                        color = colors.symbolColor,
-                        style = textStyle
-                    )
-                    Text(
-                        text = if (!isLastItem) "$closingBracket," else closingBracket,
-                        color = colors.symbolColor,
-                        style = textStyle
-                    )
-                }
-            }
+            Text(text = coloredText, style = textStyle)
         }
 
         Column(
@@ -288,29 +297,34 @@ private fun PrimitiveElement(
         }
     }
 
-    val coloredValueString = remember(value, colors) {
-        val valueString = value.toString()
+    val coloredText = remember(key, value, colors, isLastItem) {
         buildAnnotatedString {
-            append(valueString)
-            addStyle(SpanStyle(color = valueColor), 0, valueString.length)
+            key?.let {
+                withStyle(SpanStyle(color = colors.keyColor)) {
+                    append("\"$it\"")
+                }
+                withStyle(SpanStyle(color = colors.symbolColor)) {
+                    append(": ")
+                }
+            }
+
+            withStyle(SpanStyle(color = valueColor)) {
+                append(value.toString())
+            }
+
             if (!isLastItem) {
-                append(",")
-                addStyle(SpanStyle(color = colors.symbolColor), valueString.length + 1, valueString.length + 1)
+                withStyle(SpanStyle(color = colors.symbolColor)) {
+                    append(",")
+                }
             }
         }
     }
 
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Spacer(modifier = Modifier.width(indent))
-
-        key?.let {
-            Text(text = "\"$it\"", color = colors.keyColor, style = textStyle)
-            Text(text = ": ", color = colors.symbolColor, style = textStyle)
-        }
-
-        Text(text = coloredValueString, style = textStyle)
+        Text(text = coloredText, style = textStyle)
     }
 }
 
@@ -321,7 +335,7 @@ private fun JsonTreeDarkPreview() {
         JsonTree(
             json = jsonString,
             colors = defaultDarkColors,
-            initialState = TreeState.FIRST_ITEM_EXPANDED
+            initialState = TreeState.EXPANDED
         )
     }
 }
@@ -360,7 +374,7 @@ private val jsonString = """
                     "hello world",
                     "hello world"
                 ],
-                "arrayOfObjects": [
+                "arrayOfObjects with a really long key name to create two lines": [
                     {
                         "string": "hello world"
                     },
@@ -378,7 +392,7 @@ private val jsonString = """
     		"hello",
     		"world"
     	],
-    	"longString": "developing extraordinary exercises mall finnish oclc loading radios impressed outcome harvey reputation surround robinson fight hanging championship moreover kde ensures",
+    	"longString with a really long key name as well to create two lines": "developing extraordinary exercises mall finnish oclc loading radios impressed outcome harvey reputation surround robinson fight hanging championship moreover kde ensures",
         "anotherBoolean": false
     }
 """.trimIndent()
