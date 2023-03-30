@@ -31,7 +31,7 @@ internal class JsonTreeTest {
     fun initial_state_is_first_item_expanded() {
         setJson(nestedJson)
 
-        composeTestRule.onNodeWithText("\"topLevelObject\": { 2 items },").assertIsNotDisplayed()
+        composeTestRule.onNodeWithText("\"topLevelObject\": { 2 items },").assertIsDisplayed()
         composeTestRule.onNodeWithText("\"topLevelArray\": [ 2 items ],").assertIsDisplayed()
         composeTestRule.onNodeWithText("\"emptyObject\": { 0 items }").assertIsDisplayed()
 
