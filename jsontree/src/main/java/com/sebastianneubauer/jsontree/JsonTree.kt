@@ -127,12 +127,9 @@ private fun ElementResolver(
         )
         is JsonArray -> {
             val childElements = remember(value) {
-                buildMap {
-                    val items = value.jsonArray.mapIndexed { index, item ->
-                        Pair(index.toString(), item)
-                    }
-                    putAll(items)
-                }
+                value.jsonArray
+                    .mapIndexed { index, item -> Pair(index.toString(), item) }
+                    .toMap()
             }
 
             CollapsableElement(
@@ -262,7 +259,7 @@ private fun CollapsableElement(
                     textStyle = textStyle,
                     icon = icon,
                     iconSize = iconSize,
-                    isLastItem = childElements.values.lastOrNull() == entry
+                    isLastItem = key == childElements.keys.lastOrNull()
                 )
             }
 
