@@ -1,9 +1,18 @@
 package com.sebastianneubauer.jsontree
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.junit.Rule
@@ -98,5 +107,76 @@ internal class JsonTreeTest {
 
         composeTestRule.onNodeWithText("\"topLevelObject\": {").performClick()
         composeTestRule.onNodeWithText("\"topLevelObject\": { 2 items },").assertIsDisplayed()
+    }
+
+    @Test
+    fun array_of_arrays_is_rendered_correctly() {
+        setJson(arrayOfArraysJson)
+
+        composeTestRule.onNodeWithText("\"array\": [ 2 items ]").assertIsDisplayed()
+        composeTestRule.onNodeWithText("\"array\": [ 2 items ]").performClick()
+        composeTestRule.onNodeWithText("\"array\": [").assertIsDisplayed()
+        composeTestRule.onNodeWithText("[ 1 items ],").assertIsDisplayed()
+        composeTestRule.onNodeWithText("[ 2 items ]").assertIsDisplayed()
+
+        composeTestRule.onNodeWithText("[ 1 items ],").performClick()
+        composeTestRule.onNodeWithText("[ 2 items ]").performClick()
+
+        composeTestRule.onNodeWithText("\"stringValue\"").assertIsDisplayed()
+        composeTestRule.onNodeWithText("],").assertIsDisplayed()
+        composeTestRule.onNodeWithText("42,").assertIsDisplayed()
+        composeTestRule.onNodeWithText("52").assertIsDisplayed()
+    }
+
+    @Test
+    fun root_array_is_rendered_correctly() {
+        setJson(rootArrayJson)
+
+        composeTestRule.onNodeWithText("[").assertIsDisplayed()
+        composeTestRule.onNodeWithText("\"stringValue\"").assertIsDisplayed()
+        composeTestRule.onNodeWithText("]").assertIsDisplayed()
+    }
+
+    @Test
+    fun root_string_is_rendered_correctly() {
+        setJson(rootStringJson)
+
+        composeTestRule.onNodeWithText("\"stringValue\"").assertIsDisplayed()
+    }
+
+    @Test
+    fun empty_object_is_rendered_correctly() {
+        setJson(EMPTY_OBJECT_JSON)
+
+        composeTestRule.onNodeWithText("{").assertIsDisplayed()
+        composeTestRule.onNodeWithText("}").assertIsDisplayed()
+
+        composeTestRule.onNodeWithText("{").performClick()
+        composeTestRule.onNodeWithText("{ 0 items }").assertIsDisplayed()
+    }
+
+    @Test
+    fun invalid_json_shows_an_error() {
+        composeTestRule.setContent {
+            Box {
+                var errorMessage: String? by remember { mutableStateOf(null) }
+
+                JsonTree(
+                    modifier = Modifier.testTag("jsonTree"),
+                    json = INVALID_JSON,
+                    onError = { throwable -> errorMessage = throwable.localizedMessage }
+                )
+
+                errorMessage?.let {
+                    Text(
+                        modifier = Modifier.testTag("errorText"),
+                        text = it
+                    )
+                }
+            }
+        }
+
+        composeTestRule.onNodeWithTag("jsonTree").assertDoesNotExist()
+        composeTestRule.onNodeWithTag("errorText").assertIsDisplayed()
     }
 }

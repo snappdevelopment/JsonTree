@@ -64,6 +64,7 @@ import kotlinx.serialization.json.longOrNull
  */
 @Composable
 public fun JsonTree(
+    modifier: Modifier = Modifier,
     json: String,
     initialState: TreeState = TreeState.FIRST_ITEM_EXPANDED,
     colors: TreeColors = defaultLightColors,
@@ -82,17 +83,19 @@ public fun JsonTree(
     }
 
     jsonElement?.let {
-        ElementResolver(
-            key = null,
-            value = it,
-            state = initialState,
-            colors = colors,
-            icon = icon,
-            iconSize = iconSize,
-            textStyle = textStyle,
-            isLastItem = true,
-            isOuterMostItem = true
-        )
+        Box(modifier = modifier) {
+            ElementResolver(
+                key = null,
+                value = it,
+                state = initialState,
+                colors = colors,
+                icon = icon,
+                iconSize = iconSize,
+                textStyle = textStyle,
+                isLastItem = true,
+                isOuterMostItem = true
+            )
+        }
     }
 }
 
