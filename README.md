@@ -1,8 +1,8 @@
-# <img src="screenshots/jsonTreeIcon.png" height="25"> JsonTree
+# 🌳 JsonTree
 
 ![](https://img.shields.io/maven-central/v/com.sebastianneubauer.jsontree/jsontree) ![](https://img.shields.io/badge/Kotlin-1.8.0-orange) ![](https://img.shields.io/badge/SDK-21+-brightgreen)
 <br /><br />
-
+JsonTree is an Android library to display JSON data in Compose with syntax highlighting and more.
 <br /><br />
 
 <p float="left">
@@ -12,7 +12,7 @@
 
 ## About
 
-`JsonTree` is an Android library to display formatted JSON data in Compose.
+JsonTree is an Android library to display formatted JSON data in Compose.
 Users can expand/collapse objects and arrays, and show their count of child items. JsonTree offers several customizations for visual appearance like syntax highlighting, text style and icons.
 
 ## Download
