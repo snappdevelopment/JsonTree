@@ -4,10 +4,10 @@ android-target = "33"
 
 java = "1.8"
 
-gradle-plugin = "7.4.1"
+gradle-plugin = "7.4.2"
 kotlin = "1.8.0"
 publish = "0.24.0"
-api-validator = "0.12.1"
+api-validator = "0.13.0"
 
 androidx-activity-compose = "1.7.0"
 androidx-compose-material3 = "1.0.1"
