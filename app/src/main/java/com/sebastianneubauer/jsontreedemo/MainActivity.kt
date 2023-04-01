@@ -5,8 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -31,13 +34,23 @@ internal class MainActivity : ComponentActivity() {
 
         setContent {
             JsonTreeTheme {
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .background(Color.Black),
+                        .background(Color.Black)
+                        .padding(16.dp),
                 ) {
                     var errorMessage: String? by remember { mutableStateOf(null) }
+
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "🌳 JsonTree",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.White
+                    )
+
+                    Spacer(modifier = Modifier.height(48.dp))
 
                     JsonTree(
                         json = jsonString,
@@ -56,10 +69,9 @@ internal class MainActivity : ComponentActivity() {
 
                     errorMessage?.let {
                         Text(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             text = it,
+                            color = Color.White
                         )
                     }
                 }
@@ -75,16 +87,9 @@ internal class MainActivity : ComponentActivity() {
         "boolean": true,
         "null": null,
     	"object": {
-    		"string": "hello world",
-    	    "int": 42,
-    	    "float": 42.5,
-            "boolean": true,
-            "null": null,
+            "longString": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
             "nestedObject": {
                 "string": "hello world",
-    	        "int": 42,
-    	        "float": 42.5,
-                "boolean": true,
                 "nestedArray": [
                     "hello world"
                 ],
@@ -102,12 +107,10 @@ internal class MainActivity : ComponentActivity() {
                 ]
             }
     	},
-    	"topLevelArray": [
+    	"array": [
     		"hello",
     		"world"
-    	],
-    	"longString": "developing extraordinary exercises mall finnish oclc loading radios impressed outcome harvey reputation surround robinson fight hanging championship moreover kde ensures",
-        "anotherBoolean": false
+    	]
     }
 """.trimIndent()
 
