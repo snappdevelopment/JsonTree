@@ -116,10 +116,10 @@ internal class JsonTreeTest {
         composeTestRule.onNodeWithText("\"array\": [ 2 items ]").assertIsDisplayed()
         composeTestRule.onNodeWithText("\"array\": [ 2 items ]").performClick()
         composeTestRule.onNodeWithText("\"array\": [").assertIsDisplayed()
-        composeTestRule.onNodeWithText("[ 1 items ],").assertIsDisplayed()
+        composeTestRule.onNodeWithText("[ 1 item ],").assertIsDisplayed()
         composeTestRule.onNodeWithText("[ 2 items ]").assertIsDisplayed()
 
-        composeTestRule.onNodeWithText("[ 1 items ],").performClick()
+        composeTestRule.onNodeWithText("[ 1 item ],").performClick()
         composeTestRule.onNodeWithText("[ 2 items ]").performClick()
 
         composeTestRule.onNodeWithText("\"stringValue\"").assertIsDisplayed()

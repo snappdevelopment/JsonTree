@@ -6,15 +6,14 @@
 <br /><br />
 
 <p float="left">
-<img src="screenshots/jsonTree1.png" height="450">
-<img src="screenshots/jsonTree2.png" height="450">
+<img src="screenshots/jsonTree.png" height="450">
 <img src="screenshots/jsonTreeGif.gif" height="450">
 </p>
 
 ## About
 
 `JsonTree` is an Android library to display formatted JSON data in Compose.
-Users can expand/collapse objects and arrays, and show counts of child items. JsonTree offers several customizations for visual appearance like syntax highlighting, text style and icons.
+Users can expand/collapse objects and arrays, and show their count of child items. JsonTree offers several customizations for visual appearance like syntax highlighting, text style and icons.
 
 ## Download
 
@@ -31,7 +30,7 @@ dependencies {
 Add `JsonTree` to your Compose UI and customize it with the following options. Get started by only providing your JSON data and using the default parameter.
 ```kotlin
 JsonTree(
-    json = "{ "key": "value" }"
+    json = "{ \"key\": \"value\" }"
 )
 ```
 For more customization, use the following parameter.
