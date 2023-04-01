@@ -21,11 +21,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -169,6 +170,7 @@ private fun ElementResolver(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun CollapsableElement(
     type: CollapsableType,
@@ -185,7 +187,7 @@ private fun CollapsableElement(
     var state by remember { mutableStateOf(initialState) }
     val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
     val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
-    val itemCount = stringResource(R.string.jsontree_collapsable_items, childElements.size)
+    val itemCount = pluralStringResource(R.plurals.jsontree_collapsable_items, childElements.size, childElements.size)
 
     val coloredText = remember(key, state, colors, isLastItem) {
         buildAnnotatedString {
