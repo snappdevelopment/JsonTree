@@ -21,7 +21,6 @@ See `maven-central` tag at the top for the latest version.
 
 ```groovy
 dependencies {
-    //not released yet, coming soon
     implementation 'com.sebastianneubauer.jsontree:jsontree:latest-version'
 }
 ```
