@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,14 +17,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.vectorResource
@@ -82,12 +84,16 @@ public fun JsonTree(
         }
     }
 
+    var stateResetKey by remember { mutableStateOf(0) }
+    LaunchedEffect(initialState) { stateResetKey += 1 }
+
     jsonElement?.let {
         Box(modifier = modifier) {
             ElementResolver(
                 key = null,
                 value = it,
                 state = initialState,
+                stateResetKey = stateResetKey,
                 colors = colors,
                 icon = icon,
                 iconSize = iconSize,
@@ -104,6 +110,7 @@ private fun ElementResolver(
     key: String?,
     value: JsonElement,
     state: TreeState,
+    stateResetKey: Int,
     colors: TreeColors,
     icon: ImageVector,
     iconSize: Dp,
@@ -135,17 +142,22 @@ private fun ElementResolver(
                     .toMap()
             }
 
+            var collapsableState by remember(stateResetKey) { mutableStateOf(state) }
+
             CollapsableElement(
                 type = CollapsableType.ARRAY,
                 key = key,
                 childElements = childElements,
-                initialState = state,
+                state = collapsableState,
+                stateResetKey = stateResetKey,
                 indent = if (isOuterMostItem) 0.dp else iconSize,
                 colors = colors,
                 textStyle = textStyle,
                 icon = icon,
                 iconSize = iconSize,
                 isLastItem = isLastItem,
+                isOuterMostItem = isOuterMostItem,
+                onClick = { newState -> collapsableState = newState },
             )
         }
         is JsonObject -> {
@@ -153,17 +165,22 @@ private fun ElementResolver(
                 value.jsonObject.entries.associate { it.toPair() }
             }
 
+            var collapsableState by remember(stateResetKey) { mutableStateOf(state) }
+
             CollapsableElement(
                 type = CollapsableType.OBJECT,
                 key = key,
                 childElements = childElements,
-                initialState = state,
+                state = collapsableState,
+                stateResetKey = stateResetKey,
                 indent = if (isOuterMostItem) 0.dp else iconSize,
                 colors = colors,
                 textStyle = textStyle,
                 icon = icon,
                 iconSize = iconSize,
                 isLastItem = isLastItem,
+                isOuterMostItem = isOuterMostItem,
+                onClick = { newState -> collapsableState = newState },
             )
         }
     }
@@ -174,15 +191,17 @@ private fun CollapsableElement(
     type: CollapsableType,
     key: String?,
     childElements: Map<String, JsonElement>,
-    initialState: TreeState,
+    state: TreeState,
+    stateResetKey: Int,
     indent: Dp,
     colors: TreeColors,
     textStyle: TextStyle,
     icon: ImageVector,
     iconSize: Dp,
     isLastItem: Boolean,
+    isOuterMostItem: Boolean,
+    onClick: (TreeState) -> Unit,
 ) {
-    var state by remember { mutableStateOf(initialState) }
     val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
     val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
     val itemCount = pluralStringResource(R.plurals.jsontree_collapsable_items, childElements.size, childElements.size)
@@ -214,6 +233,8 @@ private fun CollapsableElement(
         }
     }
 
+    val rotation = if (state == TreeState.COLLAPSED) 0F else 90F
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -226,17 +247,18 @@ private fun CollapsableElement(
                     interactionSource = MutableInteractionSource(),
                     indication = null
                 ) {
-                    state = when (state) {
+                    val newState = when (state) {
                         TreeState.COLLAPSED -> TreeState.EXPANDED
                         TreeState.EXPANDED, TreeState.FIRST_ITEM_EXPANDED -> TreeState.COLLAPSED
                     }
+                    onClick(newState)
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 modifier = Modifier
                     .size(iconSize)
-                    .rotate(if (state == TreeState.COLLAPSED) 0F else 90F),
+                    .graphicsLayer(rotationZ = rotation),
                 imageVector = icon,
                 tint = colors.iconColor,
                 contentDescription = null
@@ -245,19 +267,24 @@ private fun CollapsableElement(
             Text(text = coloredText, style = textStyle)
         }
 
+        val heightModifier = if (state == TreeState.COLLAPSED) {
+            Modifier.height(0.dp)
+        } else {
+            Modifier.height(IntrinsicSize.Min)
+        }
         Column(
-            modifier = Modifier
-                .run {
-                    // Using height instead of visibility to avoid leaving composition
-                    // and thus losing the TreeState of child elements
-                    if (state == TreeState.COLLAPSED) height(0.dp) else this
-                }
+            modifier = heightModifier
         ) {
             childElements.forEach { (key, entry) ->
                 ElementResolver(
                     key = if (type == CollapsableType.ARRAY) null else key,
                     value = entry,
-                    state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
+                    state = if (state == TreeState.FIRST_ITEM_EXPANDED && isOuterMostItem) {
+                        TreeState.COLLAPSED
+                    } else {
+                        state
+                    },
+                    stateResetKey = stateResetKey,
                     colors = colors,
                     textStyle = textStyle,
                     icon = icon,
