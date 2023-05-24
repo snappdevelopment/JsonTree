@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,6 +53,7 @@ import kotlinx.serialization.json.longOrNull
  * Renders JSON data as a formatted tree with collapsable objects and arrays.
  * Collapsed items display the amount of child items inside them.
  *
+ * @param modifier The Modifier for this Composable.
  * @param json The json data as a string.
  * @param initialState The initial state of the tree before user interaction. One of [TreeState].
  * @param colors The color palette the tree uses. [defaultLightColors], [defaultDarkColors] or a
@@ -156,7 +156,6 @@ private fun ElementResolver(
                 icon = icon,
                 iconSize = iconSize,
                 isLastItem = isLastItem,
-                isOuterMostItem = isOuterMostItem,
                 onClick = { newState -> collapsableState = newState },
             )
         }
@@ -179,7 +178,6 @@ private fun ElementResolver(
                 icon = icon,
                 iconSize = iconSize,
                 isLastItem = isLastItem,
-                isOuterMostItem = isOuterMostItem,
                 onClick = { newState -> collapsableState = newState },
             )
         }
@@ -199,14 +197,13 @@ private fun CollapsableElement(
     icon: ImageVector,
     iconSize: Dp,
     isLastItem: Boolean,
-    isOuterMostItem: Boolean,
     onClick: (TreeState) -> Unit,
 ) {
     val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
     val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
     val itemCount = pluralStringResource(R.plurals.jsontree_collapsable_items, childElements.size, childElements.size)
 
-    val coloredText = remember(key, state, colors, isLastItem) {
+    val coloredText = remember(key, state, colors, isLastItem, itemCount, type) {
         buildAnnotatedString {
             key?.let {
                 withStyle(SpanStyle(color = colors.keyColor)) {
@@ -233,8 +230,6 @@ private fun CollapsableElement(
         }
     }
 
-    val rotation = if (state == TreeState.COLLAPSED) 0F else 90F
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -258,7 +253,7 @@ private fun CollapsableElement(
             Icon(
                 modifier = Modifier
                     .size(iconSize)
-                    .graphicsLayer(rotationZ = rotation),
+                    .graphicsLayer(rotationZ = if (state == TreeState.COLLAPSED) 0F else 90F),
                 imageVector = icon,
                 tint = colors.iconColor,
                 contentDescription = null
@@ -267,23 +262,16 @@ private fun CollapsableElement(
             Text(text = coloredText, style = textStyle)
         }
 
-        val heightModifier = if (state == TreeState.COLLAPSED) {
-            Modifier.height(0.dp)
-        } else {
-            Modifier.height(IntrinsicSize.Min)
-        }
         Column(
-            modifier = heightModifier
+            modifier = Modifier.height(
+                if (state == TreeState.COLLAPSED) 0.dp else Dp.Unspecified
+            )
         ) {
             childElements.forEach { (key, entry) ->
                 ElementResolver(
                     key = if (type == CollapsableType.ARRAY) null else key,
                     value = entry,
-                    state = if (state == TreeState.FIRST_ITEM_EXPANDED && isOuterMostItem) {
-                        TreeState.COLLAPSED
-                    } else {
-                        state
-                    },
+                    state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
                     stateResetKey = stateResetKey,
                     colors = colors,
                     textStyle = textStyle,

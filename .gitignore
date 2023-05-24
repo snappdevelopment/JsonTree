@@ -47,6 +47,7 @@ captures/
 .idea/dictionaries
 .idea/libraries
 .idea/androidTestResultsUserPreferences.xml
+.idea/JetClient/
 # Android Studio 3 in .gitignore file.
 .idea/caches
 .idea/modules.xml
