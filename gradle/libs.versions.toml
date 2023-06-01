@@ -16,7 +16,7 @@ androidx-compose-foundation = "1.4.0"
 androidx-compose-ui = "1.4.0"
 androidx-compose-runtime = "1.4.0"
 
-kotlinx-serialization-json = "1.5.0"
+kotlinx-serialization-json = "1.5.1"
 
 junit = "4.13.2"
 detekt = "1.22.0"
