@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -262,31 +261,29 @@ private fun CollapsableElement(
             Text(text = coloredText, style = textStyle)
         }
 
-        Column(
-            modifier = Modifier.height(
-                if (state == TreeState.COLLAPSED) 0.dp else Dp.Unspecified
-            )
-        ) {
-            childElements.forEach { (key, entry) ->
-                ElementResolver(
-                    key = if (type == CollapsableType.ARRAY) null else key,
-                    value = entry,
-                    state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
-                    stateResetKey = stateResetKey,
-                    colors = colors,
-                    textStyle = textStyle,
-                    icon = icon,
-                    iconSize = iconSize,
-                    isLastItem = key == childElements.keys.lastOrNull()
+        if (state != TreeState.COLLAPSED) {
+            Column {
+                childElements.forEach { (key, entry) ->
+                    ElementResolver(
+                        key = if (type == CollapsableType.ARRAY) null else key,
+                        value = entry,
+                        state = TreeState.COLLAPSED,
+                        stateResetKey = stateResetKey,
+                        colors = colors,
+                        textStyle = textStyle,
+                        icon = icon,
+                        iconSize = iconSize,
+                        isLastItem = key == childElements.keys.lastOrNull()
+                    )
+                }
+
+                Text(
+                    modifier = Modifier.padding(start = indent),
+                    text = if (!isLastItem) "$closingBracket," else closingBracket,
+                    color = colors.symbolColor,
+                    style = textStyle
                 )
             }
-
-            Text(
-                modifier = Modifier.padding(start = indent),
-                text = if (!isLastItem) "$closingBracket," else closingBracket,
-                color = colors.symbolColor,
-                style = textStyle
-            )
         }
     }
 }
