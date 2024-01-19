@@ -1,6 +1,5 @@
 package com.sebastianneubauer.jsontree
 
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -48,99 +47,117 @@ public fun jsonTree2(
 private class JsonViewModel(
     private val jsonTree: JsonTree
 ) {
-    private var fullList: MutableList<JsonTree> = mutableListOf()
-
-    var renderList = mutableStateOf<List<JsonTree>>(emptyList())
+    private var renderList = mutableListOf<JsonTree>()
 
     init {
-        jsonTree.treeToList(fullList)
-        println("Full list:")
-        fullList.forEach { println(it) }
+        renderList = jsonTree.toRenderList()
+        println("Render list:")
+        renderList.forEach { println(it) }
 
-        val collapsedItems = mutableListOf<JsonTree>()
-        fullList.forEach {
-            when (it) {
-                is JsonTree.PrimitiveElement -> {}
-                is JsonTree.NullElement -> {}
+        renderList = expandOrCollapseItemWithId(id = renderList[1].id)
+        renderList = expandOrCollapseItemWithId(id = renderList[3].id)
+        println()
+        println("Expand item Render list:")
+        renderList.forEach { println(it) }
+
+        renderList = expandOrCollapseItemWithId(id = renderList[1].id)
+        println()
+        println("Collapse Render list:")
+        renderList.forEach { println(it) }
+
+        renderList = expandOrCollapseItemWithId(id = renderList[1].id)
+        println()
+        println("exp Render list:")
+        renderList.forEach { println(it) }
+    }
+
+    private fun JsonTree.toRenderList(): MutableList<JsonTree> {
+        val list = mutableListOf<JsonTree>()
+
+        fun addToList(jsonTree: JsonTree) {
+            when (jsonTree) {
+                is JsonTree.EndBracket -> error("EndBracket in initial list creation")
+                is JsonTree.PrimitiveElement -> list.add(jsonTree)
+                is JsonTree.NullElement -> list.add(jsonTree)
                 is JsonTree.ArrayElement -> {
-                    if (it.state == TreeState.COLLAPSED) {
-                        collapsedItems.addAll(it.children.values)
+                    list.add(jsonTree)
+                    if (jsonTree.state != TreeState.COLLAPSED) {
+                        jsonTree.children.forEach {
+                            addToList(it.value)
+                        }
+                        list.add(
+                            JsonTree.EndBracket(
+                                id = jsonTree.id + "_b",
+                                level = jsonTree.level,
+                                type = JsonTree.EndBracket.Type.ARRAY
+                            )
+                        )
                     }
                 }
                 is JsonTree.ObjectElement -> {
-                    if (it.state == TreeState.COLLAPSED) {
-                        collapsedItems.addAll(it.children.values)
+                    list.add(jsonTree)
+                    if (jsonTree.state != TreeState.COLLAPSED) {
+                        jsonTree.children.forEach {
+                            addToList(it.value)
+                        }
+                        list.add(
+                            JsonTree.EndBracket(
+                                id = jsonTree.id + "_b",
+                                level = jsonTree.level,
+                                type = JsonTree.EndBracket.Type.OBJECT
+                            )
+                        )
                     }
                 }
             }
         }
-        println()
-        println("Removed items:")
-        collapsedItems.forEach { println(it) }
-        renderList.value = fullList.toMutableList().apply { removeAll(collapsedItems) }
-        println()
-        println("Render list:")
-        renderList.value.forEach { println(it) }
 
-        renderList.value = expandOrCollapseItemWithId(id = fullList[1].id)
-        println()
-        println("Expand item Render list:")
-        renderList.value.forEach { println(it) }
-
-        renderList.value = expandOrCollapseItemWithId(id = fullList[1].id)
-        println()
-        println("Collapse Render list:")
-        renderList.value.forEach { println(it) }
-    }
-
-    fun JsonTree.treeToList(list: MutableList<JsonTree>) {
-        when (this) {
-            is JsonTree.PrimitiveElement -> list.add(this)
-            is JsonTree.NullElement -> list.add(this)
-            is JsonTree.ArrayElement -> {
-                list.add(this)
-                this.children.forEach {
-                    it.value.treeToList(list)
-                }
-            }
-            is JsonTree.ObjectElement -> {
-                list.add(this)
-                this.children.forEach {
-                    it.value.treeToList(list)
-                }
-            }
-        }
+        addToList(this)
+        return list
     }
 
     fun expandOrCollapseItemWithId(id: String): MutableList<JsonTree> {
-        val item = fullList.first { it.id == id }
+        val item = renderList.first { it.id == id }
+
         return when (item) {
             is JsonTree.PrimitiveElement -> error("PrimitiveElement can't be clicked")
             is JsonTree.NullElement -> error("NullElement can't be clicked")
+            is JsonTree.EndBracket -> error("EndBracket can't be clicked")
             is JsonTree.ArrayElement -> {
                 when (item.state) {
                     TreeState.EXPANDED -> {
-                        fullList.toMutableList().apply {
+                        renderList.toMutableList().apply {
                             val index = indexOf(item)
                             remove(item)
+                            // children will still have the previous state
                             add(index, item.copy(state = TreeState.COLLAPSED))
-                            removeAll(item.children.values)
+                            val childIds = item.children.values.flatMap { it.getIds() }.toSet()
+                            val endBracketId = item.id + "_b"
+                            removeAll { it.id in (childIds + endBracketId) }
                         }
                     }
                     TreeState.COLLAPSED -> {
-                        fullList.toMutableList().apply {
+                        renderList.toMutableList().apply {
                             val index = indexOf(item)
                             remove(item)
                             add(index, item.copy(state = TreeState.EXPANDED))
-                            addAll(index + 1, item.children.values)
+                            val endBracket = JsonTree.EndBracket(
+                                id = item.id + "_b",
+                                level = item.level,
+                                type = JsonTree.EndBracket.Type.OBJECT
+                            )
+                            addAll(index + 1, item.children.values + endBracket)
                         }
                     }
                     TreeState.FIRST_ITEM_EXPANDED -> {
-                        fullList.toMutableList().apply {
+                        renderList.toMutableList().apply {
                             val index = indexOf(item)
                             remove(item)
+                            // children will still have the previous state
                             add(index, item.copy(state = TreeState.COLLAPSED))
-                            removeAll(item.children.values)
+                            val childIds = item.children.values.flatMap { it.getIds() }.toSet()
+                            val endBracketId = item.id + "_b"
+                            removeAll { it.id in (childIds + endBracketId) }
                         }
                     }
                 }
@@ -148,32 +165,72 @@ private class JsonViewModel(
             is JsonTree.ObjectElement -> {
                 when (item.state) {
                     TreeState.EXPANDED -> {
-                        fullList.toMutableList().apply {
+                        renderList.toMutableList().apply {
                             val index = indexOf(item)
                             remove(item)
+                            // children will still have the previous state
                             add(index, item.copy(state = TreeState.COLLAPSED))
-                            removeAll(item.children.values)
+                            val childIds = item.children.values.flatMap { it.getIds() }.toSet()
+                            val endBracketId = item.id + "_b"
+                            removeAll { it.id in (childIds + endBracketId) }
                         }
                     }
                     TreeState.COLLAPSED -> {
-                        fullList.toMutableList().apply {
+                        renderList.toMutableList().apply {
                             val index = indexOf(item)
                             remove(item)
                             add(index, item.copy(state = TreeState.EXPANDED))
-                            addAll(index + 1, item.children.values)
+                            val endBracket = JsonTree.EndBracket(
+                                id = item.id + "_b",
+                                level = item.level,
+                                type = JsonTree.EndBracket.Type.OBJECT
+                            )
+                            addAll(index + 1, item.children.values + endBracket)
                         }
                     }
                     TreeState.FIRST_ITEM_EXPANDED -> {
-                        fullList.toMutableList().apply {
+                        renderList.toMutableList().apply {
                             val index = indexOf(item)
                             remove(item)
+                            // children will still have the previous state
                             add(index, item.copy(state = TreeState.COLLAPSED))
-                            removeAll(item.children.values)
+                            val childIds = item.children.values.flatMap { it.getIds() }.toSet()
+                            val endBracketId = item.id + "_b"
+                            removeAll { it.id in (childIds + endBracketId) }
                         }
                     }
                 }
             }
         }
+    }
+
+    private fun JsonTree.getIds(): List<String> {
+        val list = mutableListOf<String>()
+
+        fun getChildIds(jsonTree: JsonTree) {
+            when (jsonTree) {
+                is JsonTree.PrimitiveElement -> list.add(jsonTree.id)
+                is JsonTree.NullElement -> list.add(jsonTree.id)
+                is JsonTree.EndBracket -> list.add(jsonTree.id)
+                is JsonTree.ArrayElement -> {
+                    list.add(jsonTree.id)
+                    jsonTree.children.forEach {
+                        getChildIds(it.value)
+                    }
+                    list.add(jsonTree.id + "_b")
+                }
+                is JsonTree.ObjectElement -> {
+                    list.add(jsonTree.id)
+                    jsonTree.children.forEach {
+                        getChildIds(it.value)
+                    }
+                    list.add(jsonTree.id + "_b")
+                }
+            }
+        }
+
+        getChildIds(this)
+        return list
     }
 }
 
@@ -274,6 +331,14 @@ private sealed interface JsonTree {
         val key: String?,
         val children: Map<String, JsonTree>,
     ) : JsonTree
+
+    data class EndBracket(
+        override val id: String,
+        override val level: Int,
+        val type: Type
+    ) : JsonTree {
+        enum class Type { ARRAY, OBJECT }
+    }
 }
 
 internal val nestedJson = """
