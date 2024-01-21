@@ -85,13 +85,7 @@ private class JsonViewModel(
                         jsonTree.children.forEach {
                             addToList(it.value)
                         }
-                        list.add(
-                            JsonTree.EndBracket(
-                                id = jsonTree.id + "_b",
-                                level = jsonTree.level,
-                                type = JsonTree.EndBracket.Type.ARRAY
-                            )
-                        )
+                        list.add(jsonTree.endBracket)
                     }
                 }
                 is JsonTree.ObjectElement -> {
@@ -100,13 +94,7 @@ private class JsonViewModel(
                         jsonTree.children.forEach {
                             addToList(it.value)
                         }
-                        list.add(
-                            JsonTree.EndBracket(
-                                id = jsonTree.id + "_b",
-                                level = jsonTree.level,
-                                type = JsonTree.EndBracket.Type.OBJECT
-                            )
-                        )
+                        list.add(jsonTree.endBracket)
                     }
                 }
             }
@@ -132,7 +120,7 @@ private class JsonViewModel(
                             // children will still have the previous state
                             add(index, item.copy(state = TreeState.COLLAPSED))
                             val childIds = item.children.values.flatMap { it.getIds() }.toSet()
-                            val endBracketId = item.id + "_b"
+                            val endBracketId = item.endBracket.id
                             removeAll { it.id in (childIds + endBracketId) }
                         }
                     }
@@ -141,12 +129,7 @@ private class JsonViewModel(
                             val index = indexOf(item)
                             remove(item)
                             add(index, item.copy(state = TreeState.EXPANDED))
-                            val endBracket = JsonTree.EndBracket(
-                                id = item.id + "_b",
-                                level = item.level,
-                                type = JsonTree.EndBracket.Type.OBJECT
-                            )
-                            addAll(index + 1, item.children.values + endBracket)
+                            addAll(index + 1, item.children.values + item.endBracket)
                         }
                     }
                     TreeState.FIRST_ITEM_EXPANDED -> {
@@ -156,7 +139,7 @@ private class JsonViewModel(
                             // children will still have the previous state
                             add(index, item.copy(state = TreeState.COLLAPSED))
                             val childIds = item.children.values.flatMap { it.getIds() }.toSet()
-                            val endBracketId = item.id + "_b"
+                            val endBracketId = item.endBracket.id
                             removeAll { it.id in (childIds + endBracketId) }
                         }
                     }
@@ -171,7 +154,7 @@ private class JsonViewModel(
                             // children will still have the previous state
                             add(index, item.copy(state = TreeState.COLLAPSED))
                             val childIds = item.children.values.flatMap { it.getIds() }.toSet()
-                            val endBracketId = item.id + "_b"
+                            val endBracketId = item.endBracket.id
                             removeAll { it.id in (childIds + endBracketId) }
                         }
                     }
@@ -180,12 +163,7 @@ private class JsonViewModel(
                             val index = indexOf(item)
                             remove(item)
                             add(index, item.copy(state = TreeState.EXPANDED))
-                            val endBracket = JsonTree.EndBracket(
-                                id = item.id + "_b",
-                                level = item.level,
-                                type = JsonTree.EndBracket.Type.OBJECT
-                            )
-                            addAll(index + 1, item.children.values + endBracket)
+                            addAll(index + 1, item.children.values + item.endBracket)
                         }
                     }
                     TreeState.FIRST_ITEM_EXPANDED -> {
@@ -195,7 +173,7 @@ private class JsonViewModel(
                             // children will still have the previous state
                             add(index, item.copy(state = TreeState.COLLAPSED))
                             val childIds = item.children.values.flatMap { it.getIds() }.toSet()
-                            val endBracketId = item.id + "_b"
+                            val endBracketId = item.endBracket.id
                             removeAll { it.id in (childIds + endBracketId) }
                         }
                     }
@@ -217,14 +195,14 @@ private class JsonViewModel(
                     jsonTree.children.forEach {
                         getChildIds(it.value)
                     }
-                    list.add(jsonTree.id + "_b")
+                    list.add(jsonTree.endBracket.id)
                 }
                 is JsonTree.ObjectElement -> {
                     list.add(jsonTree.id)
                     jsonTree.children.forEach {
                         getChildIds(it.value)
                     }
-                    list.add(jsonTree.id + "_b")
+                    list.add(jsonTree.endBracket.id)
                 }
             }
         }
@@ -340,6 +318,20 @@ private sealed interface JsonTree {
         enum class Type { ARRAY, OBJECT }
     }
 }
+
+private val JsonTree.ObjectElement.endBracket: JsonTree.EndBracket
+    get() = JsonTree.EndBracket(
+        id = "$id-b",
+        level = level,
+        type = JsonTree.EndBracket.Type.OBJECT
+    )
+
+private val JsonTree.ArrayElement.endBracket: JsonTree.EndBracket
+    get() = JsonTree.EndBracket(
+        id = "$id-b",
+        level = level,
+        type = JsonTree.EndBracket.Type.ARRAY
+    )
 
 internal val nestedJson = """
     {
