@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
@@ -64,7 +65,8 @@ public fun JsonTree2Ui(
             val jsonTree = it.toJsonTree(
                 state = initialState,
                 level = 0,
-                key = null
+                key = null,
+                isLastItem = true
             )
             JsonViewModel(jsonTree)
         }
@@ -73,65 +75,85 @@ public fun JsonTree2Ui(
 
         Box(modifier = modifier) {
             LazyColumn {
-                items(listItems, key = { it.id }) {
-                    when (it) {
+                itemsIndexed(listItems, key = { index, item -> item.id }) { index, item ->
+                    when (item) {
                         is JsonTree.CollapsableElement.ArrayElement -> {
                             CollapsableElement(
                                 type = CollapsableType.ARRAY,
-                                key = it.key,
-                                childElements = it.children,
-                                state = it.state,
-                                indent = it.level * iconSize,
+                                key = item.key,
+                                childElements = item.children,
+                                state = item.state,
+                                indent = if (index == 0 || index == listItems.lastIndex) {
+                                    0.dp
+                                } else {
+                                    item.level * iconSize
+                                },
                                 colors = colors,
                                 textStyle = textStyle,
                                 icon = icon,
                                 iconSize = iconSize,
-                                isLastItem = true,
-                                onClick = { viewModel.expandOrCollapseItemWithId(it.id) }
+                                isLastItem = item.isLastItem,
+                                onClick = { viewModel.expandOrCollapseItemWithId(item.id) }
                             )
                         }
                         is JsonTree.CollapsableElement.ObjectElement -> {
                             CollapsableElement(
                                 type = CollapsableType.OBJECT,
-                                key = it.key,
-                                childElements = it.children,
-                                state = it.state,
-                                indent = it.level * iconSize,
+                                key = item.key,
+                                childElements = item.children,
+                                state = item.state,
+                                indent = if (index == 0 || index == listItems.lastIndex) {
+                                    0.dp
+                                } else {
+                                    item.level * iconSize
+                                },
                                 colors = colors,
                                 textStyle = textStyle,
                                 icon = icon,
                                 iconSize = iconSize,
-                                isLastItem = true,
-                                onClick = { viewModel.expandOrCollapseItemWithId(it.id) }
+                                isLastItem = item.isLastItem,
+                                onClick = { viewModel.expandOrCollapseItemWithId(item.id) }
                             )
                         }
                         is JsonTree.PrimitiveElement -> {
                             PrimitiveElement(
-                                key = it.key,
-                                value = it.value,
+                                key = item.key,
+                                value = item.value,
                                 colors = colors,
                                 textStyle = textStyle,
-                                indent = it.level * iconSize,
-                                isLastItem = true
+                                indent = if (index == 0 || index == listItems.lastIndex) {
+                                    0.dp
+                                } else {
+                                    (item.level * iconSize) + iconSize
+                                },
+                                isLastItem = item.isLastItem
                             )
                         }
                         is JsonTree.NullElement -> {
                             PrimitiveElement(
-                                key = it.key,
-                                value = it.value,
+                                key = item.key,
+                                value = item.value,
                                 colors = colors,
                                 textStyle = textStyle,
-                                indent = it.level * iconSize,
-                                isLastItem = true
+                                indent = if (index == 0 || index == listItems.lastIndex) {
+                                    0.dp
+                                } else {
+                                    (item.level * iconSize) + iconSize
+                                },
+                                isLastItem = item.isLastItem
                             )
                         }
                         is JsonTree.EndBracket -> {
                             Bracket(
-                                type = it.type,
-                                isLastItem = true,
-                                indent = it.level * iconSize,
+                                type = item.type,
                                 colors = colors,
-                                textStyle = textStyle
+                                textStyle = textStyle,
+                                indent = if (index == 0 || index == listItems.lastIndex) {
+                                    0.dp
+                                } else {
+                                    (item.level * iconSize) + iconSize
+                                },
+                                isLastItem = item.isLastItem
                             )
                         }
                     }

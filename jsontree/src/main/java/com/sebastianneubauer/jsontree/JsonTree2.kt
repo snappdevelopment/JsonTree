@@ -147,7 +147,8 @@ internal class JsonViewModel(
 internal fun JsonElement.toJsonTree(
     state: TreeState,
     level: Int,
-    key: String?
+    key: String?,
+    isLastItem: Boolean,
 ): JsonTree {
     return when (this) {
         is JsonPrimitive -> {
@@ -155,7 +156,8 @@ internal fun JsonElement.toJsonTree(
                 id = UUID.randomUUID().toString(),
                 level = level,
                 key = key,
-                value = this
+                value = this,
+                isLastItem = isLastItem,
             )
         }
         is JsonNull -> {
@@ -163,7 +165,8 @@ internal fun JsonElement.toJsonTree(
                 id = UUID.randomUUID().toString(),
                 level = level,
                 key = key,
-                value = this
+                value = this,
+                isLastItem = isLastItem,
             )
         }
         is JsonArray -> {
@@ -174,7 +177,8 @@ internal fun JsonElement.toJsonTree(
                     it.value.toJsonTree(
                         state = TreeState.COLLAPSED,
                         level = level + 1,
-                        key = it.key
+                        key = it.key,
+                        isLastItem = it.key == (jsonArray.size - 1).toString()
                     )
                 }
 
@@ -183,7 +187,8 @@ internal fun JsonElement.toJsonTree(
                 level = level,
                 state = state,
                 key = key,
-                children = childElements
+                children = childElements,
+                isLastItem = isLastItem,
             )
         }
         is JsonObject -> {
@@ -193,7 +198,8 @@ internal fun JsonElement.toJsonTree(
                     it.value.toJsonTree(
                         state = TreeState.COLLAPSED,
                         level = level + 1,
-                        key = it.key
+                        key = it.key,
+                        isLastItem = it == jsonObject.entries.last()
                     )
                 }
 
@@ -202,7 +208,8 @@ internal fun JsonElement.toJsonTree(
                 level = level,
                 state = state,
                 key = key,
-                children = childElements
+                children = childElements,
+                isLastItem = isLastItem,
             )
         }
     }
@@ -211,10 +218,12 @@ internal fun JsonElement.toJsonTree(
 internal sealed interface JsonTree {
     val id: String
     val level: Int
+    val isLastItem: Boolean
 
     data class PrimitiveElement(
         override val id: String,
         override val level: Int,
+        override val isLastItem: Boolean,
         val key: String?,
         val value: JsonPrimitive,
     ) : JsonTree
@@ -222,6 +231,7 @@ internal sealed interface JsonTree {
     data class NullElement(
         override val id: String,
         override val level: Int,
+        override val isLastItem: Boolean,
         val key: String?,
         val value: JsonPrimitive,
     ) : JsonTree
@@ -235,6 +245,7 @@ internal sealed interface JsonTree {
             override val level: Int,
             override val state: TreeState,
             override val children: Map<String, JsonTree>,
+            override val isLastItem: Boolean,
             val key: String?,
         ) : CollapsableElement
 
@@ -243,6 +254,7 @@ internal sealed interface JsonTree {
             override val level: Int,
             override val state: TreeState,
             override val children: Map<String, JsonTree>,
+            override val isLastItem: Boolean,
             val key: String?,
         ) : CollapsableElement
     }
@@ -250,6 +262,7 @@ internal sealed interface JsonTree {
     data class EndBracket(
         override val id: String,
         override val level: Int,
+        override val isLastItem: Boolean,
         val type: Type
     ) : JsonTree {
         enum class Type { ARRAY, OBJECT }
@@ -260,6 +273,7 @@ private val JsonTree.CollapsableElement.endBracket: EndBracket
     get() = EndBracket(
         id = "$id-b",
         level = level,
+        isLastItem = isLastItem,
         type = when (this) {
             is ObjectElement -> JsonTree.EndBracket.Type.OBJECT
             is ArrayElement -> JsonTree.EndBracket.Type.ARRAY

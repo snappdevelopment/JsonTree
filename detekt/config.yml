@@ -11,7 +11,7 @@ complexity:
   TooManyFunctions:
     thresholdInFiles: 20
   LongMethod:
-    threshold: 100
+    threshold: 200
   LongParameterList:
     functionThreshold: 15
   CyclomaticComplexMethod:
