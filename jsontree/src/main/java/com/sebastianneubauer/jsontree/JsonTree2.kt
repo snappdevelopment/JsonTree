@@ -1,11 +1,13 @@
 package com.sebastianneubauer.jsontree
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.sebastianneubauer.jsontree.JsonTree.CollapsableElement.ArrayElement
 import com.sebastianneubauer.jsontree.JsonTree.CollapsableElement.ObjectElement
 import com.sebastianneubauer.jsontree.JsonTree.EndBracket
 import com.sebastianneubauer.jsontree.JsonTree.NullElement
 import com.sebastianneubauer.jsontree.JsonTree.PrimitiveElement
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -15,65 +17,14 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import java.util.UUID
 
-// private fun main() {
-//    jsonTree2(json = nestedJson)
-// }
-
-// @Composable
-public fun jsonTree2(
-//    modifier: Modifier = Modifier,
-    json: String,
-    initialState: TreeState = TreeState.FIRST_ITEM_EXPANDED,
-//    colors: TreeColors = defaultLightColors,
-//    icon: ImageVector = ImageVector.vectorResource(R.drawable.jsontree_arrow_right),
-//    iconSize: Dp = 20.dp,
-//    textStyle: TextStyle = LocalTextStyle.current,
-    onError: (Throwable) -> Unit = {}
-) {
-    val jsonElement: JsonElement? = // remember(json) {
-        runCatching {
-            Json.parseToJsonElement(json)
-        }.getOrElse { throwable ->
-            onError(throwable)
-            null
-        }
-    // }
-
-    jsonElement?.let {
-        val jsonTree = it.toJsonTree(
-            state = initialState,
-            level = 0,
-            key = null
-        )
-        JsonViewModel(jsonTree)
-    }
-}
-
-private class JsonViewModel(
+internal class JsonViewModel(
     private val jsonTree: JsonTree
 ) {
-    private var renderList = listOf<JsonTree>()
+    private var renderList = mutableStateOf(emptyList<JsonTree>())
+    val items = renderList
 
     init {
-        renderList = jsonTree.toRenderList()
-        println("Render list:")
-        renderList.forEach { println(it) }
-
-        renderList = expandOrCollapseItemWithId(id = renderList[1].id)
-        renderList = expandOrCollapseItemWithId(id = renderList[3].id)
-        println()
-        println("Expand item Render list:")
-        renderList.forEach { println(it) }
-
-        renderList = expandOrCollapseItemWithId(id = renderList[1].id)
-        println()
-        println("Collapse Render list:")
-        renderList.forEach { println(it) }
-
-        renderList = expandOrCollapseItemWithId(id = renderList[1].id)
-        println()
-        println("exp Render list:")
-        renderList.forEach { println(it) }
+        renderList.value = jsonTree.toRenderList()
     }
 
     private fun JsonTree.toRenderList(): List<JsonTree> {
@@ -109,28 +60,30 @@ private class JsonViewModel(
         return list
     }
 
-    fun expandOrCollapseItemWithId(id: String): List<JsonTree> {
-        val item = renderList.first { it.id == id }
+    fun expandOrCollapseItemWithId(id: String) {
+        val item = renderList.value.first { it.id == id }
 
-        return when (item) {
+        val newList = when (item) {
             is PrimitiveElement -> error("PrimitiveElement can't be clicked")
             is NullElement -> error("NullElement can't be clicked")
             is EndBracket -> error("EndBracket can't be clicked")
             is ArrayElement -> {
                 when (item.state) {
-                    TreeState.COLLAPSED -> renderList.expandItem(item)
+                    TreeState.COLLAPSED -> renderList.value.expandItem(item)
                     TreeState.EXPANDED,
-                    TreeState.FIRST_ITEM_EXPANDED -> renderList.collapseItem(item)
+                    TreeState.FIRST_ITEM_EXPANDED -> renderList.value.collapseItem(item)
                 }
             }
             is ObjectElement -> {
                 when (item.state) {
-                    TreeState.COLLAPSED -> renderList.expandItem(item)
+                    TreeState.COLLAPSED -> renderList.value.expandItem(item)
                     TreeState.EXPANDED,
-                    TreeState.FIRST_ITEM_EXPANDED -> renderList.collapseItem(item)
+                    TreeState.FIRST_ITEM_EXPANDED -> renderList.value.collapseItem(item)
                 }
             }
         }
+
+        renderList.value = newList
     }
 
     private fun List<JsonTree>.collapseItem(item: JsonTree.CollapsableElement): List<JsonTree> {
@@ -191,7 +144,7 @@ private class JsonViewModel(
     }
 }
 
-private fun JsonElement.toJsonTree(
+internal fun JsonElement.toJsonTree(
     state: TreeState,
     level: Int,
     key: String?
@@ -255,7 +208,7 @@ private fun JsonElement.toJsonTree(
     }
 }
 
-private sealed interface JsonTree {
+internal sealed interface JsonTree {
     val id: String
     val level: Int
 
@@ -312,33 +265,3 @@ private val JsonTree.CollapsableElement.endBracket: EndBracket
             is ArrayElement -> JsonTree.EndBracket.Type.ARRAY
         }
     )
-
-internal val nestedJson = """
-    {
-    	"topLevelObject": {
-    		"string": "stringValue",
-            "nestedObject": {
-    	        "int": 42,
-                "nestedArray": [
-                    "nestedArrayValue",
-                    "nestedArrayValue"
-                ],
-                "arrayOfObjects": [
-                    {
-                        "anotherString": "anotherStringValue"
-                    },
-                    {
-                        "anotherInt": 52
-                    }
-                ]
-            }
-    	},
-    	"topLevelArray": [
-    		"hello",
-    		"world"
-    	],
-    	"emptyObject": {
-
-        }
-    }
-""".trimIndent()

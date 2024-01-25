@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.JsonTree
+import com.sebastianneubauer.jsontree.JsonTree2Ui
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
@@ -44,7 +45,6 @@ internal class MainActivity : ComponentActivity() {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
                         .padding(16.dp),
                 ) {
                     var errorMessage: String? by remember { mutableStateOf(null) }
@@ -115,7 +115,7 @@ internal class MainActivity : ComponentActivity() {
                         ) {
                             when (pageIndex) {
                                 0 -> {
-                                    JsonTree(
+                                    JsonTree2Ui(
                                         modifier = Modifier.background(
                                             if(colors == defaultLightColors) Color.White else Color.Black
                                         ),
