@@ -1,13 +1,16 @@
 package com.sebastianneubauer.jsontree
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.sebastianneubauer.jsontree.JsonTree.CollapsableElement.ArrayElement
 import com.sebastianneubauer.jsontree.JsonTree.CollapsableElement.ObjectElement
 import com.sebastianneubauer.jsontree.JsonTree.EndBracket
 import com.sebastianneubauer.jsontree.JsonTree.NullElement
 import com.sebastianneubauer.jsontree.JsonTree.PrimitiveElement
+import com.sebastianneubauer.jsontree.ParserState.Loading
+import com.sebastianneubauer.jsontree.ParserState.Parsing.Error
+import com.sebastianneubauer.jsontree.ParserState.Parsing.Parsed
+import com.sebastianneubauer.jsontree.ParserState.Ready
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -18,13 +21,31 @@ import kotlinx.serialization.json.jsonObject
 import java.util.UUID
 
 internal class JsonViewModel(
-    private val jsonTree: JsonTree
+    private val json: String,
 ) {
-    private var renderList = mutableStateOf(emptyList<JsonTree>())
-    val items = renderList
+    private var parserState = mutableStateOf<ParserState>(Loading)
+    val state = parserState
 
-    init {
-        renderList.value = jsonTree.toRenderList()
+    fun initJsonParser(initialState: TreeState) {
+        val parsingState = runCatching {
+            Parsed(Json.parseToJsonElement(json))
+        }.getOrElse { throwable ->
+            Error(throwable)
+        }
+
+        parserState.value = when (parsingState) {
+            is Parsed -> {
+                Ready(
+                    list = parsingState.jsonElement.toJsonTree(
+                        state = initialState,
+                        level = 0,
+                        key = null,
+                        isLastItem = true
+                    ).toRenderList()
+                )
+            }
+            is Error -> parsingState
+        }
     }
 
     private fun JsonTree.toRenderList(): List<JsonTree> {
@@ -60,8 +81,9 @@ internal class JsonViewModel(
         return list
     }
 
-    fun expandOrCollapseItemWithId(id: String) {
-        val item = renderList.value.first { it.id == id }
+    fun expandOrCollapseItem(item: JsonTree) {
+        val state = parserState.value
+        check(state is Ready)
 
         val newList = when (item) {
             is PrimitiveElement -> error("PrimitiveElement can't be clicked")
@@ -69,21 +91,21 @@ internal class JsonViewModel(
             is EndBracket -> error("EndBracket can't be clicked")
             is ArrayElement -> {
                 when (item.state) {
-                    TreeState.COLLAPSED -> renderList.value.expandItem(item)
+                    TreeState.COLLAPSED -> state.list.expandItem(item)
                     TreeState.EXPANDED,
-                    TreeState.FIRST_ITEM_EXPANDED -> renderList.value.collapseItem(item)
+                    TreeState.FIRST_ITEM_EXPANDED -> state.list.collapseItem(item)
                 }
             }
             is ObjectElement -> {
                 when (item.state) {
-                    TreeState.COLLAPSED -> renderList.value.expandItem(item)
+                    TreeState.COLLAPSED -> state.list.expandItem(item)
                     TreeState.EXPANDED,
-                    TreeState.FIRST_ITEM_EXPANDED -> renderList.value.collapseItem(item)
+                    TreeState.FIRST_ITEM_EXPANDED -> state.list.collapseItem(item)
                 }
             }
         }
 
-        renderList.value = newList
+        parserState.value = state.copy(newList)
     }
 
     private fun List<JsonTree>.collapseItem(item: JsonTree.CollapsableElement): List<JsonTree> {
@@ -92,12 +114,11 @@ internal class JsonViewModel(
                 is ObjectElement -> item.copy(state = TreeState.COLLAPSED)
                 is ArrayElement -> item.copy(state = TreeState.COLLAPSED)
             }
-            val index = indexOf(item)
-            remove(item)
-            add(index, newItem)
-            val childIds = item.children.values.flatMap { it.getIds() }.toSet()
-            val endBracketId = item.endBracket.id
-            removeAll { it.id in (childIds + endBracketId) }
+            val itemIndex = indexOf(item)
+            val endBracketIndex = indexOf(item.endBracket)
+            val itemsToRemove = slice(itemIndex..endBracketIndex)
+            removeAll(itemsToRemove)
+            add(itemIndex, newItem)
         }
     }
 
@@ -107,40 +128,20 @@ internal class JsonViewModel(
                 is ObjectElement -> item.copy(state = TreeState.EXPANDED)
                 is ArrayElement -> item.copy(state = TreeState.EXPANDED)
             }
-            val index = indexOf(item)
-            remove(item)
-            add(index, newItem)
-            addAll(index + 1, item.children.values + item.endBracket)
+            val itemIndex = indexOf(item)
+            removeAt(itemIndex)
+            addAll(itemIndex, listOf(newItem) + item.children.values + item.endBracket)
         }
     }
+}
 
-    private fun JsonTree.getIds(): List<String> {
-        val list = mutableListOf<String>()
+internal sealed interface ParserState {
+    object Loading : ParserState
+    data class Ready(val list: List<JsonTree>) : ParserState
 
-        fun getChildIds(jsonTree: JsonTree) {
-            when (jsonTree) {
-                is PrimitiveElement -> list.add(jsonTree.id)
-                is NullElement -> list.add(jsonTree.id)
-                is EndBracket -> list.add(jsonTree.id)
-                is ArrayElement -> {
-                    list.add(jsonTree.id)
-                    jsonTree.children.forEach {
-                        getChildIds(it.value)
-                    }
-                    list.add(jsonTree.endBracket.id)
-                }
-                is ObjectElement -> {
-                    list.add(jsonTree.id)
-                    jsonTree.children.forEach {
-                        getChildIds(it.value)
-                    }
-                    list.add(jsonTree.endBracket.id)
-                }
-            }
-        }
-
-        getChildIds(this)
-        return list
+    sealed interface Parsing : ParserState {
+        data class Parsed(val jsonElement: JsonElement) : Parsing
+        data class Error(val throwable: Throwable) : Parsing
     }
 }
 
