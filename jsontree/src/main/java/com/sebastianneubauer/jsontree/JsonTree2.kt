@@ -18,7 +18,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
 
 internal class JsonViewModel(
     private val json: String,
@@ -37,6 +37,7 @@ internal class JsonViewModel(
             is Parsed -> {
                 Ready(
                     list = parsingState.jsonElement.toJsonTree(
+                        idGenerator = AtomicLong(),
                         state = initialState,
                         level = 0,
                         key = null,
@@ -133,6 +134,80 @@ internal class JsonViewModel(
             addAll(itemIndex, listOf(newItem) + item.children.values + item.endBracket)
         }
     }
+
+    private fun JsonElement.toJsonTree(
+        idGenerator: AtomicLong,
+        state: TreeState,
+        level: Int,
+        key: String?,
+        isLastItem: Boolean,
+    ): JsonTree {
+        return when (this) {
+            is JsonPrimitive -> {
+                PrimitiveElement(
+                    id = idGenerator.incrementAndGet().toString(),
+                    level = level,
+                    key = key,
+                    value = this,
+                    isLastItem = isLastItem,
+                )
+            }
+            is JsonNull -> {
+                NullElement(
+                    id = idGenerator.incrementAndGet().toString(),
+                    level = level,
+                    key = key,
+                    value = this,
+                    isLastItem = isLastItem,
+                )
+            }
+            is JsonArray -> {
+                val childElements = jsonArray
+                    .mapIndexed { index, item -> Pair(index.toString(), item) }
+                    .toMap()
+                    .mapValues {
+                        it.value.toJsonTree(
+                            idGenerator = idGenerator,
+                            state = TreeState.COLLAPSED,
+                            level = level + 1,
+                            key = it.key,
+                            isLastItem = it.key == (jsonArray.size - 1).toString()
+                        )
+                    }
+
+                ArrayElement(
+                    id = idGenerator.incrementAndGet().toString(),
+                    level = level,
+                    state = state,
+                    key = key,
+                    children = childElements,
+                    isLastItem = isLastItem,
+                )
+            }
+            is JsonObject -> {
+                val childElements = jsonObject.entries
+                    .associate { it.toPair() }
+                    .mapValues {
+                        it.value.toJsonTree(
+                            idGenerator = idGenerator,
+                            state = TreeState.COLLAPSED,
+                            level = level + 1,
+                            key = it.key,
+                            isLastItem = it == jsonObject.entries.last()
+                        )
+                    }
+
+                ObjectElement(
+                    id = idGenerator.incrementAndGet().toString(),
+                    level = level,
+                    state = state,
+                    key = key,
+                    children = childElements,
+                    isLastItem = isLastItem,
+                )
+            }
+        }
+    }
 }
 
 internal sealed interface ParserState {
@@ -142,77 +217,6 @@ internal sealed interface ParserState {
     sealed interface Parsing : ParserState {
         data class Parsed(val jsonElement: JsonElement) : Parsing
         data class Error(val throwable: Throwable) : Parsing
-    }
-}
-
-internal fun JsonElement.toJsonTree(
-    state: TreeState,
-    level: Int,
-    key: String?,
-    isLastItem: Boolean,
-): JsonTree {
-    return when (this) {
-        is JsonPrimitive -> {
-            PrimitiveElement(
-                id = UUID.randomUUID().toString(),
-                level = level,
-                key = key,
-                value = this,
-                isLastItem = isLastItem,
-            )
-        }
-        is JsonNull -> {
-            NullElement(
-                id = UUID.randomUUID().toString(),
-                level = level,
-                key = key,
-                value = this,
-                isLastItem = isLastItem,
-            )
-        }
-        is JsonArray -> {
-            val childElements = jsonArray
-                .mapIndexed { index, item -> Pair(index.toString(), item) }
-                .toMap()
-                .mapValues {
-                    it.value.toJsonTree(
-                        state = TreeState.COLLAPSED,
-                        level = level + 1,
-                        key = it.key,
-                        isLastItem = it.key == (jsonArray.size - 1).toString()
-                    )
-                }
-
-            ArrayElement(
-                id = UUID.randomUUID().toString(),
-                level = level,
-                state = state,
-                key = key,
-                children = childElements,
-                isLastItem = isLastItem,
-            )
-        }
-        is JsonObject -> {
-            val childElements = jsonObject.entries
-                .associate { it.toPair() }
-                .mapValues {
-                    it.value.toJsonTree(
-                        state = TreeState.COLLAPSED,
-                        level = level + 1,
-                        key = it.key,
-                        isLastItem = it == jsonObject.entries.last()
-                    )
-                }
-
-            ObjectElement(
-                id = UUID.randomUUID().toString(),
-                level = level,
-                state = state,
-                key = key,
-                children = childElements,
-                isLastItem = isLastItem,
-            )
-        }
     }
 }
 
