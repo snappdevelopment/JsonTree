@@ -115,10 +115,9 @@ internal class JsonViewModel(
                 is ObjectElement -> item.copy(state = TreeState.COLLAPSED)
                 is ArrayElement -> item.copy(state = TreeState.COLLAPSED)
             }
-            val itemIndex = indexOf(item)
-            val endBracketIndex = indexOf(item.endBracket)
-            val itemsToRemove = slice(itemIndex..endBracketIndex)
-            removeAll(itemsToRemove)
+            val itemIndex = indexOfFirst { it.id == item.id }
+            val endBracketIndex = indexOfFirst { it.id == item.endBracket.id }
+            subList(itemIndex, endBracketIndex + 1).clear()
             add(itemIndex, newItem)
         }
     }
@@ -129,7 +128,7 @@ internal class JsonViewModel(
                 is ObjectElement -> item.copy(state = TreeState.EXPANDED)
                 is ArrayElement -> item.copy(state = TreeState.EXPANDED)
             }
-            val itemIndex = indexOf(item)
+            val itemIndex = indexOfFirst { it.id == item.id }
             removeAt(itemIndex)
             addAll(itemIndex, listOf(newItem) + item.children.values + item.endBracket)
         }
