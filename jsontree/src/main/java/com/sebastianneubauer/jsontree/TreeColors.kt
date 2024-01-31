@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
  * @param numberValueColor The color for json numbers.
  * @param booleanValueColor The color for json booleans.
  * @param nullValueColor The color for json nulls.
+ * @param indexColor The color for indices in arrays.
  * @param symbolColor The color for all symbols like brackets, colons and commas.
  * @param iconColor The color for the icon in front of collapsable items.
  */
@@ -19,6 +20,7 @@ public data class TreeColors(
     val numberValueColor: Color,
     val booleanValueColor: Color,
     val nullValueColor: Color,
+    val indexColor: Color,
     val symbolColor: Color,
     val iconColor: Color,
 )
@@ -32,6 +34,7 @@ public val defaultLightColors: TreeColors = TreeColors(
     numberValueColor = Color(0xFFF7964A),
     booleanValueColor = Color(0xFFE9BB4D),
     nullValueColor = Color(0xFFE9BB4D),
+    indexColor = Color(0x991D4555),
     symbolColor = Color(0xFF1D4555),
     iconColor = Color(0xFF1D4555),
 )
@@ -45,6 +48,7 @@ public val defaultDarkColors: TreeColors = TreeColors(
     numberValueColor = Color(0xFFe1b866),
     booleanValueColor = Color(0xFFdee1b6),
     nullValueColor = Color(0xFFdee1b6),
+    indexColor = Color(0xE6798199),
     symbolColor = Color(0xFF798199),
     iconColor = Color(0xFF798199),
 )

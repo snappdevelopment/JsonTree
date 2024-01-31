@@ -41,7 +41,8 @@ internal class JsonViewModel(
                         state = initialState,
                         level = 0,
                         key = null,
-                        isLastItem = true
+                        isLastItem = true,
+                        parentType = ParentType.NONE
                     ).toRenderList()
                 )
             }
@@ -140,6 +141,7 @@ internal class JsonViewModel(
         level: Int,
         key: String?,
         isLastItem: Boolean,
+        parentType: ParentType,
     ): JsonTree {
         return when (this) {
             is JsonPrimitive -> {
@@ -149,6 +151,7 @@ internal class JsonViewModel(
                     key = key,
                     value = this,
                     isLastItem = isLastItem,
+                    parentType = parentType,
                 )
             }
             is JsonNull -> {
@@ -158,6 +161,7 @@ internal class JsonViewModel(
                     key = key,
                     value = this,
                     isLastItem = isLastItem,
+                    parentType = parentType,
                 )
             }
             is JsonArray -> {
@@ -170,7 +174,8 @@ internal class JsonViewModel(
                             state = TreeState.COLLAPSED,
                             level = level + 1,
                             key = it.key,
-                            isLastItem = it.key == (jsonArray.size - 1).toString()
+                            isLastItem = it.key == (jsonArray.size - 1).toString(),
+                            parentType = ParentType.ARRAY,
                         )
                     }
 
@@ -181,6 +186,7 @@ internal class JsonViewModel(
                     key = key,
                     children = childElements,
                     isLastItem = isLastItem,
+                    parentType = parentType,
                 )
             }
             is JsonObject -> {
@@ -192,7 +198,8 @@ internal class JsonViewModel(
                             state = TreeState.COLLAPSED,
                             level = level + 1,
                             key = it.key,
-                            isLastItem = it == jsonObject.entries.last()
+                            isLastItem = it == jsonObject.entries.last(),
+                            parentType = ParentType.OBJECT
                         )
                     }
 
@@ -203,6 +210,7 @@ internal class JsonViewModel(
                     key = key,
                     children = childElements,
                     isLastItem = isLastItem,
+                    parentType = parentType,
                 )
             }
         }
@@ -230,6 +238,7 @@ internal sealed interface JsonTree {
         override val isLastItem: Boolean,
         val key: String?,
         val value: JsonPrimitive,
+        val parentType: ParentType,
     ) : JsonTree
 
     data class NullElement(
@@ -238,6 +247,7 @@ internal sealed interface JsonTree {
         override val isLastItem: Boolean,
         val key: String?,
         val value: JsonPrimitive,
+        val parentType: ParentType,
     ) : JsonTree
 
     sealed interface CollapsableElement : JsonTree {
@@ -251,6 +261,7 @@ internal sealed interface JsonTree {
             override val children: Map<String, JsonTree>,
             override val isLastItem: Boolean,
             val key: String?,
+            val parentType: ParentType,
         ) : CollapsableElement
 
         data class ArrayElement(
@@ -260,6 +271,7 @@ internal sealed interface JsonTree {
             override val children: Map<String, JsonTree>,
             override val isLastItem: Boolean,
             val key: String?,
+            val parentType: ParentType,
         ) : CollapsableElement
     }
 
@@ -272,6 +284,8 @@ internal sealed interface JsonTree {
         enum class Type { ARRAY, OBJECT }
     }
 }
+
+internal enum class ParentType { NONE, ARRAY, OBJECT }
 
 private val JsonTree.CollapsableElement.endBracket: EndBracket
     get() = EndBracket(

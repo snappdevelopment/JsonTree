@@ -47,6 +47,7 @@ public fun JsonTree2Ui(
     icon: ImageVector = ImageVector.vectorResource(R.drawable.jsontree_arrow_right),
     iconSize: Dp = 20.dp,
     textStyle: TextStyle = LocalTextStyle.current,
+    showIndices: Boolean = false,
     onError: (Throwable) -> Unit = {}
 ) {
     val jsonParser = remember(json) { JsonViewModel(json) }
@@ -64,6 +65,7 @@ public fun JsonTree2Ui(
                 icon = icon,
                 iconSize = iconSize,
                 textStyle = textStyle,
+                showIndices = showIndices,
                 onClick = { jsonParser.expandOrCollapseItem(it) }
             )
         }
@@ -77,15 +79,16 @@ public fun JsonTree2Ui(
 private fun JsonTreeList(
     modifier: Modifier,
     items: List<JsonTree>,
-    colors: TreeColors = defaultLightColors,
-    icon: ImageVector = ImageVector.vectorResource(R.drawable.jsontree_arrow_right),
-    iconSize: Dp = 20.dp,
-    textStyle: TextStyle = LocalTextStyle.current,
+    colors: TreeColors,
+    icon: ImageVector,
+    iconSize: Dp,
+    textStyle: TextStyle,
+    showIndices: Boolean,
     onClick: (JsonTree) -> Unit,
 ) {
     Box(modifier = modifier) {
         LazyColumn {
-            itemsIndexed(items, key = { index, item -> item.id }) { index, item ->
+            itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
                 when (item) {
                     is JsonTree.CollapsableElement.ArrayElement -> {
                         CollapsableElement(
@@ -103,6 +106,8 @@ private fun JsonTreeList(
                             icon = icon,
                             iconSize = iconSize,
                             isLastItem = item.isLastItem,
+                            showIndices = showIndices,
+                            parentType = item.parentType,
                             onClick = { onClick(item) }
                         )
                     }
@@ -122,6 +127,8 @@ private fun JsonTreeList(
                             icon = icon,
                             iconSize = iconSize,
                             isLastItem = item.isLastItem,
+                            showIndices = showIndices,
+                            parentType = item.parentType,
                             onClick = { onClick(item) }
                         )
                     }
@@ -136,7 +143,9 @@ private fun JsonTreeList(
                             } else {
                                 (item.level * iconSize) + iconSize
                             },
-                            isLastItem = item.isLastItem
+                            isLastItem = item.isLastItem,
+                            showIndices = showIndices,
+                            parentType = item.parentType,
                         )
                     }
                     is JsonTree.NullElement -> {
@@ -150,7 +159,9 @@ private fun JsonTreeList(
                             } else {
                                 (item.level * iconSize) + iconSize
                             },
-                            isLastItem = item.isLastItem
+                            isLastItem = item.isLastItem,
+                            showIndices = showIndices,
+                            parentType = item.parentType,
                         )
                     }
                     is JsonTree.EndBracket -> {
@@ -184,6 +195,8 @@ private fun CollapsableElement(
     icon: ImageVector,
     iconSize: Dp,
     isLastItem: Boolean,
+    showIndices: Boolean,
+    parentType: ParentType,
     onClick: () -> Unit,
 ) {
     val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
@@ -193,11 +206,20 @@ private fun CollapsableElement(
     val coloredText = remember(key, state, colors, isLastItem, itemCount, type) {
         buildAnnotatedString {
             key?.let {
-                withStyle(SpanStyle(color = colors.keyColor)) {
-                    append("\"$it\"")
-                }
-                withStyle(SpanStyle(color = colors.symbolColor)) {
-                    append(": ")
+                if (parentType == ParentType.ARRAY && showIndices) {
+                    withStyle(SpanStyle(color = colors.indexColor)) {
+                        append(it)
+                    }
+                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                        append(": ")
+                    }
+                } else if (parentType != ParentType.ARRAY) {
+                    withStyle(SpanStyle(color = colors.keyColor)) {
+                        append("\"$it\"")
+                    }
+                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                        append(": ")
+                    }
                 }
             }
 
@@ -254,6 +276,8 @@ private fun PrimitiveElement(
     textStyle: TextStyle,
     indent: Dp,
     isLastItem: Boolean,
+    showIndices: Boolean,
+    parentType: ParentType,
 ) {
     val valueColor = remember(value) {
         when {
@@ -270,11 +294,20 @@ private fun PrimitiveElement(
     val coloredText = remember(key, value, colors, isLastItem) {
         buildAnnotatedString {
             key?.let {
-                withStyle(SpanStyle(color = colors.keyColor)) {
-                    append("\"$it\"")
-                }
-                withStyle(SpanStyle(color = colors.symbolColor)) {
-                    append(": ")
+                if (parentType == ParentType.ARRAY && showIndices) {
+                    withStyle(SpanStyle(color = colors.indexColor)) {
+                        append(it)
+                    }
+                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                        append(": ")
+                    }
+                } else if (parentType != ParentType.ARRAY) {
+                    withStyle(SpanStyle(color = colors.keyColor)) {
+                        append("\"$it\"")
+                    }
+                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                        append(": ")
+                    }
                 }
             }
 
