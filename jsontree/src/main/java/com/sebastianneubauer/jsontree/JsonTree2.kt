@@ -4,7 +4,6 @@ import androidx.compose.runtime.mutableStateOf
 import com.sebastianneubauer.jsontree.JsonTree.CollapsableElement.ArrayElement
 import com.sebastianneubauer.jsontree.JsonTree.CollapsableElement.ObjectElement
 import com.sebastianneubauer.jsontree.JsonTree.EndBracket
-import com.sebastianneubauer.jsontree.JsonTree.NullElement
 import com.sebastianneubauer.jsontree.JsonTree.PrimitiveElement
 import com.sebastianneubauer.jsontree.ParserState.Loading
 import com.sebastianneubauer.jsontree.ParserState.Parsing.Error
@@ -13,7 +12,6 @@ import com.sebastianneubauer.jsontree.ParserState.Ready
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
@@ -36,14 +34,15 @@ internal class JsonViewModel(
         parserState.value = when (parsingState) {
             is Parsed -> {
                 Ready(
-                    list = parsingState.jsonElement.toJsonTree(
-                        idGenerator = AtomicLong(),
-                        state = initialState,
-                        level = 0,
-                        key = null,
-                        isLastItem = true,
-                        parentType = ParentType.NONE
-                    ).toRenderList()
+                    list = parsingState.jsonElement
+                        .toJsonTree(
+                            idGenerator = AtomicLong(),
+                            state = initialState,
+                            level = 0,
+                            key = null,
+                            isLastItem = true,
+                            parentType = ParentType.NONE
+                        ).toRenderList()
                 )
             }
             is Error -> parsingState
@@ -57,7 +56,6 @@ internal class JsonViewModel(
             when (jsonTree) {
                 is EndBracket -> error("EndBracket in initial list creation")
                 is PrimitiveElement -> list.add(jsonTree)
-                is NullElement -> list.add(jsonTree)
                 is ArrayElement -> {
                     list.add(jsonTree)
                     if (jsonTree.state != TreeState.COLLAPSED) {
@@ -89,7 +87,6 @@ internal class JsonViewModel(
 
         val newList = when (item) {
             is PrimitiveElement -> error("PrimitiveElement can't be clicked")
-            is NullElement -> error("NullElement can't be clicked")
             is EndBracket -> error("EndBracket can't be clicked")
             is ArrayElement -> {
                 when (item.state) {
@@ -146,16 +143,6 @@ internal class JsonViewModel(
         return when (this) {
             is JsonPrimitive -> {
                 PrimitiveElement(
-                    id = idGenerator.incrementAndGet().toString(),
-                    level = level,
-                    key = key,
-                    value = this,
-                    isLastItem = isLastItem,
-                    parentType = parentType,
-                )
-            }
-            is JsonNull -> {
-                NullElement(
                     id = idGenerator.incrementAndGet().toString(),
                     level = level,
                     key = key,
@@ -233,15 +220,6 @@ internal sealed interface JsonTree {
     val isLastItem: Boolean
 
     data class PrimitiveElement(
-        override val id: String,
-        override val level: Int,
-        override val isLastItem: Boolean,
-        val key: String?,
-        val value: JsonPrimitive,
-        val parentType: ParentType,
-    ) : JsonTree
-
-    data class NullElement(
         override val id: String,
         override val level: Int,
         override val isLastItem: Boolean,

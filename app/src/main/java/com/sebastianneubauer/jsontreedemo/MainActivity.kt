@@ -110,8 +110,7 @@ internal class MainActivity : ComponentActivity() {
                         state = pagerState
                     ) { pageIndex ->
                         Column(
-                            modifier = Modifier
-                                .padding(16.dp)
+                            modifier = Modifier.padding(vertical = 16.dp),
                         ) {
                             when (pageIndex) {
                                 0 -> {
@@ -120,6 +119,7 @@ internal class MainActivity : ComponentActivity() {
                                             if(colors == defaultLightColors) Color.White else Color.Black
                                         ),
                                         json = json,
+                                        onLoading = { Text(text = "Loading...") },
                                         initialState = initialState,
                                         colors = colors,
                                         onError = { errorMessage = it.localizedMessage },
@@ -169,7 +169,8 @@ internal class MainActivity : ComponentActivity() {
         			"url": "https://user.com",
         			"description": "bargains independence smell sharing electric extra failures wallpaper freelance higher mathematics disaster directed clicking elder anyone encountered living mattress drill",
         			"verified": true,
-        			"salary": 38775
+        			"salary": 38775,
+                    "newValue": null
         		},
         		{
         			"_id": "6CEAN1AXU6F666A4",
