@@ -152,19 +152,20 @@ internal class JsonViewModel(
                 )
             }
             is JsonArray -> {
-                val childElements = jsonArray
-                    .mapIndexed { index, item -> Pair(index.toString(), item) }
-                    .toMap()
-                    .mapValues {
-                        it.value.toJsonTree(
+                val childElements = jsonArray.mapIndexed { index, item ->
+                    Pair(
+                        index.toString(),
+                        item.toJsonTree(
                             idGenerator = idGenerator,
                             state = TreeState.COLLAPSED,
                             level = level + 1,
-                            key = it.key,
-                            isLastItem = it.key == (jsonArray.size - 1).toString(),
+                            key = index.toString(),
+                            isLastItem = index == (jsonArray.size - 1),
                             parentType = ParentType.ARRAY,
                         )
-                    }
+                    )
+                }
+                    .toMap()
 
                 ArrayElement(
                     id = idGenerator.incrementAndGet().toString(),
@@ -177,9 +178,9 @@ internal class JsonViewModel(
                 )
             }
             is JsonObject -> {
-                val childElements = jsonObject.entries
-                    .associate { it.toPair() }
-                    .mapValues {
+                val childElements = jsonObject.entries.associate {
+                    Pair(
+                        it.key,
                         it.value.toJsonTree(
                             idGenerator = idGenerator,
                             state = TreeState.COLLAPSED,
@@ -188,7 +189,8 @@ internal class JsonViewModel(
                             isLastItem = it == jsonObject.entries.last(),
                             parentType = ParentType.OBJECT
                         )
-                    }
+                    )
+                }
 
                 ObjectElement(
                     id = idGenerator.incrementAndGet().toString(),
