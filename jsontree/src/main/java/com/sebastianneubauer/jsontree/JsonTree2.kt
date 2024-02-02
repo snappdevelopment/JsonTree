@@ -49,38 +49,6 @@ internal class JsonViewModel(
         }
     }
 
-    private fun JsonTree.toRenderList(): List<JsonTree> {
-        val list = mutableListOf<JsonTree>()
-
-        fun addToList(jsonTree: JsonTree) {
-            when (jsonTree) {
-                is EndBracket -> error("EndBracket in initial list creation")
-                is PrimitiveElement -> list.add(jsonTree)
-                is ArrayElement -> {
-                    list.add(jsonTree)
-                    if (jsonTree.state != TreeState.COLLAPSED) {
-                        jsonTree.children.forEach {
-                            addToList(it.value)
-                        }
-                        list.add(jsonTree.endBracket)
-                    }
-                }
-                is ObjectElement -> {
-                    list.add(jsonTree)
-                    if (jsonTree.state != TreeState.COLLAPSED) {
-                        jsonTree.children.forEach {
-                            addToList(it.value)
-                        }
-                        list.add(jsonTree.endBracket)
-                    }
-                }
-            }
-        }
-
-        addToList(this)
-        return list
-    }
-
     fun expandOrCollapseItem(item: JsonTree) {
         val state = parserState.value
         check(state is Ready)
@@ -110,13 +78,34 @@ internal class JsonViewModel(
     private fun List<JsonTree>.collapseItem(item: JsonTree.CollapsableElement): List<JsonTree> {
         return toMutableList().apply {
             val newItem = when (item) {
-                is ObjectElement -> item.copy(state = TreeState.COLLAPSED)
-                is ArrayElement -> item.copy(state = TreeState.COLLAPSED)
+                is ObjectElement -> item.copy(state = TreeState.COLLAPSED, children = item.children.collapse())
+                is ArrayElement -> item.copy(state = TreeState.COLLAPSED, children = item.children.collapse())
             }
             val itemIndex = indexOfFirst { it.id == item.id }
             val endBracketIndex = indexOfFirst { it.id == item.endBracket.id }
             subList(itemIndex, endBracketIndex + 1).clear()
             add(itemIndex, newItem)
+        }
+    }
+
+    private fun Map<String, JsonTree>.collapse(): Map<String, JsonTree> {
+        return mapValues {
+            when (val child = it.value) {
+                is PrimitiveElement -> child
+                is EndBracket -> child
+                is ArrayElement -> {
+                    child.copy(
+                        state = TreeState.COLLAPSED,
+                        children = child.children.collapse()
+                    )
+                }
+                is ObjectElement -> {
+                    child.copy(
+                        state = TreeState.COLLAPSED,
+                        children = child.children.collapse()
+                    )
+                }
+            }
         }
     }
 
@@ -157,7 +146,7 @@ internal class JsonViewModel(
                         index.toString(),
                         item.toJsonTree(
                             idGenerator = idGenerator,
-                            state = TreeState.COLLAPSED,
+                            state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
                             level = level + 1,
                             key = index.toString(),
                             isLastItem = index == (jsonArray.size - 1),
@@ -183,7 +172,7 @@ internal class JsonViewModel(
                         it.key,
                         it.value.toJsonTree(
                             idGenerator = idGenerator,
-                            state = TreeState.COLLAPSED,
+                            state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
                             level = level + 1,
                             key = it.key,
                             isLastItem = it == jsonObject.entries.last(),
@@ -203,6 +192,38 @@ internal class JsonViewModel(
                 )
             }
         }
+    }
+
+    private fun JsonTree.toRenderList(): List<JsonTree> {
+        val list = mutableListOf<JsonTree>()
+
+        fun addToList(jsonTree: JsonTree) {
+            when (jsonTree) {
+                is EndBracket -> error("EndBracket in initial list creation")
+                is PrimitiveElement -> list.add(jsonTree)
+                is ArrayElement -> {
+                    list.add(jsonTree)
+                    if (jsonTree.state != TreeState.COLLAPSED) {
+                        jsonTree.children.forEach {
+                            addToList(it.value)
+                        }
+                        list.add(jsonTree.endBracket)
+                    }
+                }
+                is ObjectElement -> {
+                    list.add(jsonTree)
+                    if (jsonTree.state != TreeState.COLLAPSED) {
+                        jsonTree.children.forEach {
+                            addToList(it.value)
+                        }
+                        list.add(jsonTree.endBracket)
+                    }
+                }
+            }
+        }
+
+        addToList(this)
+        return list
     }
 }
 
