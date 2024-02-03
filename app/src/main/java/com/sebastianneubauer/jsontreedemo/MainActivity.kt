@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.JsonTree
-import com.sebastianneubauer.jsontree.JsonTree2Ui
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
@@ -114,7 +111,7 @@ internal class MainActivity : ComponentActivity() {
                         ) {
                             when (pageIndex) {
                                 0 -> {
-                                    JsonTree2Ui(
+                                    JsonTree(
                                         modifier = Modifier.background(
                                             if(colors == defaultLightColors) Color.White else Color.Black
                                         ),

@@ -1,14 +1,15 @@
 package com.sebastianneubauer.jsontree
 
 import androidx.compose.runtime.mutableStateOf
-import com.sebastianneubauer.jsontree.JsonTree.CollapsableElement.ArrayElement
-import com.sebastianneubauer.jsontree.JsonTree.CollapsableElement.ObjectElement
-import com.sebastianneubauer.jsontree.JsonTree.EndBracket
-import com.sebastianneubauer.jsontree.JsonTree.PrimitiveElement
-import com.sebastianneubauer.jsontree.ParserState.Loading
-import com.sebastianneubauer.jsontree.ParserState.Parsing.Error
-import com.sebastianneubauer.jsontree.ParserState.Parsing.Parsed
-import com.sebastianneubauer.jsontree.ParserState.Ready
+import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
+import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
+import com.sebastianneubauer.jsontree.JsonTreeElement.EndBracket
+import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
+import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive
+import com.sebastianneubauer.jsontree.JsonTreeParserState.Loading
+import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Error
+import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Parsed
+import com.sebastianneubauer.jsontree.JsonTreeParserState.Ready
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -18,13 +19,13 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import java.util.concurrent.atomic.AtomicLong
 
-internal class JsonViewModel(
+internal class JsonTreeParser(
     private val json: String,
 ) {
-    private var parserState = mutableStateOf<ParserState>(Loading)
+    private var parserState = mutableStateOf<JsonTreeParserState>(Loading)
     val state = parserState
 
-    fun initJsonParser(initialState: TreeState) {
+    fun init(initialState: TreeState) {
         val parsingState = runCatching {
             Parsed(Json.parseToJsonElement(json))
         }.getOrElse { throwable ->
@@ -42,28 +43,28 @@ internal class JsonViewModel(
                             key = null,
                             isLastItem = true,
                             parentType = ParentType.NONE
-                        ).toRenderList()
+                        ).toList()
                 )
             }
             is Error -> parsingState
         }
     }
 
-    fun expandOrCollapseItem(item: JsonTree) {
+    fun expandOrCollapseItem(item: JsonTreeElement) {
         val state = parserState.value
         check(state is Ready)
 
         val newList = when (item) {
-            is PrimitiveElement -> error("PrimitiveElement can't be clicked")
+            is Primitive -> error("Primitive can't be clicked")
             is EndBracket -> error("EndBracket can't be clicked")
-            is ArrayElement -> {
+            is Array -> {
                 when (item.state) {
                     TreeState.COLLAPSED -> state.list.expandItem(item)
                     TreeState.EXPANDED,
                     TreeState.FIRST_ITEM_EXPANDED -> state.list.collapseItem(item)
                 }
             }
-            is ObjectElement -> {
+            is Object -> {
                 when (item.state) {
                     TreeState.COLLAPSED -> state.list.expandItem(item)
                     TreeState.EXPANDED,
@@ -75,11 +76,11 @@ internal class JsonViewModel(
         parserState.value = state.copy(newList)
     }
 
-    private fun List<JsonTree>.collapseItem(item: JsonTree.CollapsableElement): List<JsonTree> {
+    private fun List<JsonTreeElement>.collapseItem(item: JsonTreeElement.Collapsable): List<JsonTreeElement> {
         return toMutableList().apply {
             val newItem = when (item) {
-                is ObjectElement -> item.copy(state = TreeState.COLLAPSED, children = item.children.collapse())
-                is ArrayElement -> item.copy(state = TreeState.COLLAPSED, children = item.children.collapse())
+                is Object -> item.copy(state = TreeState.COLLAPSED, children = item.children.collapse())
+                is Array -> item.copy(state = TreeState.COLLAPSED, children = item.children.collapse())
             }
             val itemIndex = indexOfFirst { it.id == item.id }
             val endBracketIndex = indexOfFirst { it.id == item.endBracket.id }
@@ -88,18 +89,18 @@ internal class JsonViewModel(
         }
     }
 
-    private fun Map<String, JsonTree>.collapse(): Map<String, JsonTree> {
+    private fun Map<String, JsonTreeElement>.collapse(): Map<String, JsonTreeElement> {
         return mapValues {
             when (val child = it.value) {
-                is PrimitiveElement -> child
+                is Primitive -> child
                 is EndBracket -> child
-                is ArrayElement -> {
+                is Array -> {
                     child.copy(
                         state = TreeState.COLLAPSED,
                         children = child.children.collapse()
                     )
                 }
-                is ObjectElement -> {
+                is Object -> {
                     child.copy(
                         state = TreeState.COLLAPSED,
                         children = child.children.collapse()
@@ -109,11 +110,11 @@ internal class JsonViewModel(
         }
     }
 
-    private fun List<JsonTree>.expandItem(item: JsonTree.CollapsableElement): List<JsonTree> {
+    private fun List<JsonTreeElement>.expandItem(item: JsonTreeElement.Collapsable): List<JsonTreeElement> {
         return toMutableList().apply {
             val newItem = when (item) {
-                is ObjectElement -> item.copy(state = TreeState.EXPANDED)
-                is ArrayElement -> item.copy(state = TreeState.EXPANDED)
+                is Object -> item.copy(state = TreeState.EXPANDED)
+                is Array -> item.copy(state = TreeState.EXPANDED)
             }
             val itemIndex = indexOfFirst { it.id == item.id }
             removeAt(itemIndex)
@@ -128,10 +129,10 @@ internal class JsonViewModel(
         key: String?,
         isLastItem: Boolean,
         parentType: ParentType,
-    ): JsonTree {
+    ): JsonTreeElement {
         return when (this) {
             is JsonPrimitive -> {
-                PrimitiveElement(
+                Primitive(
                     id = idGenerator.incrementAndGet().toString(),
                     level = level,
                     key = key,
@@ -156,7 +157,7 @@ internal class JsonViewModel(
                 }
                     .toMap()
 
-                ArrayElement(
+                Array(
                     id = idGenerator.incrementAndGet().toString(),
                     level = level,
                     state = state,
@@ -181,7 +182,7 @@ internal class JsonViewModel(
                     )
                 }
 
-                ObjectElement(
+                Object(
                     id = idGenerator.incrementAndGet().toString(),
                     level = level,
                     state = state,
@@ -194,14 +195,14 @@ internal class JsonViewModel(
         }
     }
 
-    private fun JsonTree.toRenderList(): List<JsonTree> {
-        val list = mutableListOf<JsonTree>()
+    private fun JsonTreeElement.toList(): List<JsonTreeElement> {
+        val list = mutableListOf<JsonTreeElement>()
 
-        fun addToList(jsonTree: JsonTree) {
+        fun addToList(jsonTree: JsonTreeElement) {
             when (jsonTree) {
                 is EndBracket -> error("EndBracket in initial list creation")
-                is PrimitiveElement -> list.add(jsonTree)
-                is ArrayElement -> {
+                is Primitive -> list.add(jsonTree)
+                is Array -> {
                     list.add(jsonTree)
                     if (jsonTree.state != TreeState.COLLAPSED) {
                         jsonTree.children.forEach {
@@ -210,7 +211,7 @@ internal class JsonViewModel(
                         list.add(jsonTree.endBracket)
                     }
                 }
-                is ObjectElement -> {
+                is Object -> {
                     list.add(jsonTree)
                     if (jsonTree.state != TreeState.COLLAPSED) {
                         jsonTree.children.forEach {
@@ -226,75 +227,3 @@ internal class JsonViewModel(
         return list
     }
 }
-
-internal sealed interface ParserState {
-    object Loading : ParserState
-    data class Ready(val list: List<JsonTree>) : ParserState
-
-    sealed interface Parsing : ParserState {
-        data class Parsed(val jsonElement: JsonElement) : Parsing
-        data class Error(val throwable: Throwable) : Parsing
-    }
-}
-
-internal sealed interface JsonTree {
-    val id: String
-    val level: Int
-    val isLastItem: Boolean
-
-    data class PrimitiveElement(
-        override val id: String,
-        override val level: Int,
-        override val isLastItem: Boolean,
-        val key: String?,
-        val value: JsonPrimitive,
-        val parentType: ParentType,
-    ) : JsonTree
-
-    sealed interface CollapsableElement : JsonTree {
-        val state: TreeState
-        val children: Map<String, JsonTree>
-
-        data class ObjectElement(
-            override val id: String,
-            override val level: Int,
-            override val state: TreeState,
-            override val children: Map<String, JsonTree>,
-            override val isLastItem: Boolean,
-            val key: String?,
-            val parentType: ParentType,
-        ) : CollapsableElement
-
-        data class ArrayElement(
-            override val id: String,
-            override val level: Int,
-            override val state: TreeState,
-            override val children: Map<String, JsonTree>,
-            override val isLastItem: Boolean,
-            val key: String?,
-            val parentType: ParentType,
-        ) : CollapsableElement
-    }
-
-    data class EndBracket(
-        override val id: String,
-        override val level: Int,
-        override val isLastItem: Boolean,
-        val type: Type
-    ) : JsonTree {
-        enum class Type { ARRAY, OBJECT }
-    }
-}
-
-internal enum class ParentType { NONE, ARRAY, OBJECT }
-
-private val JsonTree.CollapsableElement.endBracket: EndBracket
-    get() = EndBracket(
-        id = "$id-b",
-        level = level,
-        isLastItem = isLastItem,
-        type = when (this) {
-            is ObjectElement -> JsonTree.EndBracket.Type.OBJECT
-            is ArrayElement -> JsonTree.EndBracket.Type.ARRAY
-        }
-    )
