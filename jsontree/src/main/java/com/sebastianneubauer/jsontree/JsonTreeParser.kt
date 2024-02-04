@@ -95,16 +95,24 @@ internal class JsonTreeParser(
                 is Primitive -> child
                 is EndBracket -> child
                 is Array -> {
-                    child.copy(
-                        state = TreeState.COLLAPSED,
-                        children = child.children.collapse()
-                    )
+                    if (child.state != TreeState.COLLAPSED) {
+                        child.copy(
+                            state = TreeState.COLLAPSED,
+                            children = child.children.collapse()
+                        )
+                    } else {
+                        child
+                    }
                 }
                 is Object -> {
-                    child.copy(
-                        state = TreeState.COLLAPSED,
-                        children = child.children.collapse()
-                    )
+                    if (child.state != TreeState.COLLAPSED) {
+                        child.copy(
+                            state = TreeState.COLLAPSED,
+                            children = child.children.collapse()
+                        )
+                    } else {
+                        child
+                    }
                 }
             }
         }
