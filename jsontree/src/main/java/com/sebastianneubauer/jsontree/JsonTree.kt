@@ -3,13 +3,10 @@ package com.sebastianneubauer.jsontree
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
@@ -201,32 +198,27 @@ private fun Collapsable(
     iconSize: Dp,
     onClick: () -> Unit,
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = indent)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        Icon(
             modifier = Modifier
-                .fillMaxWidth()
-                .clickable(
-                    interactionSource = MutableInteractionSource(),
-                    indication = null,
-                    onClick = onClick
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                modifier = Modifier
-                    .size(iconSize)
-                    .graphicsLayer(rotationZ = if (state == TreeState.COLLAPSED) 0F else 90F),
-                imageVector = icon,
-                tint = colors.iconColor,
-                contentDescription = null
-            )
+                .size(iconSize)
+                .graphicsLayer(rotationZ = if (state == TreeState.COLLAPSED) 0F else 90F),
+            imageVector = icon,
+            tint = colors.iconColor,
+            contentDescription = null
+        )
 
-            Text(text = text, style = textStyle)
-        }
+        Text(text = text, style = textStyle)
     }
 }
 
@@ -236,12 +228,11 @@ private fun Primitive(
     textStyle: TextStyle,
     indent: Dp,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Spacer(modifier = Modifier.width(indent))
-        Text(text = text, style = textStyle)
-    }
+    Text(
+        modifier = Modifier.padding(start = indent),
+        text = text,
+        style = textStyle
+    )
 }
 
 @Composable
