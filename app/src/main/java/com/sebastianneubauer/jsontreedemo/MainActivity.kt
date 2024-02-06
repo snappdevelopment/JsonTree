@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -112,11 +114,20 @@ internal class MainActivity : ComponentActivity() {
                             when (pageIndex) {
                                 0 -> {
                                     JsonTree(
-                                        modifier = Modifier.background(
-                                            if(colors == defaultLightColors) Color.White else Color.Black
-                                        ),
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(
+                                                if(colors == defaultLightColors) Color.White else Color.Black
+                                            ),
                                         json = json,
-                                        onLoading = { Text(text = "Loading...") },
+                                        onLoading = {
+                                            Box(
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(text = "Loading...")
+                                            }
+                                        },
                                         initialState = initialState,
                                         colors = colors,
                                         onError = { errorMessage = it.localizedMessage },
