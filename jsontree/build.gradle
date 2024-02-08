@@ -35,6 +35,7 @@ dependencies {
 
     implementation libs.kotlinx.serialization.json
 
+    testImplementation libs.testing.junit
     androidTestImplementation libs.testing.compose.ui.junit
     debugImplementation libs.testing.compose.ui.manifest
 }
