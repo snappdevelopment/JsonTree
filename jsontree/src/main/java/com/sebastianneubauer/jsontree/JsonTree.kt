@@ -54,6 +54,7 @@ public fun JsonTree(
     iconSize: Dp = 20.dp,
     textStyle: TextStyle = LocalTextStyle.current,
     showIndices: Boolean = false,
+    showItemCount: Boolean = true,
     onError: (Throwable) -> Unit = {}
 ) {
     val jsonParser = remember(json) { JsonTreeParser(json) }
@@ -72,6 +73,7 @@ public fun JsonTree(
                     iconSize = iconSize,
                     textStyle = textStyle,
                     showIndices = showIndices,
+                    showItemCount = showItemCount,
                     onClick = { jsonParser.expandOrCollapseItem(it) }
                 )
             }
@@ -90,6 +92,7 @@ private fun JsonTreeList(
     iconSize: Dp,
     textStyle: TextStyle,
     showIndices: Boolean,
+    showItemCount: Boolean,
     onClick: (JsonTreeElement) -> Unit,
 ) {
     LazyColumn {
@@ -104,6 +107,7 @@ private fun JsonTreeList(
                         colors = colors,
                         isLastItem = item.isLastItem,
                         showIndices = showIndices,
+                        showItemCount = showItemCount,
                         parentType = item.parentType
                     )
 
@@ -131,6 +135,7 @@ private fun JsonTreeList(
                         colors = colors,
                         isLastItem = item.isLastItem,
                         showIndices = showIndices,
+                        showItemCount = showItemCount,
                         parentType = item.parentType
                     )
 

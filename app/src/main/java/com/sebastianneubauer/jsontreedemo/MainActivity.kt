@@ -7,11 +7,13 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
@@ -50,6 +52,8 @@ internal class MainActivity : ComponentActivity() {
                     var json: String by remember { mutableStateOf(simpleJson) }
                     var colors: TreeColors by remember { mutableStateOf(defaultLightColors) }
                     var initialState: TreeState by remember { mutableStateOf(TreeState.FIRST_ITEM_EXPANDED) }
+                    var showIndices: Boolean by remember { mutableStateOf(true) }
+                    var showItemCount: Boolean by remember { mutableStateOf(true) }
 
                     Text(
                         modifier = Modifier.fillMaxWidth(),
@@ -60,45 +64,66 @@ internal class MainActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.height(48.dp))
 
-                    Button(
-                        onClick = {
-                            json = when (json) {
-                                emptyJson -> simpleJson
-                                simpleJson -> complexJson
-                                complexJson -> emptyJson
-                                else -> throw IllegalStateException("No JSON selected!")
+                    Row {
+                        Button(
+                            onClick = {
+                                json = when (json) {
+                                    emptyJson -> simpleJson
+                                    simpleJson -> complexJson
+                                    complexJson -> emptyJson
+                                    else -> throw IllegalStateException("No JSON selected!")
+                                }
                             }
+                        ) {
+                            Text(
+                                text = when (json) {
+                                    simpleJson -> "Simple Json"
+                                    emptyJson -> "Empty Json"
+                                    complexJson -> "Complex Json"
+                                    else -> throw IllegalStateException("No JSON selected!")
+                                }
+                            )
                         }
-                    ) {
-                        Text(
-                            text = when (json) {
-                                simpleJson -> "Simple Json"
-                                emptyJson -> "Empty Json"
-                                complexJson -> "Complex Json"
-                                else -> throw IllegalStateException("No JSON selected!")
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Button(
+                            onClick = {
+                                val newState = when(initialState) {
+                                    TreeState.EXPANDED -> TreeState.COLLAPSED
+                                    TreeState.COLLAPSED -> TreeState.FIRST_ITEM_EXPANDED
+                                    TreeState.FIRST_ITEM_EXPANDED -> TreeState.EXPANDED
+                                }
+                                initialState = newState
                             }
-                        )
+                        ) {
+                            Text(text = initialState.name)
+                        }
                     }
 
-                    Button(
-                        onClick = {
-                            colors = if(colors == defaultLightColors) defaultDarkColors else defaultLightColors
-                        }
-                    ) {
-                        Text(text = if(colors == defaultLightColors) "Light" else "Dark")
-                    }
 
                     Button(
-                        onClick = {
-                            val newState = when(initialState) {
-                                TreeState.EXPANDED -> TreeState.COLLAPSED
-                                TreeState.COLLAPSED -> TreeState.FIRST_ITEM_EXPANDED
-                                TreeState.FIRST_ITEM_EXPANDED -> TreeState.EXPANDED
-                            }
-                            initialState = newState
-                        }
+                        onClick = { showIndices = !showIndices }
                     ) {
-                        Text(text = initialState.name)
+                        Text(text = if(showIndices) "Hide indices" else "Show indices")
+                    }
+
+                    Row {
+                        Button(
+                            onClick = { showItemCount = !showItemCount }
+                        ) {
+                            Text(text = if(showItemCount) "Hide item count" else "Show item count")
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Button(
+                            onClick = {
+                                colors = if(colors == defaultLightColors) defaultDarkColors else defaultLightColors
+                            }
+                        ) {
+                            Text(text = if(colors == defaultLightColors) "Light" else "Dark")
+                        }
                     }
 
                     val pagerState = rememberPagerState(
@@ -132,6 +157,8 @@ internal class MainActivity : ComponentActivity() {
                                         },
                                         initialState = initialState,
                                         colors = colors,
+                                        showIndices = showIndices,
+                                        showItemCount = showItemCount,
                                         onError = { errorMessage = it.localizedMessage },
                                     )
                                 }

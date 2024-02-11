@@ -24,11 +24,12 @@ internal fun rememberCollapsableText(
     colors: TreeColors,
     isLastItem: Boolean,
     showIndices: Boolean,
+    showItemCount: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
     val itemCount = pluralStringResource(R.plurals.jsontree_collapsable_items, childItemCount, childItemCount)
 
-    return remember(key, state, colors, isLastItem, itemCount, type) {
+    return remember(key, state, colors, isLastItem, itemCount, type, showIndices, showItemCount) {
         val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
         val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
 
@@ -56,8 +57,14 @@ internal fun rememberCollapsableText(
             }
 
             if (state == TreeState.COLLAPSED) {
-                withStyle(SpanStyle(color = colors.symbolColor)) {
-                    append(itemCount)
+                if (showItemCount) {
+                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                        append(itemCount)
+                    }
+                } else {
+                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                        append(" ... ")
+                    }
                 }
 
                 withStyle(SpanStyle(color = colors.symbolColor)) {
@@ -89,7 +96,7 @@ internal fun rememberPrimitiveText(
         }
     }
 
-    return remember(key, value, colors, isLastItem) {
+    return remember(key, value, colors, isLastItem, showIndices) {
         buildAnnotatedString {
             key?.let {
                 if (parentType == ParentType.ARRAY && showIndices) {
