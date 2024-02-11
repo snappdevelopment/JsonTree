@@ -101,11 +101,13 @@ internal class MainActivity : ComponentActivity() {
                         Text(text = initialState.name)
                     }
 
-                    val pagerState = rememberPagerState(0)
+                    val pagerState = rememberPagerState(
+                        initialPage = 0,
+                        pageCount = { 3 }
+                    )
 
                     //Pager to test leaving composition
                     HorizontalPager(
-                        pageCount = 3,
                         state = pagerState
                     ) { pageIndex ->
                         Column(

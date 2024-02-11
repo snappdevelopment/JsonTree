@@ -1,41 +1,39 @@
 [versions]
 android-min = "21"
-android-target = "33"
+android-target = "34"
 
 java = "1.8"
 
-gradle-plugin = "7.4.2"
-kotlin = "1.8.0"
+gradle-plugin = "8.2.2"
+kotlin = "1.9.22"
 publish = "0.25.1"
-api-validator = "0.13.0"
+api-validator = "0.14.0"
 
-androidx-activity-compose = "1.7.0"
-androidx-compose-material3 = "1.0.1"
-androidx-compose-compiler = "1.4.0"
-androidx-compose-foundation = "1.4.0"
-androidx-compose-ui = "1.4.0"
-androidx-compose-runtime = "1.4.0"
+androidx-activity-compose = "1.8.2"
+androidx-compose-compiler = "1.5.9"
+androidx-compose-bom = "2024.02.00"
 
-kotlinx-serialization-json = "1.5.0"
+kotlinx-serialization-json = "1.6.2"
 
 junit = "4.13.2"
 detekt = "1.22.0"
 
 
 [libraries]
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidx-compose-bom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+androidx-compose-material = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
-androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "androidx-compose-ui" }
-androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "androidx-compose-ui" }
-androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "androidx-compose-ui" }
-androidx-compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "androidx-compose-foundation" }
-androidx-compose-material = { module = "androidx.compose.material3:material3", version.ref = "androidx-compose-material3" }
-androidx-compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "androidx-compose-runtime" }
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 
 testing-junit = { module = "junit:junit", version.ref = "junit" }
-testing-compose-ui-junit = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "androidx-compose-ui" }
-testing-compose-ui-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-compose-ui" }
+testing-compose-ui-junit = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+testing-compose-ui-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "publish" }

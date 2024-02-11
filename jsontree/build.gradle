@@ -27,6 +27,7 @@ android {
 }
 
 dependencies {
+    implementation platform(libs.androidx.compose.bom)
     implementation libs.androidx.compose.ui
     implementation libs.androidx.compose.ui.tooling
     implementation libs.androidx.compose.foundation
@@ -36,6 +37,7 @@ dependencies {
     implementation libs.kotlinx.serialization.json
 
     testImplementation libs.testing.junit
+    testImplementation platform(libs.androidx.compose.bom)
     androidTestImplementation libs.testing.compose.ui.junit
     debugImplementation libs.testing.compose.ui.manifest
 }
