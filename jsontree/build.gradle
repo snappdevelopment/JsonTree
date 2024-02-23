@@ -7,12 +7,7 @@ plugins {
 apply from: "$rootProject.projectDir/common-android.gradle"
 
 android {
-    compileOptions {
-        targetCompatibility JavaVersion.toVersion(libs.versions.java.get())
-        sourceCompatibility JavaVersion.toVersion(libs.versions.java.get())
-    }
     kotlinOptions {
-        jvmTarget = libs.versions.java.get()
         freeCompilerArgs += ["-Xexplicit-api=strict", "-Xjvm-default=all", "-opt-in=kotlin.RequiresOptIn"]
     }
     buildFeatures {

@@ -2,11 +2,11 @@
 android-min = "21"
 android-target = "34"
 
-java = "1.8"
+java-toolchain = "17"
 
 gradle-plugin = "8.2.2"
 kotlin = "1.9.22"
-publish = "0.25.1"
+publish = "0.25.2"
 api-validator = "0.14.0"
 
 androidx-activity-compose = "1.8.2"

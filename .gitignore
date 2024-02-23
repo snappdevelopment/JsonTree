@@ -50,6 +50,7 @@ captures/
 .idea/JetClient/
 .idea/deploymentTargetSelector.xml
 .idea/deploymentTargetDropDown.xml
+.idea/render.experimental.xml
 # Android Studio 3 in .gitignore file.
 .idea/caches
 .idea/modules.xml

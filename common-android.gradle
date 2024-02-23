@@ -16,3 +16,9 @@ android {
         buildConfig = false
     }
 }
+
+kotlin{
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.java.toolchain.get()))
+    }
+}
