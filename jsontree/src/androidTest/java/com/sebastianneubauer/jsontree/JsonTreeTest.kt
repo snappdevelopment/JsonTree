@@ -11,9 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -33,7 +34,8 @@ internal class JsonTreeTest {
         composeTestRule.setContent {
             JsonTree(
                 json = json,
-                initialState = initialState
+                initialState = initialState,
+                onLoading = {}
             )
         }
     }
@@ -46,8 +48,8 @@ internal class JsonTreeTest {
         composeTestRule.onNodeWithText("\"topLevelArray\": [ 2 items ],").assertIsDisplayed()
         composeTestRule.onNodeWithText("\"emptyObject\": { 0 items }").assertIsDisplayed()
 
-        composeTestRule.onNodeWithText("\"string\": \"stringValue\",").assertIsNotDisplayed()
-        composeTestRule.onNodeWithText("\"hello\",").assertIsNotDisplayed()
+        composeTestRule.onNodeWithText("\"string\": \"stringValue\",").assertDoesNotExist()
+        composeTestRule.onNodeWithText("\"hello\",").assertDoesNotExist()
     }
 
     @Test
@@ -55,7 +57,7 @@ internal class JsonTreeTest {
         setJson(nestedJson, initialState = TreeState.COLLAPSED)
 
         composeTestRule.onNodeWithText("{ 3 items }").assertIsDisplayed()
-        composeTestRule.onNodeWithText("\"topLevelObject\"", substring = true).assertIsNotDisplayed()
+        composeTestRule.onNodeWithText("\"topLevelObject\"", substring = true).assertDoesNotExist()
     }
 
     @Test
@@ -163,7 +165,8 @@ internal class JsonTreeTest {
                 JsonTree(
                     modifier = Modifier.testTag("jsonTree"),
                     json = INVALID_JSON,
-                    onError = { throwable -> errorMessage = throwable.localizedMessage }
+                    onError = { throwable -> errorMessage = throwable.localizedMessage },
+                    onLoading = {}
                 )
 
                 errorMessage?.let {
@@ -175,7 +178,6 @@ internal class JsonTreeTest {
             }
         }
 
-        composeTestRule.onNodeWithTag("jsonTree").assertDoesNotExist()
         composeTestRule.onNodeWithTag("errorText").assertIsDisplayed()
     }
 
@@ -185,7 +187,7 @@ internal class JsonTreeTest {
             var jsonString: String by remember { mutableStateOf(rootStringJson) }
 
             Column {
-                JsonTree(json = jsonString)
+                JsonTree(json = jsonString, onLoading = {})
 
                 Button(
                     modifier = Modifier.testTag("button"),
@@ -209,7 +211,8 @@ internal class JsonTreeTest {
             Column {
                 JsonTree(
                     json = jsonString,
-                    initialState = TreeState.COLLAPSED
+                    initialState = TreeState.COLLAPSED,
+                    onLoading = {}
                 )
 
                 Button(
@@ -235,6 +238,7 @@ internal class JsonTreeTest {
                 JsonTree(
                     modifier = Modifier.testTag("jsonTree"),
                     json = jsonString,
+                    onLoading = {}
                 )
 
                 Button(
@@ -244,11 +248,7 @@ internal class JsonTreeTest {
             }
         }
 
-        composeTestRule.onNodeWithTag("jsonTree").assertDoesNotExist()
-
         composeTestRule.onNodeWithTag("button").performClick()
-
-        composeTestRule.onNodeWithTag("jsonTree").assertExists()
         composeTestRule.assertRootStringIsDisplayed()
     }
 
@@ -262,7 +262,8 @@ internal class JsonTreeTest {
                 JsonTree(
                     modifier = Modifier.testTag("jsonTree"),
                     json = jsonString,
-                    onError = { throwable -> errorMessage = throwable.localizedMessage }
+                    onError = { throwable -> errorMessage = throwable.localizedMessage },
+                    onLoading = {}
                 )
 
                 Button(
@@ -284,7 +285,6 @@ internal class JsonTreeTest {
 
         composeTestRule.onNodeWithTag("button").performClick()
 
-        composeTestRule.onNodeWithTag("jsonTree").assertDoesNotExist()
         composeTestRule.onNodeWithTag("errorText").assertIsDisplayed()
     }
 
@@ -296,7 +296,8 @@ internal class JsonTreeTest {
             Column {
                 JsonTree(
                     json = arrayOfArraysJson,
-                    initialState = initalState
+                    initialState = initalState,
+                    onLoading = {}
                 )
 
                 Button(
@@ -324,5 +325,70 @@ internal class JsonTreeTest {
         composeTestRule.onNodeWithTag("button").performClick()
 
         composeTestRule.onNodeWithText("\"array\": [ 2 items ]").assertIsDisplayed()
+    }
+
+    @Test
+    fun showing_and_hiding_indices_is_handled_correctly() {
+        composeTestRule.setContent {
+            var showIndices: Boolean by remember { mutableStateOf(true) }
+
+            Column {
+                JsonTree(
+                    json = arrayOfArraysJson,
+                    onLoading = {},
+                    showIndices = showIndices,
+                    initialState = TreeState.EXPANDED
+                )
+
+                Button(
+                    modifier = Modifier.testTag("button"),
+                    onClick = { showIndices = !showIndices }
+                ) {}
+            }
+        }
+
+        composeTestRule.onNodeWithText("0: [").assertIsDisplayed()
+        composeTestRule.onNodeWithText("0: \"stringValue\"").assertIsDisplayed()
+        composeTestRule.onNodeWithText("1: [").assertIsDisplayed()
+        composeTestRule.onNodeWithText("0: 42,").assertIsDisplayed()
+        composeTestRule.onNodeWithText("1: 52").assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag("button").performClick()
+
+        composeTestRule.onAllNodesWithText("[").assertCountEquals(2)
+        composeTestRule.onNodeWithText("\"stringValue\"").assertIsDisplayed()
+        composeTestRule.onNodeWithText("42,").assertIsDisplayed()
+        composeTestRule.onNodeWithText("52").assertIsDisplayed()
+    }
+
+    @Test
+    fun showing_and_hiding_item_count_is_handled_correctly() {
+        composeTestRule.setContent {
+            var showItemCount: Boolean by remember { mutableStateOf(true) }
+
+            Column {
+                JsonTree(
+                    json = rootArrayJson,
+                    onLoading = {},
+                    showItemCount = showItemCount,
+                    initialState = TreeState.COLLAPSED
+                )
+
+                Button(
+                    modifier = Modifier.testTag("button"),
+                    onClick = { showItemCount = !showItemCount }
+                ) {}
+            }
+        }
+
+        composeTestRule.onNodeWithText("[ 1 item ]").assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag("button").performClick()
+
+        composeTestRule.onNodeWithText("[ ... ]").assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag("button").performClick()
+
+        composeTestRule.onNodeWithText("[ 1 item ]").assertIsDisplayed()
     }
 }

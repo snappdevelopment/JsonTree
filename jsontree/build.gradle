@@ -7,12 +7,7 @@ plugins {
 apply from: "$rootProject.projectDir/common-android.gradle"
 
 android {
-    compileOptions {
-        targetCompatibility JavaVersion.toVersion(libs.versions.java.get())
-        sourceCompatibility JavaVersion.toVersion(libs.versions.java.get())
-    }
     kotlinOptions {
-        jvmTarget = libs.versions.java.get()
         freeCompilerArgs += ["-Xexplicit-api=strict", "-Xjvm-default=all", "-opt-in=kotlin.RequiresOptIn"]
     }
     buildFeatures {
@@ -27,6 +22,7 @@ android {
 }
 
 dependencies {
+    implementation platform(libs.androidx.compose.bom)
     implementation libs.androidx.compose.ui
     implementation libs.androidx.compose.ui.tooling
     implementation libs.androidx.compose.foundation
@@ -35,6 +31,8 @@ dependencies {
 
     implementation libs.kotlinx.serialization.json
 
+    testImplementation libs.testing.junit
+    testImplementation platform(libs.androidx.compose.bom)
     androidTestImplementation libs.testing.compose.ui.junit
     debugImplementation libs.testing.compose.ui.manifest
 }

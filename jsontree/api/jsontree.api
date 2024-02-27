@@ -1,10 +1,10 @@
 public final class com/sebastianneubauer/jsontree/JsonTreeKt {
-	public static final fun JsonTree-eHTjO5g (Landroidx/compose/ui/Modifier;Ljava/lang/String;Lcom/sebastianneubauer/jsontree/TreeState;Lcom/sebastianneubauer/jsontree/TreeColors;Landroidx/compose/ui/graphics/vector/ImageVector;FLandroidx/compose/ui/text/TextStyle;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun JsonTree-121YqSk (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Landroidx/compose/ui/Modifier;Lcom/sebastianneubauer/jsontree/TreeState;Lcom/sebastianneubauer/jsontree/TreeColors;Landroidx/compose/ui/graphics/vector/ImageVector;FLandroidx/compose/ui/text/TextStyle;ZZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class com/sebastianneubauer/jsontree/TreeColors {
 	public static final field $stable I
-	public synthetic fun <init> (JJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (JJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-0d7_KjU ()J
 	public final fun component2-0d7_KjU ()J
 	public final fun component3-0d7_KjU ()J
@@ -12,11 +12,13 @@ public final class com/sebastianneubauer/jsontree/TreeColors {
 	public final fun component5-0d7_KjU ()J
 	public final fun component6-0d7_KjU ()J
 	public final fun component7-0d7_KjU ()J
-	public final fun copy-4JmcsL4 (JJJJJJJ)Lcom/sebastianneubauer/jsontree/TreeColors;
-	public static synthetic fun copy-4JmcsL4$default (Lcom/sebastianneubauer/jsontree/TreeColors;JJJJJJJILjava/lang/Object;)Lcom/sebastianneubauer/jsontree/TreeColors;
+	public final fun component8-0d7_KjU ()J
+	public final fun copy-FD3wquc (JJJJJJJJ)Lcom/sebastianneubauer/jsontree/TreeColors;
+	public static synthetic fun copy-FD3wquc$default (Lcom/sebastianneubauer/jsontree/TreeColors;JJJJJJJJILjava/lang/Object;)Lcom/sebastianneubauer/jsontree/TreeColors;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBooleanValueColor-0d7_KjU ()J
 	public final fun getIconColor-0d7_KjU ()J
+	public final fun getIndexColor-0d7_KjU ()J
 	public final fun getKeyColor-0d7_KjU ()J
 	public final fun getNullValueColor-0d7_KjU ()J
 	public final fun getNumberValueColor-0d7_KjU ()J
@@ -35,6 +37,7 @@ public final class com/sebastianneubauer/jsontree/TreeState : java/lang/Enum {
 	public static final field COLLAPSED Lcom/sebastianneubauer/jsontree/TreeState;
 	public static final field EXPANDED Lcom/sebastianneubauer/jsontree/TreeState;
 	public static final field FIRST_ITEM_EXPANDED Lcom/sebastianneubauer/jsontree/TreeState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/sebastianneubauer/jsontree/TreeState;
 	public static fun values ()[Lcom/sebastianneubauer/jsontree/TreeState;
 }
