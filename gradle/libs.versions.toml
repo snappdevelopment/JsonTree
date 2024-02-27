@@ -13,7 +13,7 @@ androidx-activity-compose = "1.8.2"
 androidx-compose-compiler = "1.5.9"
 androidx-compose-bom = "2024.02.00"
 
-kotlinx-serialization-json = "1.6.2"
+kotlinx-serialization-json = "1.6.3"
 
 junit = "4.13.2"
 detekt = "1.22.0"
