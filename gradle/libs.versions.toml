@@ -6,7 +6,7 @@ java-toolchain = "17"
 
 gradle-plugin = "8.2.2"
 kotlin = "1.9.22"
-publish = "0.25.2"
+publish = "0.27.0"
 api-validator = "0.14.0"
 
 androidx-activity-compose = "1.8.2"
