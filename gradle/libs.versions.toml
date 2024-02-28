@@ -16,7 +16,7 @@ androidx-compose-bom = "2024.02.01"
 kotlinx-serialization-json = "1.6.2"
 
 junit = "4.13.2"
-detekt = "1.22.0"
+detekt = "1.23.5"
 
 
 [libraries]
