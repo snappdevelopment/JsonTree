@@ -11,7 +11,7 @@ api-validator = "0.14.0"
 
 androidx-activity-compose = "1.8.2"
 androidx-compose-compiler = "1.5.9"
-androidx-compose-bom = "2024.02.01"
+androidx-compose-bom = "2024.02.02"
 
 kotlinx-serialization-json = "1.6.3"
 
