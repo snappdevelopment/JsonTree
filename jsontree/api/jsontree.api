@@ -1,5 +1,5 @@
 public final class com/sebastianneubauer/jsontree/JsonTreeKt {
-	public static final fun JsonTree-121YqSk (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Landroidx/compose/ui/Modifier;Lcom/sebastianneubauer/jsontree/TreeState;Lcom/sebastianneubauer/jsontree/TreeColors;Landroidx/compose/ui/graphics/vector/ImageVector;FLandroidx/compose/ui/text/TextStyle;ZZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;III)V
+	public static final fun JsonTree-k3FuEkE (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Landroidx/compose/ui/Modifier;Lcom/sebastianneubauer/jsontree/TreeState;Landroidx/compose/foundation/layout/PaddingValues;Lcom/sebastianneubauer/jsontree/TreeColors;Landroidx/compose/ui/graphics/vector/ImageVector;FLandroidx/compose/ui/text/TextStyle;ZZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;III)V
 }
 
 public final class com/sebastianneubauer/jsontree/TreeColors {

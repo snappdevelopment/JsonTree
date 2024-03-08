@@ -5,8 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.JsonTree
@@ -44,9 +49,7 @@ internal class MainActivity : ComponentActivity() {
         setContent {
             JsonTreeTheme {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     var errorMessage: String? by remember { mutableStateOf(null) }
                     var json: String by remember { mutableStateOf(simpleJson) }
@@ -55,8 +58,10 @@ internal class MainActivity : ComponentActivity() {
                     var showIndices: Boolean by remember { mutableStateOf(true) }
                     var showItemCount: Boolean by remember { mutableStateOf(true) }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     Text(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         text = "🌳 JsonTree",
                         style = MaterialTheme.typography.headlineMedium,
                         color = Color.Black
@@ -64,13 +69,15 @@ internal class MainActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.height(48.dp))
 
-                    Row {
+                    Row(modifier = Modifier.padding(horizontal = 16.dp)) {
                         Button(
                             onClick = {
+                                errorMessage = null
                                 json = when (json) {
                                     emptyJson -> simpleJson
                                     simpleJson -> complexJson
-                                    complexJson -> emptyJson
+                                    complexJson -> invalidJson
+                                    invalidJson -> emptyJson
                                     else -> throw IllegalStateException("No JSON selected!")
                                 }
                             }
@@ -80,6 +87,7 @@ internal class MainActivity : ComponentActivity() {
                                     simpleJson -> "Simple Json"
                                     emptyJson -> "Empty Json"
                                     complexJson -> "Complex Json"
+                                    invalidJson -> "Invalid Json"
                                     else -> throw IllegalStateException("No JSON selected!")
                                 }
                             )
@@ -101,14 +109,14 @@ internal class MainActivity : ComponentActivity() {
                         }
                     }
 
-
                     Button(
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         onClick = { showIndices = !showIndices }
                     ) {
                         Text(text = if(showIndices) "Hide indices" else "Show indices")
                     }
 
-                    Row {
+                    Row(modifier = Modifier.padding(horizontal = 16.dp)) {
                         Button(
                             onClick = { showItemCount = !showItemCount }
                         ) {
@@ -133,26 +141,39 @@ internal class MainActivity : ComponentActivity() {
 
                     //Pager to test leaving composition
                     HorizontalPager(
-                        state = pagerState
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1F),
+                        state = pagerState,
+                        verticalAlignment = Alignment.Top
                     ) { pageIndex ->
-                        Column(
-                            modifier = Modifier.padding(vertical = 16.dp),
-                        ) {
-                            when (pageIndex) {
-                                0 -> {
+                        when (pageIndex) {
+                            0 -> {
+                                val error = errorMessage
+                                if(error!= null) {
+                                    Text(
+                                        text = error,
+                                        color = Color.Black
+                                    )
+                                } else {
                                     JsonTree(
                                         modifier = Modifier
                                             .fillMaxSize()
+                                            .horizontalScroll(rememberScrollState())
                                             .background(
-                                                if(colors == defaultLightColors) Color.White else Color.Black
+                                                if (colors == defaultLightColors) Color.White else Color.Black
                                             ),
+                                        contentPadding = PaddingValues(16.dp),
                                         json = json,
                                         onLoading = {
                                             Box(
                                                 modifier = Modifier.fillMaxSize(),
                                                 contentAlignment = Alignment.Center
                                             ) {
-                                                Text(text = "Loading...")
+                                                Text(
+                                                    text = "Loading...",
+                                                    color = if (colors == defaultLightColors) Color.Black else Color.White
+                                                )
                                             }
                                         },
                                         initialState = initialState,
@@ -162,22 +183,14 @@ internal class MainActivity : ComponentActivity() {
                                         onError = { errorMessage = it.localizedMessage },
                                     )
                                 }
-                                1 -> {
-                                    Text(text = "Page 1")
-                                }
-                                2 -> {
-                                    Text(text = "Page 2")
-                                }
+                            }
+                            1 -> {
+                                Text(text = "Page 1")
+                            }
+                            2 -> {
+                                Text(text = "Page 2")
                             }
                         }
-                    }
-
-                    errorMessage?.let {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = it,
-                            color = Color.White
-                        )
                     }
                 }
             }

@@ -2117,3 +2117,5 @@ internal val simpleJson = """
 """.trimIndent()
 
 internal val emptyJson = "{}"
+
+internal val invalidJson = ""

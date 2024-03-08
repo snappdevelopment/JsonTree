@@ -3,6 +3,7 @@ package com.sebastianneubauer.jsontree
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.times
  * @param onLoading A Composable which is shown during the initial loading of the tree.
  * @param modifier The Modifier for this Composable.
  * @param initialState The initial state of the tree before user interaction. One of [TreeState].
+ * @param contentPadding The content padding for the scrollable container.
  * @param colors The color palette the tree uses. [defaultLightColors], [defaultDarkColors] or a
  * custom instance of [TreeColors].
  * @param icon The icon which is shown in front of collapsable items. Default value is an arrow icon.
@@ -49,6 +51,7 @@ public fun JsonTree(
     onLoading: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     initialState: TreeState = TreeState.FIRST_ITEM_EXPANDED,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     colors: TreeColors = defaultLightColors,
     icon: ImageVector = ImageVector.vectorResource(R.drawable.jsontree_arrow_right),
     iconSize: Dp = 20.dp,
@@ -63,11 +66,12 @@ public fun JsonTree(
         jsonParser.init(initialState)
     }
 
-    Box(modifier = modifier) {
-        when (val state = jsonParser.state.value) {
-            is JsonTreeParserState.Ready -> {
+    when (val state = jsonParser.state.value) {
+        is JsonTreeParserState.Ready -> {
+            Box(modifier = modifier) {
                 JsonTreeList(
                     items = state.list,
+                    contentPadding = contentPadding,
                     colors = colors,
                     icon = icon,
                     iconSize = iconSize,
@@ -77,16 +81,17 @@ public fun JsonTree(
                     onClick = { jsonParser.expandOrCollapseItem(it) }
                 )
             }
-            is JsonTreeParserState.Loading -> onLoading()
-            is JsonTreeParserState.Parsing.Error -> onError(state.throwable)
-            is JsonTreeParserState.Parsing.Parsed -> error("Unexpected state $state")
         }
+        is JsonTreeParserState.Loading -> onLoading()
+        is JsonTreeParserState.Parsing.Error -> onError(state.throwable)
+        is JsonTreeParserState.Parsing.Parsed -> error("Unexpected state $state")
     }
 }
 
 @Composable
 private fun JsonTreeList(
     items: List<JsonTreeElement>,
+    contentPadding: PaddingValues,
     colors: TreeColors,
     icon: ImageVector,
     iconSize: Dp,
@@ -95,7 +100,9 @@ private fun JsonTreeList(
     showItemCount: Boolean,
     onClick: (JsonTreeElement) -> Unit,
 ) {
-    LazyColumn {
+    LazyColumn(
+        contentPadding = contentPadding
+    ) {
         itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
             when (item) {
                 is JsonTreeElement.Collapsable.Array -> {
