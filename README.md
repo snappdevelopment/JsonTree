@@ -47,6 +47,8 @@ JsonTree(
     onLoading = { Text(text = "Loading...") },
     // The initial state of the tree. Expand the first item or expand/collapse all items
     initialState = TreeState.FIRST_ITEM_EXPANDED,
+    // The content padding for the internal LazyColumn
+    contentPadding = PaddingValues(16.dp),
     // The color palette for your json tree
     colors = TreeColors(
         keyColor = Color.Blue,
