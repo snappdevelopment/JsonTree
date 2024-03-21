@@ -14,6 +14,7 @@ androidx-compose-compiler = "1.5.11"
 androidx-compose-bom = "2024.03.00"
 
 kotlinx-serialization-json = "1.6.3"
+coroutines = "1.8.0"
 
 junit = "4.13.2"
 detekt = "1.23.6"
@@ -34,6 +35,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 testing-junit = { module = "junit:junit", version.ref = "junit" }
 testing-compose-ui-junit = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 testing-compose-ui-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+testing-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "publish" }

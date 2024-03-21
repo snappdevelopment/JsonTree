@@ -10,6 +10,8 @@ import com.sebastianneubauer.jsontree.JsonTreeParserState.Loading
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Error
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Parsed
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Ready
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -21,18 +23,20 @@ import java.util.concurrent.atomic.AtomicLong
 
 internal class JsonTreeParser(
     private val json: String,
+    private val defaultDispatcher: CoroutineDispatcher,
+    private val mainDispatcher: CoroutineDispatcher,
 ) {
     private var parserState = mutableStateOf<JsonTreeParserState>(Loading)
     val state = parserState
 
-    fun init(initialState: TreeState) {
+    suspend fun init(initialState: TreeState) = withContext(defaultDispatcher) {
         val parsingState = runCatching {
             Parsed(Json.parseToJsonElement(json))
         }.getOrElse { throwable ->
             Error(throwable)
         }
 
-        parserState.value = when (parsingState) {
+        val state = when (parsingState) {
             is Parsed -> {
                 Ready(
                     list = parsingState.jsonElement
@@ -48,9 +52,13 @@ internal class JsonTreeParser(
             }
             is Error -> parsingState
         }
+
+        withContext(mainDispatcher) {
+            parserState.value = state
+        }
     }
 
-    fun expandOrCollapseItem(item: JsonTreeElement) {
+    suspend fun expandOrCollapseItem(item: JsonTreeElement) = withContext(defaultDispatcher) {
         val state = parserState.value
         check(state is Ready)
 
@@ -73,7 +81,9 @@ internal class JsonTreeParser(
             }
         }
 
-        parserState.value = state.copy(newList)
+        withContext(mainDispatcher) {
+            parserState.value = state.copy(newList)
+        }
     }
 
     private fun List<JsonTreeElement>.collapseItem(item: JsonTreeElement.Collapsable): List<JsonTreeElement> {
