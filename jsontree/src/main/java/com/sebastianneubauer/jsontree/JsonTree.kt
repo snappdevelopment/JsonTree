@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -26,6 +27,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Renders JSON data as a formatted tree with collapsable objects and arrays.
@@ -60,7 +63,14 @@ public fun JsonTree(
     showItemCount: Boolean = true,
     onError: (Throwable) -> Unit = {}
 ) {
-    val jsonParser = remember(json) { JsonTreeParser(json) }
+    val jsonParser = remember(json) {
+        JsonTreeParser(
+            json = json,
+            defaultDispatcher = Dispatchers.Default,
+            mainDispatcher = Dispatchers.Main
+        )
+    }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(jsonParser, initialState) {
         jsonParser.init(initialState)
@@ -78,7 +88,11 @@ public fun JsonTree(
                     textStyle = textStyle,
                     showIndices = showIndices,
                     showItemCount = showItemCount,
-                    onClick = { jsonParser.expandOrCollapseItem(it) }
+                    onClick = {
+                        coroutineScope.launch {
+                            jsonParser.expandOrCollapseItem(it)
+                        }
+                    }
                 )
             }
         }
