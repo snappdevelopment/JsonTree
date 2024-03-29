@@ -10,8 +10,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -20,6 +23,7 @@ import androidx.compose.ui.test.performClick
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalTestApi::class)
 internal class JsonTreeTest {
 
     @JvmField
@@ -63,6 +67,9 @@ internal class JsonTreeTest {
     fun initial_state_is_expanded() {
         setJson(nestedJson, initialState = TreeState.EXPANDED)
 
+        // fix flakiness by waiting until first item appears
+        composeTestRule.waitUntilExactlyOneExists(hasText("\"topLevelObject\": {"))
+
         // every collapsable is expanded
         composeTestRule.onNodeWithText("\"topLevelObject\": {").assertIsDisplayed()
         composeTestRule.onNodeWithText("\"string\": \"stringValue\",").assertIsDisplayed()
@@ -86,6 +93,8 @@ internal class JsonTreeTest {
     @Test
     fun click_on_collapsed_object_or_array_expands_it() {
         setJson(nestedJson)
+        // fix flakiness by waiting until first item appears
+        composeTestRule.waitUntilExactlyOneExists(hasText("\"topLevelObject\": { 2 items },"))
 
         composeTestRule.onNodeWithText("\"topLevelObject\": { 2 items },").performClick()
         composeTestRule.onNodeWithText("\"topLevelObject\": {").assertIsDisplayed()
@@ -115,6 +124,8 @@ internal class JsonTreeTest {
     @Test
     fun array_of_arrays_is_rendered_correctly() {
         setJson(arrayOfArraysJson)
+        // fix flakiness by waiting until first item appears
+        composeTestRule.waitUntilExactlyOneExists(hasText("\"array\": [ 2 items ]"))
 
         composeTestRule.onNodeWithText("\"array\": [ 2 items ]").assertIsDisplayed()
         composeTestRule.onNodeWithText("\"array\": [ 2 items ]").performClick()
@@ -278,6 +289,9 @@ internal class JsonTreeTest {
                 }
             }
         }
+
+        // fix flakiness by waiting until first item appears
+        composeTestRule.waitUntilExactlyOneExists(hasTestTag("jsonTree"))
 
         composeTestRule.onNodeWithTag("jsonTree").assertIsDisplayed()
         composeTestRule.onNodeWithTag("errorText").assertDoesNotExist()
