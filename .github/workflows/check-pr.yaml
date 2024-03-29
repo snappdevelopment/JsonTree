@@ -9,7 +9,7 @@ on:
 
 jobs:
   assembleDebug:
-    runs-on: ubuntu-latest
+    runs-on: macos-14
 
     steps:
       - name: Checkout code
@@ -25,7 +25,7 @@ jobs:
         run: ./gradlew assembleDebug --stacktrace
 
   assembleRelease:
-    runs-on: ubuntu-latest
+    runs-on: macos-14
 
     steps:
       - name: Checkout code
@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew assembleRelease --stacktrace
 
   connectedTests:
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: [assembleDebug, assembleRelease]
 
     steps:
@@ -59,7 +59,7 @@ jobs:
         with:
           api-level: 30
           target: google_apis
-          arch: arm64-v8a
+          arch: x86_64
           script: ./gradlew connectedCheck --stacktrace
 
   check:
