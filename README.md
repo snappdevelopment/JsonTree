@@ -1,6 +1,6 @@
 # 🌳 JsonTree
 
-![](https://img.shields.io/maven-central/v/com.sebastianneubauer.jsontree/jsontree) ![](https://img.shields.io/badge/Kotlin-1.9.22-orange) ![](https://img.shields.io/badge/SDK-21+-brightgreen) ![](https://img.shields.io/badge/Android_Weekly-Issue_584-yellow)
+![](https://img.shields.io/maven-central/v/com.sebastianneubauer.jsontree/jsontree) ![](https://img.shields.io/badge/Kotlin-1.9.23-orange) ![](https://img.shields.io/badge/SDK-21+-brightgreen) ![](https://img.shields.io/badge/Android_Weekly-Issue_584-yellow)
 <br /><br />
 JsonTree is an Android library to display JSON data in Compose with syntax highlighting and more.
 <br /><br />
@@ -43,7 +43,7 @@ JsonTree(
     modifier = Modifier,
     // Your json data
     json = "{ \"key\": \"value\" }",
-    // The Composable to rendered during the initial loading
+    // The Composable to be rendered during the initial loading
     onLoading = { Text(text = "Loading...") },
     // The initial state of the tree. Expand the first item or expand/collapse all items
     initialState = TreeState.FIRST_ITEM_EXPANDED,
