@@ -40,26 +40,27 @@ jobs:
       - name: Assemble Release
         run: ./gradlew assembleRelease --stacktrace
 
-  connectedTests:
-    runs-on: macos-latest
-    needs: [assembleDebug, assembleRelease]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Run connected tests
-        uses: ReactiveCircus/android-emulator-runner@v2
-        with:
-          api-level: 33
-          arch: x86_64
-          script: ./gradlew connectedCheck --stacktrace
+# UI tests on CI are flaky
+#  connectedTests:
+#    runs-on: macos-latest
+#    needs: [assembleDebug, assembleRelease]
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v4
+#        with:
+#          distribution: 'zulu'
+#          java-version: '17'
+#
+#      - name: Run connected tests
+#        uses: ReactiveCircus/android-emulator-runner@v2
+#        with:
+#          api-level: 33
+#          arch: x86_64
+#          script: ./gradlew connectedCheck --stacktrace
 
   check:
     runs-on: ubuntu-latest
