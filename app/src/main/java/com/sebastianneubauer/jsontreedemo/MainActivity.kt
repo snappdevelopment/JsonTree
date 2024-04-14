@@ -9,6 +9,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,7 +44,7 @@ import java.lang.IllegalStateException
 
 internal class MainActivity : ComponentActivity() {
 
-    @OptIn(ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -57,6 +59,7 @@ internal class MainActivity : ComponentActivity() {
                     var initialState: TreeState by remember { mutableStateOf(TreeState.FIRST_ITEM_EXPANDED) }
                     var showIndices: Boolean by remember { mutableStateOf(true) }
                     var showItemCount: Boolean by remember { mutableStateOf(true) }
+                    var expandSingleChildren: Boolean by remember { mutableStateOf(true) }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -69,8 +72,9 @@ internal class MainActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.height(48.dp))
 
-                    Row(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    FlowRow {
                         Button(
+                            modifier = Modifier.padding(horizontal = 8.dp),
                             onClick = {
                                 errorMessage = null
                                 json = when (json) {
@@ -93,9 +97,8 @@ internal class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(16.dp))
-
                         Button(
+                            modifier = Modifier.padding(horizontal = 8.dp),
                             onClick = {
                                 val newState = when(initialState) {
                                     TreeState.EXPANDED -> TreeState.COLLAPSED
@@ -107,30 +110,35 @@ internal class MainActivity : ComponentActivity() {
                         ) {
                             Text(text = initialState.name)
                         }
-                    }
 
-                    Button(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        onClick = { showIndices = !showIndices }
-                    ) {
-                        Text(text = if(showIndices) "Hide indices" else "Show indices")
-                    }
-
-                    Row(modifier = Modifier.padding(horizontal = 16.dp)) {
                         Button(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            onClick = { showIndices = !showIndices }
+                        ) {
+                            Text(text = if(showIndices) "Hide indices" else "Show indices")
+                        }
+
+                        Button(
+                            modifier = Modifier.padding(horizontal = 8.dp),
                             onClick = { showItemCount = !showItemCount }
                         ) {
                             Text(text = if(showItemCount) "Hide item count" else "Show item count")
                         }
 
-                        Spacer(modifier = Modifier.width(16.dp))
-
                         Button(
+                            modifier = Modifier.padding(horizontal = 8.dp),
                             onClick = {
                                 colors = if(colors == defaultLightColors) defaultDarkColors else defaultLightColors
                             }
                         ) {
                             Text(text = if(colors == defaultLightColors) "Light" else "Dark")
+                        }
+
+                        Button(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            onClick = { expandSingleChildren = !expandSingleChildren }
+                        ) {
+                            Text(text = if(expandSingleChildren) "Expand children" else "Don't expand children")
                         }
                     }
 
@@ -180,6 +188,7 @@ internal class MainActivity : ComponentActivity() {
                                         colors = colors,
                                         showIndices = showIndices,
                                         showItemCount = showItemCount,
+                                        expandSingleChildren = expandSingleChildren,
                                         onError = { errorMessage = it.localizedMessage },
                                     )
                                 }

@@ -45,6 +45,9 @@ import kotlinx.coroutines.launch
  * @param iconSize The size of the [icon]. This size is also used to calculate indents.
  * @param textStyle The style which is used for all texts in the tree.
  * @param showIndices If true, arrays will show the index in front of each item.
+ * @param showItemCount If true, arrays and objects will show their amount of child items when collapsed.
+ * @param expandSingleChildren If true, children of collapsable items that have no siblings will be
+ * automatically expanded with their parent.
  * @param onError A callback which is called when the json can't be parsed and thus won't
  * be rendered. Receives the throwable of the error.
  */
@@ -61,6 +64,7 @@ public fun JsonTree(
     textStyle: TextStyle = LocalTextStyle.current,
     showIndices: Boolean = false,
     showItemCount: Boolean = true,
+    expandSingleChildren: Boolean = false,
     onError: (Throwable) -> Unit = {}
 ) {
     val jsonParser = remember(json) {
@@ -90,7 +94,10 @@ public fun JsonTree(
                     showItemCount = showItemCount,
                     onClick = {
                         coroutineScope.launch {
-                            jsonParser.expandOrCollapseItem(it)
+                            jsonParser.expandOrCollapseItem(
+                                item = it,
+                                expandSingleChildren = expandSingleChildren
+                            )
                         }
                     }
                 )
@@ -201,7 +208,7 @@ private fun JsonTreeList(
                         colors = colors,
                         textStyle = textStyle,
                         indent = if (index == 0 || index == items.lastIndex) {
-                            0.dp
+                            iconSize
                         } else {
                             (item.level * iconSize) + iconSize
                         },

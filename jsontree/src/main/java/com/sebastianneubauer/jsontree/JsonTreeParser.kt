@@ -1,5 +1,6 @@
 package com.sebastianneubauer.jsontree
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
@@ -27,7 +28,7 @@ internal class JsonTreeParser(
     private val mainDispatcher: CoroutineDispatcher,
 ) {
     private var parserState = mutableStateOf<JsonTreeParserState>(Loading)
-    val state = parserState
+    val state: State<JsonTreeParserState> = parserState
 
     suspend fun init(initialState: TreeState) = withContext(defaultDispatcher) {
         val parsingState = runCatching {
@@ -58,7 +59,10 @@ internal class JsonTreeParser(
         }
     }
 
-    suspend fun expandOrCollapseItem(item: JsonTreeElement) = withContext(defaultDispatcher) {
+    suspend fun expandOrCollapseItem(
+        item: JsonTreeElement,
+        expandSingleChildren: Boolean
+    ) = withContext(defaultDispatcher) {
         val state = parserState.value
         check(state is Ready)
 
@@ -67,14 +71,14 @@ internal class JsonTreeParser(
             is EndBracket -> error("EndBracket can't be clicked")
             is Array -> {
                 when (item.state) {
-                    TreeState.COLLAPSED -> state.list.expandItem(item)
+                    TreeState.COLLAPSED -> state.list.expandItem(item, expandSingleChildren)
                     TreeState.EXPANDED,
                     TreeState.FIRST_ITEM_EXPANDED -> state.list.collapseItem(item)
                 }
             }
             is Object -> {
                 when (item.state) {
-                    TreeState.COLLAPSED -> state.list.expandItem(item)
+                    TreeState.COLLAPSED -> state.list.expandItem(item, expandSingleChildren)
                     TreeState.EXPANDED,
                     TreeState.FIRST_ITEM_EXPANDED -> state.list.collapseItem(item)
                 }
@@ -128,15 +132,63 @@ internal class JsonTreeParser(
         }
     }
 
-    private fun List<JsonTreeElement>.expandItem(item: JsonTreeElement.Collapsable): List<JsonTreeElement> {
+    private fun List<JsonTreeElement>.expandItem(
+        item: JsonTreeElement.Collapsable,
+        expandSingleChildren: Boolean
+    ): List<JsonTreeElement> {
         return toMutableList().apply {
             val newItem = when (item) {
-                is Object -> item.copy(state = TreeState.EXPANDED)
-                is Array -> item.copy(state = TreeState.EXPANDED)
+                is Object -> item.copy(
+                    state = TreeState.EXPANDED,
+                    children = if (expandSingleChildren) item.children.expand() else item.children
+                )
+                is Array -> item.copy(
+                    state = TreeState.EXPANDED,
+                    children = if (expandSingleChildren) item.children.expand() else item.children
+                )
+            }
+            val children = if (expandSingleChildren) {
+                newItem.children.values.flatMap { it.toList() }
+            } else {
+                newItem.children.values
             }
             val itemIndex = indexOfFirst { it.id == item.id }
             removeAt(itemIndex)
-            addAll(itemIndex, listOf(newItem) + item.children.values + item.endBracket)
+            addAll(itemIndex, listOf(newItem) + children + item.endBracket)
+        }
+    }
+
+    // expand every Collapsables child if it has no siblings
+    private fun Map<String, JsonTreeElement>.expand(): Map<String, JsonTreeElement> {
+        return if (this.size == 1) {
+            mapValues {
+                when (val child = it.value) {
+                    is Primitive -> child
+                    is EndBracket -> child
+                    is Array -> {
+                        if (child.state == TreeState.COLLAPSED) {
+                            child.copy(
+                                state = TreeState.EXPANDED,
+                                children = child.children.expand()
+                            )
+                        } else {
+                            child
+                        }
+                    }
+                    is Object -> {
+                        if (child.state == TreeState.COLLAPSED) {
+                            child.copy(
+                                state = TreeState.EXPANDED,
+                                children = child.children.expand()
+                            )
+                        } else {
+                            child
+                        }
+                    }
+                }
+            }
+        } else {
+            this
         }
     }
 

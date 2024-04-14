@@ -319,7 +319,7 @@ internal class JsonTreeParserTest {
                     jsonTreeElement(state = TreeState.EXPANDED, childrenState = TreeState.EXPANDED),
                     array(state = TreeState.EXPANDED, childrenState = TreeState.EXPANDED),
                     nestedArray1(state = TreeState.EXPANDED, childrenState = TreeState.EXPANDED),
-                    objetElement(state = TreeState.EXPANDED),
+                    objectElement(state = TreeState.EXPANDED),
                     stringPrimitive,
                     JsonTreeElement.EndBracket(
                         id = "2-b",
@@ -361,7 +361,7 @@ internal class JsonTreeParserTest {
     }
 
     @Test
-    fun `nested json - expands and collapses correctly`() = runTest {
+    fun `nested json - expandSingleChildren is false - expands and collapses correctly`() = runTest {
         val underTest = underTest(nestedJson, TreeState.COLLAPSED)
         assertEquals(
             Ready(list = listOf(jsonTreeElement())),
@@ -369,7 +369,7 @@ internal class JsonTreeParserTest {
         )
 
         // expand root
-        underTest.expandOrCollapseItem(jsonTreeElement())
+        underTest.expandOrCollapseItem(jsonTreeElement(), expandSingleChildren = false)
 
         assertEquals(
             Ready(
@@ -388,7 +388,7 @@ internal class JsonTreeParserTest {
         )
 
         // expand array
-        underTest.expandOrCollapseItem(array())
+        underTest.expandOrCollapseItem(item = array(), expandSingleChildren = false)
 
         assertEquals(
             Ready(
@@ -415,7 +415,7 @@ internal class JsonTreeParserTest {
         )
 
         // expand nestedArray2
-        underTest.expandOrCollapseItem(nestedArray2())
+        underTest.expandOrCollapseItem(item = nestedArray2(), expandSingleChildren = false)
 
         assertEquals(
             Ready(
@@ -450,7 +450,10 @@ internal class JsonTreeParserTest {
         )
 
         // collapse array
-        underTest.expandOrCollapseItem(array(state = TreeState.EXPANDED, childrenState = TreeState.COLLAPSED))
+        underTest.expandOrCollapseItem(
+            item = array(state = TreeState.EXPANDED, childrenState = TreeState.COLLAPSED),
+            expandSingleChildren = false
+        )
 
         assertEquals(
             Ready(
@@ -469,7 +472,189 @@ internal class JsonTreeParserTest {
         )
 
         // collapse root
-        underTest.expandOrCollapseItem(jsonTreeElement(state = TreeState.EXPANDED, childrenState = TreeState.COLLAPSED))
+        underTest.expandOrCollapseItem(
+            item = jsonTreeElement(state = TreeState.EXPANDED, childrenState = TreeState.COLLAPSED),
+            expandSingleChildren = false
+        )
+
+        assertEquals(
+            Ready(list = listOf(jsonTreeElement())),
+            underTest.state.value
+        )
+    }
+
+    @Test
+    fun `nested json - expandSingleChildren is true - expands and collapses correctly`() = runTest {
+        val underTest = underTest(nestedJson, TreeState.COLLAPSED)
+        assertEquals(
+            Ready(list = listOf(jsonTreeElement())),
+            underTest.state.value
+        )
+
+        // expand root
+        underTest.expandOrCollapseItem(jsonTreeElement(), expandSingleChildren = true)
+
+        assertEquals(
+            Ready(
+                list = listOf(
+                    jsonTreeElement(
+                        state = TreeState.EXPANDED,
+                        childrenState = TreeState.EXPANDED,
+                        grandChildrenState = TreeState.COLLAPSED
+                    ),
+                    array(state = TreeState.EXPANDED),
+                    nestedArray1(),
+                    nestedArray2(),
+                    JsonTreeElement.EndBracket(
+                        id = "7-b",
+                        level = 1,
+                        isLastItem = true,
+                        type = JsonTreeElement.EndBracket.Type.ARRAY
+                    ),
+                    JsonTreeElement.EndBracket(
+                        id = "8-b",
+                        level = 0,
+                        isLastItem = true,
+                        type = JsonTreeElement.EndBracket.Type.OBJECT
+                    ),
+                )
+            ),
+            underTest.state.value
+        )
+
+        // expand nestedArray1, expands nested object as well
+        underTest.expandOrCollapseItem(item = nestedArray1(), expandSingleChildren = true)
+
+        assertEquals(
+            Ready(
+                list = listOf(
+                    jsonTreeElement(
+                        state = TreeState.EXPANDED,
+                        childrenState = TreeState.EXPANDED,
+                        grandChildrenState = TreeState.COLLAPSED
+                    ),
+                    array(state = TreeState.EXPANDED),
+                    nestedArray1(state = TreeState.EXPANDED, childrenState = TreeState.EXPANDED),
+                    objectElement(state = TreeState.EXPANDED),
+                    stringPrimitive,
+                    JsonTreeElement.EndBracket(
+                        id = "2-b",
+                        level = 3,
+                        isLastItem = true,
+                        type = JsonTreeElement.EndBracket.Type.OBJECT
+                    ),
+                    JsonTreeElement.EndBracket(
+                        id = "3-b",
+                        level = 2,
+                        isLastItem = false,
+                        type = JsonTreeElement.EndBracket.Type.ARRAY
+                    ),
+                    nestedArray2(),
+                    JsonTreeElement.EndBracket(
+                        id = "7-b",
+                        level = 1,
+                        isLastItem = true,
+                        type = JsonTreeElement.EndBracket.Type.ARRAY
+                    ),
+                    JsonTreeElement.EndBracket(
+                        id = "8-b",
+                        level = 0,
+                        isLastItem = true,
+                        type = JsonTreeElement.EndBracket.Type.OBJECT
+                    ),
+                )
+            ),
+            underTest.state.value
+        )
+
+        // expand nestedArray2
+        underTest.expandOrCollapseItem(item = nestedArray2(), expandSingleChildren = true)
+
+        assertEquals(
+            Ready(
+                list = listOf(
+                    jsonTreeElement(
+                        state = TreeState.EXPANDED,
+                        childrenState = TreeState.EXPANDED,
+                        grandChildrenState = TreeState.COLLAPSED
+                    ),
+                    array(state = TreeState.EXPANDED),
+                    nestedArray1(state = TreeState.EXPANDED, childrenState = TreeState.EXPANDED),
+                    objectElement(state = TreeState.EXPANDED),
+                    stringPrimitive,
+                    JsonTreeElement.EndBracket(
+                        id = "2-b",
+                        level = 3,
+                        isLastItem = true,
+                        type = JsonTreeElement.EndBracket.Type.OBJECT
+                    ),
+                    JsonTreeElement.EndBracket(
+                        id = "3-b",
+                        level = 2,
+                        isLastItem = false,
+                        type = JsonTreeElement.EndBracket.Type.ARRAY
+                    ),
+                    nestedArray2(state = TreeState.EXPANDED),
+                    numberPrimitive1,
+                    numberPrimitive2,
+                    JsonTreeElement.EndBracket(
+                        id = "6-b",
+                        level = 2,
+                        isLastItem = true,
+                        type = JsonTreeElement.EndBracket.Type.ARRAY
+                    ),
+                    JsonTreeElement.EndBracket(
+                        id = "7-b",
+                        level = 1,
+                        isLastItem = true,
+                        type = JsonTreeElement.EndBracket.Type.ARRAY
+                    ),
+                    JsonTreeElement.EndBracket(
+                        id = "8-b",
+                        level = 0,
+                        isLastItem = true,
+                        type = JsonTreeElement.EndBracket.Type.OBJECT
+                    ),
+                )
+            ),
+            underTest.state.value
+        )
+
+        // collapse array
+        underTest.expandOrCollapseItem(
+            item = array(state = TreeState.EXPANDED),
+            expandSingleChildren = true
+        )
+
+        assertEquals(
+            Ready(
+                list = listOf(
+                    jsonTreeElement(
+                        state = TreeState.EXPANDED,
+                        childrenState = TreeState.EXPANDED,
+                        grandChildrenState = TreeState.COLLAPSED
+                    ),
+                    array(),
+                    JsonTreeElement.EndBracket(
+                        id = "8-b",
+                        level = 0,
+                        isLastItem = true,
+                        type = JsonTreeElement.EndBracket.Type.OBJECT
+                    ),
+                )
+            ),
+            underTest.state.value
+        )
+
+        // collapse root
+        underTest.expandOrCollapseItem(
+            item = jsonTreeElement(
+                state = TreeState.EXPANDED,
+                childrenState = TreeState.COLLAPSED,
+                grandChildrenState = TreeState.COLLAPSED
+            ),
+            expandSingleChildren = true
+        )
 
         assertEquals(
             Ready(list = listOf(jsonTreeElement())),
@@ -504,7 +689,7 @@ internal class JsonTreeParserTest {
         parentType = JsonTreeElement.ParentType.ARRAY
     )
 
-    private fun objetElement(
+    private fun objectElement(
         state: TreeState = TreeState.COLLAPSED,
     ) = JsonTreeElement.Collapsable.Object(
         id = "2",
@@ -529,7 +714,7 @@ internal class JsonTreeParserTest {
         state = state,
         parentType = JsonTreeElement.ParentType.ARRAY,
         children = mapOf(
-            "0" to objetElement(state = childrenState)
+            "0" to objectElement(state = childrenState)
         ),
     )
 
@@ -567,6 +752,7 @@ internal class JsonTreeParserTest {
     private fun jsonTreeElement(
         state: TreeState = TreeState.COLLAPSED,
         childrenState: TreeState = TreeState.COLLAPSED,
+        grandChildrenState: TreeState = childrenState,
     ) = JsonTreeElement.Collapsable.Object(
         id = "8",
         level = 0,
@@ -575,7 +761,7 @@ internal class JsonTreeParserTest {
         key = null,
         parentType = JsonTreeElement.ParentType.NONE,
         children = mapOf(
-            "array" to array(state = childrenState, childrenState = childrenState)
+            "array" to array(state = childrenState, childrenState = grandChildrenState)
         )
     )
 }
