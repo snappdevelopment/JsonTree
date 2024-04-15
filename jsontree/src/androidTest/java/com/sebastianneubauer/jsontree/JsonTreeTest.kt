@@ -404,4 +404,52 @@ internal class JsonTreeTest {
 
         composeTestRule.onNodeWithText("[ 1 item ]").assertIsDisplayed()
     }
+
+    @Test
+    fun expanding_single_children_is_handled_correctly() {
+        composeTestRule.setContent {
+            JsonTree(
+                json = arrayOfArraysJson,
+                initialState = TreeState.COLLAPSED,
+                onLoading = {},
+                expandSingleChildren = true
+            )
+        }
+
+        composeTestRule.onNodeWithText("{ 1 item }").performClick()
+        // shows nested array
+        composeTestRule.onNodeWithText("\"array\": [").assertIsDisplayed()
+        // shows collapsed contents of nested array
+        composeTestRule.onNodeWithText("[ 1 item ],").assertIsDisplayed()
+        composeTestRule.onNodeWithText("[ 2 items ]").assertIsDisplayed()
+
+        // collapse root
+        composeTestRule.onNodeWithText("{").performClick()
+        composeTestRule.onNodeWithText("{ 1 item }").assertIsDisplayed()
+    }
+
+    @Test
+    fun not_expanding_single_children_is_handled_correctly() {
+        composeTestRule.setContent {
+            JsonTree(
+                json = arrayOfArraysJson,
+                initialState = TreeState.COLLAPSED,
+                onLoading = {},
+                expandSingleChildren = false
+            )
+        }
+
+        composeTestRule.onNodeWithText("{ 1 item }").performClick()
+
+        composeTestRule.waitUntilExactlyOneExists(hasText("\"array\": [ 2 items ]"))
+        composeTestRule.onNodeWithText("\"array\": [ 2 items ]").assertIsDisplayed()
+        composeTestRule.onNodeWithText("\"array\": [ 2 items ]").performClick()
+
+        composeTestRule.onNodeWithText("[ 1 item ],").assertIsDisplayed()
+        composeTestRule.onNodeWithText("[ 2 items ]").assertIsDisplayed()
+
+        // collapse root
+        composeTestRule.onNodeWithText("{").performClick()
+        composeTestRule.onNodeWithText("{ 1 item }").assertIsDisplayed()
+    }
 }
