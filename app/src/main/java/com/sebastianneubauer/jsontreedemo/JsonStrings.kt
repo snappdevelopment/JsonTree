@@ -2111,8 +2111,12 @@ internal val complexJson = """
 internal val simpleJson = """
     {
     	"object": {
-            "longString": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-    	}
+            "array": [
+                "value",
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+            ]
+    	},
+        "string": "Lorem ipsum"
     }
 """.trimIndent()
 

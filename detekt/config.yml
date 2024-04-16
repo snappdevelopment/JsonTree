@@ -16,6 +16,8 @@ complexity:
     functionThreshold: 15
   CyclomaticComplexMethod:
     threshold: 20
+  LargeClass:
+    threshold: 1000
 
 style:
   MagicNumber:
