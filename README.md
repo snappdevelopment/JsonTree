@@ -70,6 +70,9 @@ JsonTree(
     showIndices = false,
     // If true, then arrays and objects will show the amount of child items when collapsed.
     showItemCount = true,
+    // If true, then children without siblings will be expanded automatically with their parents, 
+    // until there are none or multiple on a level.
+    expandSingleChildren = false,
     // A callback method which is called when the provided json data can't be parsed.
     onError = { throwable -> /* Do something */ }
 )
