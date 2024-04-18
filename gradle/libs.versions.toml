@@ -9,7 +9,7 @@ kotlin = "1.9.23"
 publish = "0.28.0"
 api-validator = "0.14.0"
 
-androidx-activity-compose = "1.8.2"
+androidx-activity-compose = "1.9.0"
 androidx-compose-compiler = "1.5.11"
 androidx-compose-bom = "2024.04.01"
 
