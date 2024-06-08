@@ -5,13 +5,12 @@ android-target = "34"
 java-toolchain = "17"
 
 gradle-plugin = "8.3.2"
-kotlin = "1.9.23"
+kotlin = "2.0.0"
 publish = "0.28.0"
 api-validator = "0.14.0"
 
 androidx-activity-compose = "1.9.0"
-androidx-compose-compiler = "1.5.11"
-androidx-compose-bom = "2024.04.01"
+androidx-compose-bom = "2024.05.00"
 
 kotlinx-serialization-json = "1.6.3"
 coroutines = "1.8.0"
@@ -45,6 +44,7 @@ publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref =
 android-application = { id = "com.android.application", version.ref = "gradle-plugin" }
 android-library = { id = "com.android.library", version.ref = "gradle-plugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
 api-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "api-validator" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
