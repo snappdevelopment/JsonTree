@@ -9,7 +9,7 @@ on:
 
 jobs:
   assembleDebug:
-    runs-on: macos-14
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -25,7 +25,7 @@ jobs:
         run: ./gradlew assembleDebug --stacktrace
 
   assembleRelease:
-    runs-on: macos-14
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -63,7 +63,7 @@ jobs:
 #          script: ./gradlew connectedCheck --stacktrace
 
   check:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: [assembleDebug, assembleRelease]
 
     steps:
@@ -80,7 +80,7 @@ jobs:
         run: ./gradlew check --stacktrace
 
   detekt:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs: [assembleDebug, assembleRelease]
 
     steps:
