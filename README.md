@@ -1,24 +1,33 @@
 # 🌳 JsonTree
 
-![](https://img.shields.io/maven-central/v/com.sebastianneubauer.jsontree/jsontree) ![](https://img.shields.io/badge/Kotlin-1.9.23-orange) ![](https://img.shields.io/badge/SDK-21+-brightgreen) ![](https://img.shields.io/badge/Android_Weekly-Issue_584-yellow)
+![](https://img.shields.io/maven-central/v/com.sebastianneubauer.jsontree/jsontree) ![](https://img.shields.io/badge/Kotlin-2.0.0-orange) ![](https://img.shields.io/badge/SDK-21+-brightgreen) ![](https://img.shields.io/badge/Android_Weekly-Issue_584-yellow)
 <br /><br />
-JsonTree is an Android library to display JSON data in Compose with syntax highlighting and more.
+JsonTree is a Compose Multiplatform library to display JSON data in Compose with syntax highlighting and more.
 <br /><br />
 
 <p float="left">
-<img src="screenshots/jsonTree.png" height="450">
+<img src="screenshots/jsonTree-android-dark.png" height="450">
 <img src="screenshots/jsonTreeGif.gif" height="450">
 </p>
+<img src="screenshots/jsonTree-macos.png" height="450">
+
 
 ## About
 
-JsonTree is an Android library to display formatted JSON data in Compose.
+JsonTree is an Compose Multiplatform library to display formatted JSON data in Compose.
 Users can expand/collapse objects and arrays, which can also display additional info like item counts and item indices for arrays. 
 JsonTree offers several customizations for visual appearance like syntax highlighting, text style and icons.
 
 ## Download
 
 See `maven-central` tag at the top for the latest version.
+
+```kotlin
+dependencies {
+    // add this to commonMain in a multiplatform project
+    implementation("com.sebastianneubauer.jsontree:jsontree:latest-version")
+}
+```
 
 ```groovy
 dependencies {
@@ -65,7 +74,7 @@ JsonTree(
     // The size of the arrow icon
     iconSize = 20.dp,
     // The TextStyle to use for the json tree
-    textStyle = TextStyle(...),
+    textStyle = TextStyle(/*...*/),
     // If true, then array items will show their index.
     showIndices = false,
     // If true, then arrays and objects will show the amount of child items when collapsed.
@@ -74,7 +83,7 @@ JsonTree(
     // until there are none or multiple on a level.
     expandSingleChildren = false,
     // A callback method which is called when the provided json data can't be parsed.
-    onError = { throwable -> /* Do something */ }
+    onError = { throwable: Throwable -> /* Do something */ }
 )
 ```
 

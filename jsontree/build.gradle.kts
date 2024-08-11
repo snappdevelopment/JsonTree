@@ -12,8 +12,6 @@ plugins {
     alias(libs.plugins.publish)
 }
 
-//apply(from = "${rootProject.projectDir}/common-android.gradle")
-
 kotlin {
     jvm()
     androidTarget {
@@ -41,6 +39,11 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xexplicit-api=strict", "-Xjvm-default=all", "-opt-in=kotlin.RequiresOptIn")
     }
+
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.java.toolchain.get()))
+    }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -93,11 +96,15 @@ android {
     namespace = "com.sebastianneubauer.jsontree"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     buildFeatures {
+        buildConfig = false
         compose = true
     }
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         minSdk = libs.versions.android.minSdk.get().toInt()
+        aarMetadata {
+            minCompileSdk = libs.versions.android.minSdk.get().toInt()
+        }
     }
 }
 
