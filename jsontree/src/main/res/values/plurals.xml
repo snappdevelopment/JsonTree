@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals name="jsontree_collapsable_items">
-        <item quantity="one">\u0020%d item\u0020</item>
-        <item quantity="other">\u0020%d items\u0020</item>
-    </plurals>
-</resources>

@@ -1,49 +1,47 @@
 [versions]
-android-min = "21"
-android-target = "34"
+android-minSdk = "24"
+android-compileSdk = "34"
 
 java-toolchain = "17"
 
-gradle-plugin = "8.4.1"
+compose = "1.6.11"
+agp = "8.4.2"
 kotlin = "2.0.0"
-publish = "0.28.0"
-api-validator = "0.14.0"
+publish = "0.29.0"
+nexus-publish = "2.0.0"
+api-validator = "0.16.3"
+atomicfuGradlePlugin = "0.22.0"
 
-androidx-activity-compose = "1.9.0"
-androidx-compose-bom = "2024.05.00"
+androidx-activity-compose = "1.9.1"
 
-kotlinx-serialization-json = "1.7.0"
-coroutines = "1.8.1"
+kotlinx-serialization-json = "1.7.1"
+kotlinx-coroutines = "1.9.0-RC"
 
 junit = "4.13.2"
 detekt = "1.23.6"
 
 
 [libraries]
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidx-compose-bom" }
-androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
-androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
-androidx-compose-material = { group = "androidx.compose.material3", name = "material3" }
-androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+nexus-publish = { module = "io.github.gradle-nexus.publish-plugin:io.github.gradle-nexus.publish-plugin.gradle.plugin", version.ref = "nexus-publish" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
-
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 
-testing-junit = { module = "junit:junit", version.ref = "junit" }
-testing-compose-ui-junit = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-testing-compose-ui-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-testing-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "publish" }
 
+atomicfu = { module = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "atomicfuGradlePlugin" }
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "gradle-plugin" }
-android-library = { id = "com.android.library", version.ref = "gradle-plugin" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
 api-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "api-validator" }
