@@ -10,7 +10,7 @@ publish = "0.28.0"
 api-validator = "0.14.0"
 
 androidx-activity-compose = "1.9.0"
-androidx-compose-bom = "2024.05.00"
+androidx-compose-bom = "2024.08.00"
 
 kotlinx-serialization-json = "1.7.0"
 coroutines = "1.8.1"
