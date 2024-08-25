@@ -1,5 +1,5 @@
 [versions]
-android-minSdk = "24"
+android-minSdk = "21"
 android-compileSdk = "34"
 
 java-toolchain = "17"
@@ -15,7 +15,7 @@ atomicfuGradlePlugin = "0.22.0"
 androidx-activity-compose = "1.9.1"
 
 kotlinx-serialization-json = "1.7.1"
-kotlinx-coroutines = "1.9.0-RC"
+kotlinx-coroutines = "1.8.1"
 
 junit = "4.13.2"
 detekt = "1.23.6"
@@ -23,7 +23,6 @@ detekt = "1.23.6"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
-nexus-publish = { module = "io.github.gradle-nexus.publish-plugin:io.github.gradle-nexus.publish-plugin.gradle.plugin", version.ref = "nexus-publish" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }

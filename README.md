@@ -29,12 +29,6 @@ dependencies {
 }
 ```
 
-```groovy
-dependencies {
-    implementation 'com.sebastianneubauer.jsontree:jsontree:latest-version'
-}
-```
-
 ## How to use
 
 Add `JsonTree` to your Compose UI and customize it with the following options. Get started by only providing your JSON data and a Composable for the initial loading.

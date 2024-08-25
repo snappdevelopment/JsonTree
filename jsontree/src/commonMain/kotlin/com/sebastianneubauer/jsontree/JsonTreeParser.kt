@@ -30,7 +30,7 @@ internal class JsonTreeParser(
     private var parserState = mutableStateOf<JsonTreeParserState>(Loading)
     val state: State<JsonTreeParserState> = parserState
 
-    suspend inline fun init(initialState: TreeState) = withContext(defaultDispatcher) {
+    suspend fun init(initialState: TreeState) = withContext(defaultDispatcher) {
         val parsingState = runCatching {
             Parsed(Json.parseToJsonElement(json))
         }.getOrElse { throwable ->

@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
     id("kotlinx-atomicfu")
-//    id("module.publication")
     alias(libs.plugins.publish)
 }
 
