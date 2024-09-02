@@ -59,6 +59,7 @@ captures/
 .idea/navEditor.xml
 .idea/other.xml
 .idea/studiobot.xml
+.idea/artifacts
 
 .kotlin
 
