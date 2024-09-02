@@ -86,7 +86,6 @@ kotlin {
     }
 }
 
-
 android {
     namespace = "com.sebastianneubauer.jsontree"
     compileSdk = libs.versions.android.compileSdk.get().toInt()

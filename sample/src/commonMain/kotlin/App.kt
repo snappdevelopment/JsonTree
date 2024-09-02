@@ -22,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,22 +40,23 @@ import com.sebastianneubauer.jsontree.defaultLightColors
 import com.sebastianneubauer.jsontreesample.ui.theme.JsonTreeTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-
 @Composable
 internal fun App() = JsonTreeTheme {
     MainScreen()
 }
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalLayoutApi::class
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalLayoutApi::class
 )
 @Composable
-fun MainScreen() {
-
+private fun MainScreen() {
     Scaffold(
         modifier = Modifier.safeDrawingPadding(),
         topBar = {
             CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White),
                 title = {
                     Text(
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -68,7 +70,9 @@ fun MainScreen() {
         contentWindowInsets = WindowInsets(top = 60.dp),
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
         ) {
             var errorMessage: String? by remember { mutableStateOf(null) }
             var json: String by remember { mutableStateOf(simpleJson) }
@@ -78,17 +82,24 @@ fun MainScreen() {
             var showItemCount: Boolean by remember { mutableStateOf(true) }
             var expandSingleChildren: Boolean by remember { mutableStateOf(true) }
 
-            FlowRow {
-                Button(modifier = Modifier.padding(horizontal = 8.dp), onClick = {
-                    errorMessage = null
-                    json = when (json) {
-                        emptyJson -> simpleJson
-                        simpleJson -> complexJson
-                        complexJson -> invalidJson
-                        invalidJson -> emptyJson
-                        else -> throw IllegalStateException("No JSON selected!")
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color.White),
+            ) {
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = {
+                        errorMessage = null
+                        json = when (json) {
+                            emptyJson -> simpleJson
+                            simpleJson -> complexJson
+                            complexJson -> invalidJson
+                            invalidJson -> emptyJson
+                            else -> throw IllegalStateException("No JSON selected!")
+                        }
                     }
-                }) {
+                ) {
                     Text(
                         text = when (json) {
                             simpleJson -> "Simple Json"
@@ -100,36 +111,47 @@ fun MainScreen() {
                     )
                 }
 
-                Button(modifier = Modifier.padding(horizontal = 8.dp), onClick = {
-                    val newState = when (initialState) {
-                        TreeState.EXPANDED -> TreeState.COLLAPSED
-                        TreeState.COLLAPSED -> TreeState.FIRST_ITEM_EXPANDED
-                        TreeState.FIRST_ITEM_EXPANDED -> TreeState.EXPANDED
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = {
+                        val newState = when (initialState) {
+                            TreeState.EXPANDED -> TreeState.COLLAPSED
+                            TreeState.COLLAPSED -> TreeState.FIRST_ITEM_EXPANDED
+                            TreeState.FIRST_ITEM_EXPANDED -> TreeState.EXPANDED
+                        }
+                        initialState = newState
                     }
-                    initialState = newState
-                }) {
+                ) {
                     Text(text = initialState.name)
                 }
 
-                Button(modifier = Modifier.padding(horizontal = 8.dp),
-                    onClick = { showIndices = !showIndices }) {
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = { showIndices = !showIndices }
+                ) {
                     Text(text = if (showIndices) "Hide indices" else "Show indices")
                 }
 
-                Button(modifier = Modifier.padding(horizontal = 8.dp),
-                    onClick = { showItemCount = !showItemCount }) {
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = { showItemCount = !showItemCount }
+                ) {
                     Text(text = if (showItemCount) "Hide item count" else "Show item count")
                 }
 
-                Button(modifier = Modifier.padding(horizontal = 8.dp), onClick = {
-                    colors =
-                        if (colors == defaultLightColors) defaultDarkColors else defaultLightColors
-                }) {
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = {
+                        colors = if (colors == defaultLightColors) defaultDarkColors else defaultLightColors
+                    }
+                ) {
                     Text(text = if (colors == defaultLightColors) "Light" else "Dark")
                 }
 
-                Button(modifier = Modifier.padding(horizontal = 8.dp),
-                    onClick = { expandSingleChildren = !expandSingleChildren }) {
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = { expandSingleChildren = !expandSingleChildren }
+                ) {
                     Text(text = if (expandSingleChildren) "Expand children" else "Don't expand children")
                 }
             }
@@ -147,12 +169,20 @@ fun MainScreen() {
                         val error = errorMessage
                         if (error != null) {
                             Text(
-                                text = error, color = Color.Black
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        color = if (colors == defaultLightColors) Color.White else Color.Black
+                                    ),
+                                text = error,
+                                color = if (colors == defaultLightColors) Color.Black else Color.White,
                             )
                         } else {
                             JsonTree(
-                                modifier = Modifier.fillMaxSize()
-                                    .horizontalScroll(rememberScrollState()).background(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .horizontalScroll(rememberScrollState())
+                                    .background(
                                         if (colors == defaultLightColors) Color.White else Color.Black
                                     ),
                                 contentPadding = PaddingValues(16.dp),
@@ -191,9 +221,8 @@ fun MainScreen() {
     }
 }
 
-
 @Preview
 @Composable
-fun PreviewMainScreen() = JsonTreeTheme {
+private fun PreviewMainScreen() = JsonTreeTheme {
     MainScreen()
 }

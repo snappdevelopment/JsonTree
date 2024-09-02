@@ -65,8 +65,6 @@ kotlin {
 
 }
 
-
-
 android {
     namespace = "com.sebastianneubauer.jsontreesample"
     compileSdk = 34
