@@ -14,7 +14,7 @@ atomicfuGradlePlugin = "0.22.0"
 
 androidx-activity-compose = "1.9.1"
 
-kotlinx-serialization-json = "1.7.1"
+kotlinx-serialization-json = "1.7.2"
 kotlinx-coroutines = "1.8.1"
 
 junit = "4.13.2"
