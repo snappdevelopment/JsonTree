@@ -63,6 +63,23 @@ captures/
 
 .kotlin
 
+# Xcode
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+xcuserdata
+
+# CocoaPods
+Pods/
+
+# iOS App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
+
 # Keystore files
 # Uncomment the following lines if you do not want to check your keystore files in.
 #*.jks
