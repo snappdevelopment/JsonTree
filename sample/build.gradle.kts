@@ -65,14 +65,13 @@ kotlin {
 
 }
 
-
-
 android {
     namespace = "com.sebastianneubauer.jsontreesample"
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 24
+        minSdk = 21
+        targetSdk = 34
     }
     sourceSets["main"].apply {
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
@@ -81,6 +80,18 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildTypes {
+        getByName("release")  {
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            //for testing only, don't do this in your app
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            signingConfig = signingConfigs.getByName("debug")
+        }
     }
     buildFeatures {
         compose = true

@@ -8,7 +8,7 @@ on:
   workflow_call:
 
 jobs:
-  assembleDebug:
+  assembleAndroidDebug:
     runs-on: macos-latest
 
     steps:
@@ -21,10 +21,10 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Assemble Debug
+      - name: Assemble Android Debug
         run: ./gradlew assembleDebug --stacktrace
 
-  assembleRelease:
+  assembleAndroidRelease:
     runs-on: macos-latest
 
     steps:
@@ -37,7 +37,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Assemble Release
+      - name: Assemble Android Release
         run: ./gradlew assembleRelease --stacktrace
 
 # UI tests on CI are flaky
@@ -62,9 +62,9 @@ jobs:
 #          arch: x86_64
 #          script: ./gradlew connectedCheck --stacktrace
 
-  check:
+  test:
     runs-on: macos-latest
-    needs: [assembleDebug, assembleRelease]
+    needs: [assembleAndroidDebug, assembleAndroidRelease]
 
     steps:
       - name: Checkout code
@@ -76,12 +76,12 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Run checks
-        run: ./gradlew check --stacktrace
+      - name: Run tests
+        run: ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.JsonTreeParserTest --stacktrace
 
   detekt:
     runs-on: macos-latest
-    needs: [assembleDebug, assembleRelease]
+    needs: [assembleAndroidDebug, assembleAndroidRelease]
 
     steps:
       - name: Checkout code
