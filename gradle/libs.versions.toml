@@ -9,7 +9,7 @@ agp = "8.3.2"
 kotlin = "2.0.0"
 publish = "0.29.0"
 api-validator = "0.16.3"
-atomicfuGradlePlugin = "0.22.0"
+atomicfuGradlePlugin = "0.25.0"
 
 androidx-activity-compose = "1.9.1"
 
