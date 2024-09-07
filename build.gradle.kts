@@ -72,5 +72,4 @@ dependencies {
     detektPlugins(libs.detekt.formatting)
 }
 
-
 apply(plugin = "kotlinx-atomicfu")

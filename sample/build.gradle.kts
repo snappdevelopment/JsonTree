@@ -54,8 +54,6 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
         }
-
-
     }
 
     //https://kotlinlang.org/docs/native-objc-interop.html#export-of-kdoc-comments-to-generated-objective-c-headers
@@ -95,9 +93,6 @@ android {
     }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
     }
 }
 
