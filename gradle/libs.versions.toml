@@ -6,19 +6,14 @@ java-toolchain = "17"
 
 compose = "1.6.11"
 agp = "8.3.2"
-kotlin = "2.0.0"
+kotlin = "2.0.20"
 publish = "0.29.0"
 api-validator = "0.16.3"
-atomicfuGradlePlugin = "0.22.0"
-
+atomicfu = "0.22.0"
 androidx-activity-compose = "1.9.1"
-
 kotlinx-serialization-json = "1.7.1"
 kotlinx-coroutines = "1.8.1"
-
-junit = "4.13.2"
 detekt = "1.23.6"
-
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -29,11 +24,9 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 
-
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "publish" }
-
-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "atomicfuGradlePlugin" }
+atomicfu = { module = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version.ref = "atomicfu" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }

@@ -48,9 +48,7 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
                 implementation(libs.kotlinx.coroutines.core)
-
                 implementation (libs.kotlinx.serialization.json)
-
             }
         }
 
@@ -100,10 +98,6 @@ android {
             minCompileSdk = libs.versions.android.minSdk.get().toInt()
         }
     }
-}
-
-composeCompiler {
-    enableStrongSkippingMode = true
 }
 
 apply(plugin = "kotlinx-atomicfu")
