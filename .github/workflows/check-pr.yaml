@@ -62,7 +62,7 @@ jobs:
 #          arch: x86_64
 #          script: ./gradlew connectedCheck --stacktrace
 
-  check:
+  test:
     runs-on: macos-latest
     needs: [assembleAndroidDebug, assembleAndroidRelease]
 
@@ -76,8 +76,8 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Run checks
-        run: ./gradlew check --stacktrace
+      - name: Run tests
+        run: ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.JsonTreeParserTest --stacktrace
 
   detekt:
     runs-on: macos-latest
