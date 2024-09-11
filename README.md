@@ -1,6 +1,7 @@
 # 🌳 JsonTree
 
-![](https://img.shields.io/maven-central/v/com.sebastianneubauer.jsontree/jsontree) ![](https://img.shields.io/badge/Kotlin-2.0.0-orange) ![](https://img.shields.io/badge/SDK-21+-brightgreen) ![](https://img.shields.io/badge/Android_Weekly-Issue_584-yellow)
+![](https://img.shields.io/maven-central/v/com.sebastianneubauer.jsontree/jsontree) ![](https://img.shields.io/badge/Kotlin-2.0.20-orange) ![](https://img.shields.io/badge/Android_Weekly-Issue_584-yellow)
+![](https://img.shields.io/badge/Platform-Android|iOS|Jvm-darkgrey)
 <br /><br />
 JsonTree is a Compose Multiplatform library to display JSON data in Compose with syntax highlighting and more.
 <br /><br />
@@ -83,13 +84,13 @@ JsonTree(
 
 ## Minimum Requirements
 
-- Min SDK 21
-- Compile SDK 34
+- Android minSdk 21
+- Android compileSdk 34
 - JDK 17
 
 ## Tech Stack
 
-- Compose UI
+- Compose Multiplatform UI
 - Kotlinx Serialization
 - Detekt (Linting)
 - API validation
