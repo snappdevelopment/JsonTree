@@ -21,6 +21,8 @@ public data class TreeColors(
     val booleanValueColor: Color,
     val nullValueColor: Color,
     val indexColor: Color,
+    val highlightColor: Color,
+    val highlightTextColor: Color,
     val symbolColor: Color,
     val iconColor: Color,
 )
@@ -35,6 +37,8 @@ public val defaultLightColors: TreeColors = TreeColors(
     booleanValueColor = Color(0xFFE9BB4D),
     nullValueColor = Color(0xFFE9BB4D),
     indexColor = Color(0x991D4555),
+    highlightColor = Color(0xFFF9F871),
+    highlightTextColor = Color(0xFF000000),
     symbolColor = Color(0xFF1D4555),
     iconColor = Color(0xFF1D4555),
 )
@@ -49,6 +53,8 @@ public val defaultDarkColors: TreeColors = TreeColors(
     booleanValueColor = Color(0xFFdee1b6),
     nullValueColor = Color(0xFFdee1b6),
     indexColor = Color(0xE6798199),
+    highlightColor = Color(0xFFE1C16E),
+    highlightTextColor = Color(0xFFFFFFFF),
     symbolColor = Color(0xFF798199),
     iconColor = Color(0xFF798199),
 )
