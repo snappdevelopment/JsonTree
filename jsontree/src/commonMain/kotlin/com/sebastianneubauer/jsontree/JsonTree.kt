@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
@@ -30,6 +32,7 @@ import jsontree.jsontree.generated.resources.Res
 import jsontree.jsontree.generated.resources.jsontree_arrow_right
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.vectorResource
 
 /**
@@ -67,6 +70,7 @@ public fun JsonTree(
     showIndices: Boolean = false,
     showItemCount: Boolean = true,
     expandSingleChildren: Boolean = false,
+    jsonSearchResultState: JsonSearchResultState = rememberJsonSearchResultState(),
     onError: (Throwable) -> Unit = {}
 ) {
     val jsonParser = remember(json) {
@@ -82,10 +86,15 @@ public fun JsonTree(
         jsonParser.init(initialState)
     }
 
+    val listState = rememberLazyListState()
+
+    val searchKeyValue = jsonSearchResultState.state.searchKeyValue
+
     when (val state = jsonParser.state.value) {
         is JsonTreeParserState.Ready -> {
             Box(modifier = modifier) {
                 JsonTreeList(
+                    state = listState,
                     items = state.list,
                     contentPadding = contentPadding,
                     colors = colors,
@@ -94,6 +103,7 @@ public fun JsonTree(
                     textStyle = textStyle,
                     showIndices = showIndices,
                     showItemCount = showItemCount,
+                    searchKeyValue = searchKeyValue,
                     onClick = {
                         coroutineScope.launch {
                             jsonParser.expandOrCollapseItem(
@@ -103,11 +113,75 @@ public fun JsonTree(
                         }
                     }
                 )
+
+                if (!searchKeyValue.isNullOrEmpty()) {
+                    handleJsonSearchResult(
+                        jsonSearchResultState,
+                        jsonParser,
+                        state,
+                        searchKeyValue,
+                        listState
+                    )
+                }
             }
         }
         is JsonTreeParserState.Loading -> onLoading()
         is JsonTreeParserState.Parsing.Error -> onError(state.throwable)
         is JsonTreeParserState.Parsing.Parsed -> error("Unexpected state $state")
+    }
+}
+
+@Composable
+private fun handleJsonSearchResult(
+    jsonSearchResultState: JsonSearchResultState,
+    jsonTreeParser: JsonTreeParser,
+    state: JsonTreeParserState.Ready,
+    searchKeyValue: String?,
+    listState: LazyListState,
+) {
+    LaunchedEffect(searchKeyValue) {
+        jsonSearchResultState.state = JsonSearchResult(searchKeyValue)
+        withContext(Dispatchers.Default) {
+            state.list.forEach {
+                if (it is JsonTreeElement.Collapsable &&
+                    it.state == TreeState.COLLAPSED &&
+                    it.childrenHasMatch(searchKeyValue)
+                ) {
+                    jsonTreeParser.expandOrCollapseItem(it, true)
+                }
+            }
+
+            val highlightedLines = state.list.mapIndexed { index, jsonTreeElement ->
+                if (jsonTreeElement.hasMatch(searchKeyValue)) index else null
+            }.filterNotNull()
+            jsonSearchResultState.state = JsonSearchResult(
+                searchKeyValue,
+                state.list.size,
+                highlightedLines
+            )
+        }
+    }
+
+    LaunchedEffect(state.list.size) {
+        if (jsonSearchResultState.state.totalListSize == state.list.size) return@LaunchedEffect
+
+        jsonSearchResultState.state = JsonSearchResult()
+        withContext(Dispatchers.Default) {
+            val highlightedLines = state.list.mapIndexed { index, jsonTreeElement ->
+                if (jsonTreeElement.hasMatch(searchKeyValue)) index else null
+            }.filterNotNull()
+            jsonSearchResultState.state =
+                JsonSearchResult(searchKeyValue, state.list.size, highlightedLines)
+        }
+    }
+
+    val currentHighlightedLine = jsonSearchResultState.state.currentHighlightedLine
+    val highlightedLines = jsonSearchResultState.state.highlightedLines
+
+    LaunchedEffect(currentHighlightedLine) {
+        if (currentHighlightedLine > -1 && highlightedLines.isNotEmpty() && !listState.isScrollInProgress) {
+            listState.scrollToItem(highlightedLines[currentHighlightedLine])
+        }
     }
 }
 
@@ -121,15 +195,19 @@ private fun JsonTreeList(
     textStyle: TextStyle,
     showIndices: Boolean,
     showItemCount: Boolean,
+    searchKeyValue: String?,
+    state: LazyListState = rememberLazyListState(),
     onClick: (JsonTreeElement) -> Unit,
 ) {
     LazyColumn(
+        state = state,
         contentPadding = contentPadding
     ) {
         itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
             when (item) {
                 is JsonTreeElement.Collapsable.Array -> {
                     val coloredText = rememberCollapsableText(
+                        item = item,
                         type = CollapsableType.ARRAY,
                         key = item.key,
                         childItemCount = item.children.size,
@@ -138,7 +216,8 @@ private fun JsonTreeList(
                         isLastItem = item.isLastItem,
                         showIndices = showIndices,
                         showItemCount = showItemCount,
-                        parentType = item.parentType
+                        searchKeyValue = searchKeyValue,
+                        parentType = item.parentType,
                     )
 
                     Collapsable(
@@ -158,12 +237,14 @@ private fun JsonTreeList(
                 }
                 is JsonTreeElement.Collapsable.Object -> {
                     val coloredText = rememberCollapsableText(
+                        item = item,
                         type = CollapsableType.OBJECT,
                         key = item.key,
                         childItemCount = item.children.size,
                         state = item.state,
                         colors = colors,
                         isLastItem = item.isLastItem,
+                        searchKeyValue = searchKeyValue,
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         parentType = item.parentType
@@ -190,6 +271,7 @@ private fun JsonTreeList(
                         value = item.value,
                         colors = colors,
                         isLastItem = item.isLastItem,
+                        searchKeyValue = searchKeyValue,
                         showIndices = showIndices,
                         parentType = item.parentType
                     )
