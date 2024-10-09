@@ -6,6 +6,8 @@ internal sealed interface JsonTreeElement {
     val id: String
     val level: Int
     val isLastItem: Boolean
+    var parent: JsonTreeElement?
+    val key: String?
 
     fun hasMatch(searchKeyValue: String?): Boolean
 
@@ -17,7 +19,8 @@ internal sealed interface JsonTreeElement {
         override val id: String,
         override val level: Int,
         override val isLastItem: Boolean,
-        val key: String?,
+        override var parent: JsonTreeElement? = null,
+        override val key: String?,
         val value: JsonPrimitive,
         val parentType: ParentType,
     ) : JsonTreeElement {
@@ -44,7 +47,8 @@ internal sealed interface JsonTreeElement {
             override val state: TreeState,
             override val children: Map<String, JsonTreeElement>,
             override val isLastItem: Boolean,
-            val key: String?,
+            override var parent: JsonTreeElement? = null,
+            override val key: String?,
             val parentType: ParentType,
         ) : Collapsable {
 
@@ -66,7 +70,8 @@ internal sealed interface JsonTreeElement {
             override val state: TreeState,
             override val children: Map<String, JsonTreeElement>,
             override val isLastItem: Boolean,
-            val key: String?,
+            override var parent: JsonTreeElement? = null,
+            override val key: String?,
             val parentType: ParentType,
         ) : Collapsable {
 
@@ -87,6 +92,8 @@ internal sealed interface JsonTreeElement {
         override val id: String,
         override val level: Int,
         override val isLastItem: Boolean,
+        override var parent: JsonTreeElement? = null,
+        override var key: String? = null,
         val type: Type
     ) : JsonTreeElement {
         enum class Type { ARRAY, OBJECT }
@@ -104,5 +111,6 @@ internal val JsonTreeElement.Collapsable.endBracket: JsonTreeElement.EndBracket
         type = when (this) {
             is JsonTreeElement.Collapsable.Object -> JsonTreeElement.EndBracket.Type.OBJECT
             is JsonTreeElement.Collapsable.Array -> JsonTreeElement.EndBracket.Type.ARRAY
-        }
+        },
+        parent = parent
     )

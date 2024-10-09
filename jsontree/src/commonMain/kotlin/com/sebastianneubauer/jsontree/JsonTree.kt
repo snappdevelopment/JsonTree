@@ -17,8 +17,11 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -89,6 +92,7 @@ public fun JsonTree(
     val listState = rememberLazyListState()
 
     val searchKeyValue = jsonSearchResultState.state.searchKeyValue
+    val jsonQuery = jsonSearchResultState.state.jsonQuery
 
     when (val state = jsonParser.state.value) {
         is JsonTreeParserState.Ready -> {
@@ -104,6 +108,7 @@ public fun JsonTree(
                     showIndices = showIndices,
                     showItemCount = showItemCount,
                     searchKeyValue = searchKeyValue,
+                    jsonQuery = jsonQuery,
                     onClick = {
                         coroutineScope.launch {
                             jsonParser.expandOrCollapseItem(
@@ -115,11 +120,17 @@ public fun JsonTree(
                 )
 
                 if (!searchKeyValue.isNullOrEmpty()) {
-                    handleJsonSearchResult(
+                    handleSearchKeyValue(
                         jsonSearchResultState,
                         jsonParser,
                         state,
-                        searchKeyValue,
+                        listState
+                    )
+                } else if (!jsonQuery.isNullOrEmpty()) {
+                    handleJsonQuery(
+                        jsonSearchResultState,
+                        jsonParser,
+                        state,
                         listState
                     )
                 }
@@ -132,15 +143,15 @@ public fun JsonTree(
 }
 
 @Composable
-private fun handleJsonSearchResult(
+private fun handleSearchKeyValue(
     jsonSearchResultState: JsonSearchResultState,
     jsonTreeParser: JsonTreeParser,
     state: JsonTreeParserState.Ready,
-    searchKeyValue: String?,
     listState: LazyListState,
 ) {
+    val searchKeyValue = jsonSearchResultState.state.searchKeyValue
+
     LaunchedEffect(searchKeyValue) {
-        jsonSearchResultState.state = JsonSearchResult(searchKeyValue)
         withContext(Dispatchers.Default) {
             state.list.forEach {
                 if (it is JsonTreeElement.Collapsable &&
@@ -155,9 +166,9 @@ private fun handleJsonSearchResult(
                 if (jsonTreeElement.hasMatch(searchKeyValue)) index else null
             }.filterNotNull()
             jsonSearchResultState.state = JsonSearchResult(
-                searchKeyValue,
-                state.list.size,
-                highlightedLines
+                searchKeyValue = searchKeyValue,
+                totalListSize = state.list.size,
+                highlightedLines = highlightedLines
             )
         }
     }
@@ -171,7 +182,11 @@ private fun handleJsonSearchResult(
                 if (jsonTreeElement.hasMatch(searchKeyValue)) index else null
             }.filterNotNull()
             jsonSearchResultState.state =
-                JsonSearchResult(searchKeyValue, state.list.size, highlightedLines)
+                JsonSearchResult(
+                    searchKeyValue = searchKeyValue,
+                    totalListSize = state.list.size,
+                    highlightedLines = highlightedLines
+                )
         }
     }
 
@@ -181,6 +196,53 @@ private fun handleJsonSearchResult(
     LaunchedEffect(currentHighlightedLine) {
         if (currentHighlightedLine > -1 && highlightedLines.isNotEmpty() && !listState.isScrollInProgress) {
             listState.scrollToItem(highlightedLines[currentHighlightedLine])
+        }
+    }
+}
+
+@Composable
+private fun handleJsonQuery(
+    jsonSearchResultState: JsonSearchResultState,
+    jsonTreeParser: JsonTreeParser,
+    state: JsonTreeParserState.Ready,
+    listState: LazyListState,
+) {
+    val jsonQuery = jsonSearchResultState.state.jsonQuery
+    var lastScrolledIndex by remember { mutableStateOf(-1) }
+
+    LaunchedEffect(jsonQuery) {
+        if (jsonQuery == null) return@LaunchedEffect
+
+        val (jsonQueryParts, adjacentMap) = jsonQuery.getAdjacentMap()
+
+        withContext(Dispatchers.Default) {
+            state.list.forEach { item ->
+                val (jsonQueryKey, jsonQueryIndex) = splitArrayNotation(
+                    item.getJsonQuery(jsonQueryParts, adjacentMap)
+                )
+
+                if (item.keyMatch(jsonQueryKey) || item.keyMatch(jsonQueryIndex)) {
+                    jsonTreeParser.expandOrCollapseItem(item, true)
+                }
+            }
+
+            val highlightedLines = state.list.mapIndexed { index, item ->
+                val (jsonQueryKey, jsonQueryIndex) = splitArrayNotation(
+                    item.getJsonQuery(
+                        jsonQueryParts,
+                        adjacentMap
+                    )
+                )
+                if (item.keyMatch(jsonQueryKey) || item.keyMatch(jsonQueryIndex)) index else null
+            }.filterNotNull()
+
+            lastScrolledIndex = highlightedLines.lastOrNull() ?: -1
+        }
+    }
+
+    LaunchedEffect(lastScrolledIndex) {
+        if (lastScrolledIndex > 0 && !listState.isScrollInProgress) {
+            listState.scrollToItem(lastScrolledIndex)
         }
     }
 }
@@ -196,9 +258,12 @@ private fun JsonTreeList(
     showIndices: Boolean,
     showItemCount: Boolean,
     searchKeyValue: String?,
+    jsonQuery: String?,
     state: LazyListState = rememberLazyListState(),
     onClick: (JsonTreeElement) -> Unit,
 ) {
+    val (jsonQueryParts, adjacentMap) = jsonQuery.getAdjacentMap()
+
     LazyColumn(
         state = state,
         contentPadding = contentPadding
@@ -217,6 +282,7 @@ private fun JsonTreeList(
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         searchKeyValue = searchKeyValue,
+                        jsonQuery = item.getJsonQuery(jsonQueryParts, adjacentMap),
                         parentType = item.parentType,
                     )
 
@@ -245,6 +311,7 @@ private fun JsonTreeList(
                         colors = colors,
                         isLastItem = item.isLastItem,
                         searchKeyValue = searchKeyValue,
+                        jsonQuery = item.getJsonQuery(jsonQueryParts, adjacentMap),
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         parentType = item.parentType
@@ -272,6 +339,7 @@ private fun JsonTreeList(
                         colors = colors,
                         isLastItem = item.isLastItem,
                         searchKeyValue = searchKeyValue,
+                        jsonQuery = item.getJsonQuery(jsonQueryParts, adjacentMap),
                         showIndices = showIndices,
                         parentType = item.parentType
                     )

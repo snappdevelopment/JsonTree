@@ -27,23 +27,42 @@ internal fun rememberCollapsableText(
     colors: TreeColors,
     isLastItem: Boolean,
     searchKeyValue: String?,
+    jsonQuery: String?,
     showIndices: Boolean,
     showItemCount: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
     val itemCount = pluralStringResource(Res.plurals.jsontree_collapsable_items, childItemCount, childItemCount)
 
-    return remember(key, state, colors, isLastItem, itemCount, type, showIndices, showItemCount, searchKeyValue) {
+    return remember(
+        key, state, colors, isLastItem, itemCount, type,
+        showIndices, showItemCount, searchKeyValue, jsonQuery
+    ) {
         val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
         val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
         val childrenHasMatch = item.childrenHasMatch(searchKeyValue)
 
         buildAnnotatedString {
             key?.let {
-                val (before, highlightedText, after) = searchText(it, searchKeyValue)
+                val (jsonQueryKey, jsonQueryIndex) = splitArrayNotation(jsonQuery)
+
+                val (before, highlightedText, after) = searchText(
+                    it,
+                    jsonQueryKey ?: searchKeyValue,
+                    !jsonQueryKey.isNullOrEmpty()
+                )
 
                 if (parentType == ParentType.ARRAY && showIndices) {
-                    withStyle(SpanStyle(color = colors.indexColor)) {
+                    withStyle(
+                        if (it == jsonQueryIndex) {
+                            SpanStyle(
+                                color = colors.highlightTextColor,
+                                background = colors.highlightColor
+                            )
+                        } else {
+                            SpanStyle(color = colors.indexColor)
+                        }
+                    ) {
                         append(it)
                     }
                     withStyle(SpanStyle(color = colors.symbolColor)) {
@@ -120,6 +139,7 @@ internal fun rememberPrimitiveText(
     colors: TreeColors,
     isLastItem: Boolean,
     searchKeyValue: String?,
+    jsonQuery: String?,
     showIndices: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
@@ -135,11 +155,28 @@ internal fun rememberPrimitiveText(
         }
     }
 
-    return remember(key, value, colors, isLastItem, showIndices, searchKeyValue) {
+    return remember(key, value, colors, isLastItem, showIndices, searchKeyValue, jsonQuery) {
         buildAnnotatedString {
             key?.let {
+                val (jsonQueryKey, jsonQueryIndex) = splitArrayNotation(jsonQuery)
+
+                val (before, highlightedText, after) = searchText(
+                    it,
+                    jsonQueryKey ?: searchKeyValue,
+                    jsonQueryKey != null
+                )
+
                 if (parentType == ParentType.ARRAY && showIndices) {
-                    withStyle(SpanStyle(color = colors.indexColor)) {
+                    withStyle(
+                        if (it == jsonQueryIndex) {
+                            SpanStyle(
+                                color = colors.highlightTextColor,
+                                background = colors.highlightColor
+                            )
+                        } else {
+                            SpanStyle(color = colors.indexColor)
+                        }
+                    ) {
                         append(it)
                     }
                     withStyle(SpanStyle(color = colors.symbolColor)) {
@@ -147,8 +184,6 @@ internal fun rememberPrimitiveText(
                     }
                 } else if (parentType != ParentType.ARRAY) {
                     withStyle(SpanStyle(color = colors.keyColor)) {
-                        val (before, highlightedText, after) = searchText(it, searchKeyValue)
-
                         if (highlightedText != null) {
                             append("\"$before")
                             withStyle(
@@ -195,19 +230,4 @@ internal fun rememberPrimitiveText(
             }
         }
     }
-}
-
-internal fun searchText(text: String, searchKey: String?): Triple<String, String?, String?> {
-    if (!searchKey.isNullOrEmpty()) {
-        val regex = "(?i)${Regex.escape(searchKey)}".toRegex()
-        val match = regex.find(text)
-        if (match != null) {
-            val before = text.substring(0, match.range.first)
-            val foundText = match.value // The actual text found in the original string
-            val after = text.substring(match.range.last + 1)
-            return Triple(before, foundText, after)
-        }
-    }
-
-    return Triple(text, null, null)
 }

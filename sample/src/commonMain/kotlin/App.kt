@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.sebastianneubauer.jsontree.JsonSearchResult
 import com.sebastianneubauer.jsontree.JsonTree
 import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
@@ -168,6 +169,7 @@ private fun MainScreen() {
                 }
             }
 
+            var jsonQuery by remember { mutableStateOf("") }
             var searchKeyValue by remember { mutableStateOf("") }
             val jsonSearchResult = rememberJsonSearchResultState()
 
@@ -177,10 +179,21 @@ private fun MainScreen() {
                 Spacer(Modifier.width(8.dp))
 
                 TextField(
+                    value = jsonQuery,
+                    onValueChange = {
+                        jsonQuery = it
+                        jsonSearchResult.state = JsonSearchResult(jsonQuery = it)
+                    },
+                    label = { Text("Json Query") }
+                )
+
+                Spacer(Modifier.width(16.dp))
+
+                TextField(
                     value = searchKeyValue,
                     onValueChange = {
                         searchKeyValue = it
-                        jsonSearchResult.state = jsonSearchResult.state.copy(searchKeyValue = it)
+                        jsonSearchResult.state = JsonSearchResult(searchKeyValue = it)
                                     },
                     label = { Text("Search Key/Value") }
                 )
