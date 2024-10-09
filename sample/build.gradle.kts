@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.android.application)
@@ -26,20 +27,40 @@ kotlin {
         }
     }
 
+    js {
+        moduleName = "jsontree"
+        browser {
+            commonWebpackConfig {
+                outputFileName = "jsontree.js"
+            }
+        }
+        binaries.executable()
+        useEsModules()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        moduleName = "jsontree"
+        browser()
+        binaries.executable()
+    }
+
     sourceSets {
         all {
             languageSettings {
                 optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
             }
         }
-        commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(libs.kotlinx.serialization.json)
-            implementation(project(":jsontree"))
+        val commonMain by getting {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.components.resources)
+                implementation(compose.components.uiToolingPreview)
+                implementation(libs.kotlinx.serialization.json)
+                implementation(project(":jsontree"))
+            }
         }
 
         commonTest.dependencies {
@@ -53,6 +74,16 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
+        }
+
+        val jsWasmMain by creating {
+            dependsOn(commonMain)
+        }
+        val jsMain by getting {
+            dependsOn(jsWasmMain)
+        }
+        val wasmJsMain by getting {
+            dependsOn(jsWasmMain)
         }
     }
 
