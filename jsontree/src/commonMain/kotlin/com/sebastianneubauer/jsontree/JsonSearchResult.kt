@@ -89,10 +89,16 @@ public class JsonSearchResultState(
 }
 
 internal fun JsonTreeElement.getJsonQuery(
+    jsonQuery: String?,
     parts: List<String>?,
     adjacentMap: MutableMap<Int, Int>?
 ): String? {
-    if (parts.isNullOrEmpty() || adjacentMap == null) return null
+    if (jsonQuery == null || adjacentMap == null ||
+        !jsonQuery.startsWith(buildJsonQuery(), ignoreCase = true)
+    ) {
+        return null
+    }
+
     var lvl = level - 1
 
     when {
@@ -103,7 +109,7 @@ internal fun JsonTreeElement.getJsonQuery(
 
     lvl -= (adjacentMap[lvl] ?: 0)
 
-    return parts.getOrNull(lvl)
+    return parts?.getOrNull(lvl)
 }
 
 internal fun String?.getAdjacentMap(): Pair<List<String>?, MutableMap<Int, Int>?> {
@@ -166,4 +172,21 @@ internal fun JsonTreeElement.keyMatch(jsonQuery: String?): Boolean {
     if (key == null || jsonQuery == null) return false
     val match = key.equals(jsonQuery, true) || key.equals(jsonQuery, true)
     return this is Collapsable && state == TreeState.COLLAPSED && (match)
+}
+
+internal fun JsonTreeElement.buildJsonQuery(): String {
+    if (parent == null) return key ?: ""
+
+    val parentQuery = parent?.buildJsonQuery()
+    val queryPart = when (parent) {
+        is Collapsable.Array -> key?.let { "[$it]" }
+            ?: "" // Add array index if the parent is an array
+        else -> if (parentQuery.isNullOrEmpty()) {
+            key ?: ""
+        } else {
+            key?.let { ".$it" } ?: "" // Add key with dot notation, unless it's the root
+        }
+    }
+
+    return "$parentQuery$queryPart"
 }

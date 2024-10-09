@@ -218,7 +218,7 @@ private fun handleJsonQuery(
         withContext(Dispatchers.Default) {
             state.list.forEach { item ->
                 val (jsonQueryKey, jsonQueryIndex) = splitArrayNotation(
-                    item.getJsonQuery(jsonQueryParts, adjacentMap)
+                    item.getJsonQuery(jsonQuery, jsonQueryParts, adjacentMap)
                 )
 
                 if (item.keyMatch(jsonQueryKey) || item.keyMatch(jsonQueryIndex)) {
@@ -229,6 +229,7 @@ private fun handleJsonQuery(
             val highlightedLines = state.list.mapIndexed { index, item ->
                 val (jsonQueryKey, jsonQueryIndex) = splitArrayNotation(
                     item.getJsonQuery(
+                        jsonQuery,
                         jsonQueryParts,
                         adjacentMap
                     )
@@ -282,7 +283,7 @@ private fun JsonTreeList(
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         searchKeyValue = searchKeyValue,
-                        jsonQuery = item.getJsonQuery(jsonQueryParts, adjacentMap),
+                        jsonQuery = item.getJsonQuery(jsonQuery, jsonQueryParts, adjacentMap),
                         parentType = item.parentType,
                     )
 
@@ -311,7 +312,7 @@ private fun JsonTreeList(
                         colors = colors,
                         isLastItem = item.isLastItem,
                         searchKeyValue = searchKeyValue,
-                        jsonQuery = item.getJsonQuery(jsonQueryParts, adjacentMap),
+                        jsonQuery = item.getJsonQuery(jsonQuery, jsonQueryParts, adjacentMap),
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         parentType = item.parentType
@@ -339,7 +340,7 @@ private fun JsonTreeList(
                         colors = colors,
                         isLastItem = item.isLastItem,
                         searchKeyValue = searchKeyValue,
-                        jsonQuery = item.getJsonQuery(jsonQueryParts, adjacentMap),
+                        jsonQuery = item.getJsonQuery(jsonQuery, jsonQueryParts, adjacentMap),
                         showIndices = showIndices,
                         parentType = item.parentType
                     )
