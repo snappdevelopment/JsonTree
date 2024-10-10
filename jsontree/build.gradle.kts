@@ -1,5 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
-    id("kotlinx-atomicfu")
+    alias(libs.plugins.kotlinx.atomicfu)
     alias(libs.plugins.publish)
 }
 
@@ -29,6 +29,14 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+
+    js {
+        browser()
+        useEsModules()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
 
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
@@ -99,5 +107,3 @@ android {
         }
     }
 }
-
-apply(plugin = "kotlinx-atomicfu")
