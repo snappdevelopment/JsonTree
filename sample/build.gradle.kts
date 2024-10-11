@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlinx.atomicfu)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
 }
