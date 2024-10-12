@@ -13,13 +13,15 @@ import kotlin.test.assertTrue
 
 public class JsonTreeParserTest {
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private suspend fun underTest(json: String, initialState: TreeState): JsonTreeParser {
-        return JsonTreeParser(
-            json = json,
-            defaultDispatcher = UnconfinedTestDispatcher(),
-            mainDispatcher = UnconfinedTestDispatcher()
-        ).also { it.init(initialState) }
+    public companion object {
+        @OptIn(ExperimentalCoroutinesApi::class)
+        internal suspend fun underTest(json: String, initialState: TreeState): JsonTreeParser {
+            return JsonTreeParser(
+                json = json,
+                defaultDispatcher = UnconfinedTestDispatcher(),
+                mainDispatcher = UnconfinedTestDispatcher()
+            ).also { it.init(initialState) }
+        }
     }
 
     @Test

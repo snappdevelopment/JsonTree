@@ -9,14 +9,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -30,6 +35,7 @@ import jsontree.jsontree.generated.resources.Res
 import jsontree.jsontree.generated.resources.jsontree_arrow_right
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.vectorResource
 
 /**
@@ -67,6 +73,7 @@ public fun JsonTree(
     showIndices: Boolean = false,
     showItemCount: Boolean = true,
     expandSingleChildren: Boolean = false,
+    jsonSearchResultState: JsonSearchResultState = rememberJsonSearchResultState(),
     onError: (Throwable) -> Unit = {}
 ) {
     val jsonParser = remember(json) {
@@ -82,10 +89,16 @@ public fun JsonTree(
         jsonParser.init(initialState)
     }
 
+    val listState = rememberLazyListState()
+
+    val searchKeyValue = jsonSearchResultState.state.searchKeyValue
+    val jsonQuery = jsonSearchResultState.state.jsonQuery
+
     when (val state = jsonParser.state.value) {
         is JsonTreeParserState.Ready -> {
             Box(modifier = modifier) {
                 JsonTreeList(
+                    state = listState,
                     items = state.list,
                     contentPadding = contentPadding,
                     colors = colors,
@@ -94,6 +107,8 @@ public fun JsonTree(
                     textStyle = textStyle,
                     showIndices = showIndices,
                     showItemCount = showItemCount,
+                    searchKeyValue = searchKeyValue,
+                    jsonQuery = jsonQuery,
                     onClick = {
                         coroutineScope.launch {
                             jsonParser.expandOrCollapseItem(
@@ -103,11 +118,133 @@ public fun JsonTree(
                         }
                     }
                 )
+
+                if (!searchKeyValue.isNullOrEmpty()) {
+                    handleSearchKeyValue(
+                        jsonSearchResultState,
+                        jsonParser,
+                        state,
+                        listState
+                    )
+                } else if (!jsonQuery.isNullOrEmpty()) {
+                    handleJsonQuery(
+                        jsonSearchResultState,
+                        jsonParser,
+                        state,
+                        listState
+                    )
+                }
             }
         }
         is JsonTreeParserState.Loading -> onLoading()
         is JsonTreeParserState.Parsing.Error -> onError(state.throwable)
         is JsonTreeParserState.Parsing.Parsed -> error("Unexpected state $state")
+    }
+}
+
+@Composable
+private fun handleSearchKeyValue(
+    jsonSearchResultState: JsonSearchResultState,
+    jsonTreeParser: JsonTreeParser,
+    state: JsonTreeParserState.Ready,
+    listState: LazyListState,
+) {
+    val searchKeyValue = jsonSearchResultState.state.searchKeyValue
+
+    LaunchedEffect(searchKeyValue) {
+        withContext(Dispatchers.Default) {
+            state.list.forEach {
+                if (it is JsonTreeElement.Collapsable &&
+                    it.state == TreeState.COLLAPSED &&
+                    it.childrenHasMatch(searchKeyValue)
+                ) {
+                    jsonTreeParser.expandOrCollapseItem(it, true)
+                }
+            }
+
+            val highlightedLines = state.list.mapIndexed { index, jsonTreeElement ->
+                if (jsonTreeElement.hasMatch(searchKeyValue)) index else null
+            }.filterNotNull()
+            jsonSearchResultState.state = JsonSearchResult(
+                searchKeyValue = searchKeyValue,
+                totalListSize = state.list.size,
+                highlightedLines = highlightedLines
+            )
+        }
+    }
+
+    LaunchedEffect(state.list.size) {
+        if (jsonSearchResultState.state.totalListSize == state.list.size) return@LaunchedEffect
+
+        jsonSearchResultState.state = JsonSearchResult()
+        withContext(Dispatchers.Default) {
+            val highlightedLines = state.list.mapIndexed { index, jsonTreeElement ->
+                if (jsonTreeElement.hasMatch(searchKeyValue)) index else null
+            }.filterNotNull()
+            jsonSearchResultState.state =
+                JsonSearchResult(
+                    searchKeyValue = searchKeyValue,
+                    totalListSize = state.list.size,
+                    highlightedLines = highlightedLines
+                )
+        }
+    }
+
+    val currentHighlightedLine = jsonSearchResultState.state.currentHighlightedLine
+    val highlightedLines = jsonSearchResultState.state.highlightedLines
+
+    LaunchedEffect(currentHighlightedLine) {
+        if (currentHighlightedLine > -1 && highlightedLines.isNotEmpty() && !listState.isScrollInProgress) {
+            listState.scrollToItem(highlightedLines[currentHighlightedLine])
+        }
+    }
+}
+
+@Composable
+private fun handleJsonQuery(
+    jsonSearchResultState: JsonSearchResultState,
+    jsonTreeParser: JsonTreeParser,
+    state: JsonTreeParserState.Ready,
+    listState: LazyListState,
+) {
+    val jsonQuery = jsonSearchResultState.state.jsonQuery
+    var lastScrolledIndex by remember { mutableStateOf(-1) }
+
+    LaunchedEffect(jsonQuery) {
+        if (jsonQuery == null) return@LaunchedEffect
+
+        val (jsonQueryParts, adjacentMap) = jsonQuery.getAdjacentMap()
+
+        withContext(Dispatchers.Default) {
+            state.list.forEach { item ->
+                val (jsonQueryKey, jsonQueryIndex) = splitArrayNotation(
+                    item.getJsonQuery(jsonQuery, jsonQueryParts, adjacentMap)
+                )
+
+                if (item.keyMatch(jsonQueryKey) || item.keyMatch(jsonQueryIndex)) {
+                    jsonTreeParser.expandOrCollapseItem(item, true)
+                }
+            }
+
+            val highlightedLines = state.list.mapIndexed { index, item ->
+                val (jsonQueryKey, jsonQueryIndex) = splitArrayNotation(
+                    item.getJsonQuery(
+                        jsonQuery,
+                        jsonQueryParts,
+                        adjacentMap
+                    )
+                )
+                if (item.keyMatch(jsonQueryKey) || item.keyMatch(jsonQueryIndex)) index else null
+            }.filterNotNull()
+
+            lastScrolledIndex = highlightedLines.lastOrNull() ?: -1
+        }
+    }
+
+    LaunchedEffect(lastScrolledIndex) {
+        if (lastScrolledIndex > 0 && !listState.isScrollInProgress) {
+            listState.scrollToItem(lastScrolledIndex)
+        }
     }
 }
 
@@ -121,15 +258,22 @@ private fun JsonTreeList(
     textStyle: TextStyle,
     showIndices: Boolean,
     showItemCount: Boolean,
+    searchKeyValue: String?,
+    jsonQuery: String?,
+    state: LazyListState = rememberLazyListState(),
     onClick: (JsonTreeElement) -> Unit,
 ) {
+    val (jsonQueryParts, adjacentMap) = jsonQuery.getAdjacentMap()
+
     LazyColumn(
+        state = state,
         contentPadding = contentPadding
     ) {
         itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
             when (item) {
                 is JsonTreeElement.Collapsable.Array -> {
                     val coloredText = rememberCollapsableText(
+                        item = item,
                         type = CollapsableType.ARRAY,
                         key = item.key,
                         childItemCount = item.children.size,
@@ -138,7 +282,9 @@ private fun JsonTreeList(
                         isLastItem = item.isLastItem,
                         showIndices = showIndices,
                         showItemCount = showItemCount,
-                        parentType = item.parentType
+                        searchKeyValue = searchKeyValue,
+                        jsonQuery = item.getJsonQuery(jsonQuery, jsonQueryParts, adjacentMap),
+                        parentType = item.parentType,
                     )
 
                     Collapsable(
@@ -158,12 +304,15 @@ private fun JsonTreeList(
                 }
                 is JsonTreeElement.Collapsable.Object -> {
                     val coloredText = rememberCollapsableText(
+                        item = item,
                         type = CollapsableType.OBJECT,
                         key = item.key,
                         childItemCount = item.children.size,
                         state = item.state,
                         colors = colors,
                         isLastItem = item.isLastItem,
+                        searchKeyValue = searchKeyValue,
+                        jsonQuery = item.getJsonQuery(jsonQuery, jsonQueryParts, adjacentMap),
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         parentType = item.parentType
@@ -190,6 +339,8 @@ private fun JsonTreeList(
                         value = item.value,
                         colors = colors,
                         isLastItem = item.isLastItem,
+                        searchKeyValue = searchKeyValue,
+                        jsonQuery = item.getJsonQuery(jsonQuery, jsonQueryParts, adjacentMap),
                         showIndices = showIndices,
                         parentType = item.parentType
                     )
