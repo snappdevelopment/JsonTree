@@ -7,6 +7,10 @@ internal sealed interface JsonTreeElement {
     val level: Int
     val isLastItem: Boolean
 
+    fun hasMatch(searchKeyValue: String?): Boolean
+
+    fun childrenHasMatch(searchKeyValue: String?): Boolean
+
     enum class ParentType { NONE, ARRAY, OBJECT }
 
     data class Primitive(
@@ -16,7 +20,19 @@ internal sealed interface JsonTreeElement {
         val key: String?,
         val value: JsonPrimitive,
         val parentType: ParentType,
-    ) : JsonTreeElement
+    ) : JsonTreeElement {
+
+        override fun hasMatch(searchKeyValue: String?): Boolean {
+            if (searchKeyValue.isNullOrEmpty()) return false
+            return (key?.contains(searchKeyValue, ignoreCase = true) == true) ||
+                childrenHasMatch(searchKeyValue)
+        }
+
+        override fun childrenHasMatch(searchKeyValue: String?): Boolean {
+            if (searchKeyValue.isNullOrEmpty()) return false
+            return value.content.contains(searchKeyValue, ignoreCase = true)
+        }
+    }
 
     sealed interface Collapsable : JsonTreeElement {
         val state: TreeState
@@ -30,7 +46,19 @@ internal sealed interface JsonTreeElement {
             override val isLastItem: Boolean,
             val key: String?,
             val parentType: ParentType,
-        ) : Collapsable
+        ) : Collapsable {
+
+            override fun hasMatch(searchKeyValue: String?): Boolean {
+                if (searchKeyValue.isNullOrEmpty()) return false
+                return (key?.contains(searchKeyValue, ignoreCase = true) == true) ||
+                    (state == TreeState.COLLAPSED && childrenHasMatch(searchKeyValue))
+            }
+
+            override fun childrenHasMatch(searchKeyValue: String?): Boolean {
+                if (searchKeyValue.isNullOrEmpty()) return false
+                return children.values.any { it.hasMatch(searchKeyValue) }
+            }
+        }
 
         data class Array(
             override val id: String,
@@ -40,7 +68,19 @@ internal sealed interface JsonTreeElement {
             override val isLastItem: Boolean,
             val key: String?,
             val parentType: ParentType,
-        ) : Collapsable
+        ) : Collapsable {
+
+            override fun hasMatch(searchKeyValue: String?): Boolean {
+                if (searchKeyValue.isNullOrEmpty()) return false
+                return (key?.contains(searchKeyValue, ignoreCase = true) == true) ||
+                    (state == TreeState.COLLAPSED && childrenHasMatch(searchKeyValue))
+            }
+
+            override fun childrenHasMatch(searchKeyValue: String?): Boolean {
+                if (searchKeyValue.isNullOrEmpty()) return false
+                return children.values.any { it.hasMatch(searchKeyValue) }
+            }
+        }
     }
 
     data class EndBracket(
@@ -50,6 +90,9 @@ internal sealed interface JsonTreeElement {
         val type: Type
     ) : JsonTreeElement {
         enum class Type { ARRAY, OBJECT }
+
+        override fun hasMatch(searchKeyValue: String?) = false
+        override fun childrenHasMatch(searchKeyValue: String?) = false
     }
 }
 
