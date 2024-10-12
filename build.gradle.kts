@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform).apply(false)
     alias(libs.plugins.compose).apply(false)
     alias(libs.plugins.compose.compiler).apply(false)
+    alias(libs.plugins.kotlinx.atomicfu).apply(false)
     alias(libs.plugins.publish).apply(false)
     alias(libs.plugins.api.validator)
     alias(libs.plugins.detekt)
@@ -71,5 +72,3 @@ tasks.withType<Detekt>().configureEach {
 dependencies {
     detektPlugins(libs.detekt.formatting)
 }
-
-apply(plugin = "kotlinx-atomicfu")
