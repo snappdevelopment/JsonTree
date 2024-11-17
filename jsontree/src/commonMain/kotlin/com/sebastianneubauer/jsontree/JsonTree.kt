@@ -120,10 +120,10 @@ public fun JsonTree(
                     if (searchQuery.isNullOrEmpty()) {
                         searchState.reset()
                     } else {
-                        jsonParser.expandAllItems()
+                        val expandedList = jsonParser.expandAllItems()
                         val searchResult = jsonSearch.search(
                             searchQuery = searchQuery,
-                            jsonTreeList = state.list, // TODO: check if this works, because the current list is outdated after expanding all items. This might not get called again, because search query doesn't change.
+                            jsonTreeList = expandedList,
                         )
                         searchState.state = searchResult
                     }
@@ -135,15 +135,6 @@ public fun JsonTree(
                         lazyListState.animateScrollToItem(selectedResultIndex)
                     }
                 }
-
-//                if (!searchQuery.isNullOrEmpty()) {
-//                    handleJsonSearchResult(
-//                        jsonSearchResultState = searchState,
-//                        jsonTreeParser = jsonParser,
-//                        jsonTreeList = state.list,
-//                        listState = lazyListState
-//                    )
-//                }
             }
         }
         is JsonTreeParserState.Loading -> onLoading()
