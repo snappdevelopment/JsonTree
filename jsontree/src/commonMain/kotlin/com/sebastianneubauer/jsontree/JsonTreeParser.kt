@@ -59,6 +59,17 @@ internal class JsonTreeParser(
         }
     }
 
+    suspend fun expandAllItems() = withContext(defaultDispatcher) {
+        val state = parserState.value
+        check(state is Ready)
+
+        val expandedList = state.list.expandAll()
+
+        withContext(mainDispatcher) {
+            parserState.value = state.copy(expandedList)
+        }
+    }
+
     suspend fun expandOrCollapseItem(
         item: JsonTreeElement,
         expandSingleChildren: Boolean
@@ -130,6 +141,40 @@ internal class JsonTreeParser(
                 }
             }
         }
+    }
+
+    private fun List<JsonTreeElement>.expandAll(): List<JsonTreeElement> {
+        val list = mutableListOf<JsonTreeElement>()
+
+        fun addToList(item: JsonTreeElement) {
+            when (item) {
+                is EndBracket -> list.add(item)
+                is Primitive -> list.add(item)
+                is Array -> {
+                    list.add(item)
+                    if (item.state != TreeState.COLLAPSED) {
+                        item.children.forEach {
+                            addToList(it.value)
+                        }
+                        list.add(item.endBracket)
+                    }
+                }
+                is Object -> {
+                    list.add(item)
+                    if (item.state != TreeState.COLLAPSED) {
+                        item.children.forEach {
+                            addToList(it.value)
+                        }
+                        list.add(item.endBracket)
+                    }
+                }
+            }
+        }
+
+        this.forEach {
+            addToList(it)
+        }
+        return list
     }
 
     private fun List<JsonTreeElement>.expandItem(
