@@ -48,7 +48,7 @@ import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
-import com.sebastianneubauer.jsontree.rememberJsonSearchResultState
+import com.sebastianneubauer.jsontree.rememberSearchState
 import com.sebastianneubauer.jsontreesample.ui.theme.JsonTreeTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -169,7 +169,7 @@ private fun MainScreen() {
             }
 
             var searchKeyValue by remember { mutableStateOf("") }
-            val jsonSearchResult = rememberJsonSearchResultState()
+            val searchState = rememberSearchState()
 
             Spacer(Modifier.height(8.dp))
 
@@ -180,7 +180,7 @@ private fun MainScreen() {
                     value = searchKeyValue,
                     onValueChange = {
                         searchKeyValue = it
-                        jsonSearchResult.state = jsonSearchResult.state.copy(searchKeyValue = it)
+                        searchState.searchQuery = it
                                     },
                     label = { Text("Search Key/Value") }
                 )
@@ -194,7 +194,7 @@ private fun MainScreen() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = {
-                            jsonSearchResult.previous()
+                            searchState.selectPrevious()
                         }) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowUp,
@@ -202,10 +202,10 @@ private fun MainScreen() {
                             )
                         }
 
-                        Text("Found: ${jsonSearchResult.currentFound()}/${jsonSearchResult.totalFound()}")
+                        Text("Found: ${searchState.selectedResult}/${searchState.resultCount}")
 
                         IconButton(onClick = {
-                            jsonSearchResult.next()
+                            searchState.selectNext()
                         }) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowDown,
@@ -265,7 +265,7 @@ private fun MainScreen() {
                                     showIndices = showIndices,
                                     showItemCount = showItemCount,
                                     expandSingleChildren = expandSingleChildren,
-                                    jsonSearchResultState = jsonSearchResult,
+                                    searchState = searchState,
                                     onError = { errorMessage = it.message },
                                 )
                             }

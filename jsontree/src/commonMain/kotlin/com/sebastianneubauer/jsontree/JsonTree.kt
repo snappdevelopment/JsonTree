@@ -32,7 +32,6 @@ import jsontree.jsontree.generated.resources.Res
 import jsontree.jsontree.generated.resources.jsontree_arrow_right
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.vectorResource
 
 /**
@@ -70,7 +69,7 @@ public fun JsonTree(
     showIndices: Boolean = false,
     showItemCount: Boolean = true,
     expandSingleChildren: Boolean = false,
-    jsonSearchResultState: JsonSearchResultState = rememberJsonSearchResultState(),
+    searchState: SearchState = rememberSearchState(),
     onError: (Throwable) -> Unit = {}
 ) {
     val jsonParser = remember(json) {
@@ -80,21 +79,23 @@ public fun JsonTree(
             mainDispatcher = Dispatchers.Main
         )
     }
+    val jsonSearch = remember {
+        JsonTreeSearch(defaultDispatcher = Dispatchers.Default)
+    }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(jsonParser, initialState) {
         jsonParser.init(initialState)
     }
 
-    val listState = rememberLazyListState()
+    val lazyListState = rememberLazyListState()
 
-    val searchKeyValue = jsonSearchResultState.state.searchKeyValue
+    val searchQuery = searchState.searchQuery
 
     when (val state = jsonParser.state.value) {
         is JsonTreeParserState.Ready -> {
             Box(modifier = modifier) {
                 JsonTreeList(
-                    state = listState,
                     items = state.list,
                     contentPadding = contentPadding,
                     colors = colors,
@@ -103,7 +104,8 @@ public fun JsonTree(
                     textStyle = textStyle,
                     showIndices = showIndices,
                     showItemCount = showItemCount,
-                    searchKeyValue = searchKeyValue,
+                    searchResult = searchState.state,
+                    lazyListState = lazyListState,
                     onClick = {
                         coroutineScope.launch {
                             jsonParser.expandOrCollapseItem(
@@ -114,15 +116,34 @@ public fun JsonTree(
                     }
                 )
 
-                if (!searchKeyValue.isNullOrEmpty()) {
-                    handleJsonSearchResult(
-                        jsonSearchResultState,
-                        jsonParser,
-                        state,
-                        searchKeyValue,
-                        listState
-                    )
+                LaunchedEffect(searchQuery) {
+                    if (searchQuery.isNullOrEmpty()) {
+                        searchState.reset()
+                    } else {
+                        jsonParser.expandAllItems()
+                        val searchResult = jsonSearch.search(
+                            searchQuery = searchQuery,
+                            jsonTreeList = state.list, // TODO: check if this works, because the current list is outdated after expanding all items. This might not get called again, because search query doesn't change.
+                        )
+                        searchState.state = searchResult
+                    }
                 }
+
+                val selectedResultIndex = searchState.state.selectedResultIndex
+                LaunchedEffect(selectedResultIndex) {
+                    if (selectedResultIndex > -1 && !lazyListState.isScrollInProgress) {
+                        lazyListState.animateScrollToItem(selectedResultIndex)
+                    }
+                }
+
+//                if (!searchQuery.isNullOrEmpty()) {
+//                    handleJsonSearchResult(
+//                        jsonSearchResultState = searchState,
+//                        jsonTreeParser = jsonParser,
+//                        jsonTreeList = state.list,
+//                        listState = lazyListState
+//                    )
+//                }
             }
         }
         is JsonTreeParserState.Loading -> onLoading()
@@ -130,60 +151,77 @@ public fun JsonTree(
         is JsonTreeParserState.Parsing.Parsed -> error("Unexpected state $state")
     }
 }
-
-@Composable
-private fun handleJsonSearchResult(
-    jsonSearchResultState: JsonSearchResultState,
-    jsonTreeParser: JsonTreeParser,
-    state: JsonTreeParserState.Ready,
-    searchKeyValue: String?,
-    listState: LazyListState,
-) {
-    LaunchedEffect(searchKeyValue) {
-        jsonSearchResultState.state = JsonSearchResult(searchKeyValue)
-        withContext(Dispatchers.Default) {
-            state.list.forEach {
-                if (it is JsonTreeElement.Collapsable &&
-                    it.state == TreeState.COLLAPSED &&
-                    it.childrenHasMatch(searchKeyValue)
-                ) {
-                    jsonTreeParser.expandOrCollapseItem(it, true)
-                }
-            }
-
-            val highlightedLines = state.list.mapIndexed { index, jsonTreeElement ->
-                if (jsonTreeElement.hasMatch(searchKeyValue)) index else null
-            }.filterNotNull()
-            jsonSearchResultState.state = JsonSearchResult(
-                searchKeyValue,
-                state.list.size,
-                highlightedLines
-            )
-        }
-    }
-
-    LaunchedEffect(state.list.size) {
-        if (jsonSearchResultState.state.totalListSize == state.list.size) return@LaunchedEffect
-
-        jsonSearchResultState.state = JsonSearchResult()
-        withContext(Dispatchers.Default) {
-            val highlightedLines = state.list.mapIndexed { index, jsonTreeElement ->
-                if (jsonTreeElement.hasMatch(searchKeyValue)) index else null
-            }.filterNotNull()
-            jsonSearchResultState.state =
-                JsonSearchResult(searchKeyValue, state.list.size, highlightedLines)
-        }
-    }
-
-    val currentHighlightedLine = jsonSearchResultState.state.currentHighlightedLine
-    val highlightedLines = jsonSearchResultState.state.highlightedLines
-
-    LaunchedEffect(currentHighlightedLine) {
-        if (currentHighlightedLine > -1 && highlightedLines.isNotEmpty() && !listState.isScrollInProgress) {
-            listState.scrollToItem(highlightedLines[currentHighlightedLine])
-        }
-    }
-}
+//
+// @Composable
+// private fun handleJsonSearchResult(
+//    jsonSearchResultState: SearchState,
+//    jsonTreeParser: JsonTreeParser,
+//    jsonTreeList: List<JsonTreeElement>,
+//    listState: LazyListState,
+// ) {
+//    val searchQuery = jsonSearchResultState.state.searchQuery
+//
+//    LaunchedEffect(searchQuery) {
+//        jsonSearchResultState.state = SearchResult(
+//            searchQuery = searchQuery,
+//            totalListSize = null,
+//            resultIndices = emptyList(),
+//            selectedResultIndex = -1
+//        )
+//        withContext(Dispatchers.Default) {
+//            jsonTreeList.forEach {
+//                if (it is JsonTreeElement.Collapsable &&
+//                    it.state == TreeState.COLLAPSED &&
+//                    it.childrenHasMatch(searchQuery)
+//                ) {
+//                    jsonTreeParser.expandOrCollapseItem(it, true)
+//                }
+//            }
+//
+//            val highlightedLines = jsonTreeList.mapIndexed { index, jsonTreeElement ->
+//                if (jsonTreeElement.hasMatch(searchQuery)) index else null
+//            }.filterNotNull()
+//            jsonSearchResultState.state = SearchResult(
+//                searchQuery = searchQuery,
+//                totalListSize = jsonTreeList.size,
+//                resultIndices = highlightedLines,
+//                selectedResultIndex = -1,
+//            )
+//        }
+//    }
+//
+//    LaunchedEffect(jsonTreeList.size) {
+//        if (jsonSearchResultState.state.totalListSize == jsonTreeList.size) return@LaunchedEffect
+//
+//        jsonSearchResultState.state = SearchResult(
+//            searchQuery = null,
+//            totalListSize = null,
+//            resultIndices = emptyList(),
+//            selectedResultIndex = -1,
+//        )
+//        withContext(Dispatchers.Default) {
+//            val highlightedLines = jsonTreeList.mapIndexed { index, jsonTreeElement ->
+//                if (jsonTreeElement.hasMatch(searchQuery)) index else null
+//            }.filterNotNull()
+//            jsonSearchResultState.state =
+//                SearchResult(
+//                    searchQuery = searchQuery,
+//                    totalListSize = jsonTreeList.size,
+//                    resultIndices = highlightedLines,
+//                    selectedResultIndex = -1,
+//                )
+//        }
+//    }
+//
+//    val currentHighlightedLine = jsonSearchResultState.state.selectedResultIndex
+//    val highlightedLines = jsonSearchResultState.state.resultIndices
+//
+//    LaunchedEffect(currentHighlightedLine) {
+//        if (currentHighlightedLine > -1 && highlightedLines.isNotEmpty() && !listState.isScrollInProgress) {
+//            listState.scrollToItem(highlightedLines[currentHighlightedLine])
+//        }
+//    }
+// }
 
 @Composable
 private fun JsonTreeList(
@@ -195,17 +233,19 @@ private fun JsonTreeList(
     textStyle: TextStyle,
     showIndices: Boolean,
     showItemCount: Boolean,
-    searchKeyValue: String?,
-    state: LazyListState = rememberLazyListState(),
+    searchResult: SearchResult,
+    lazyListState: LazyListState,
     onClick: (JsonTreeElement) -> Unit,
 ) {
     LazyColumn(
-        state = state,
+        state = lazyListState,
         contentPadding = contentPadding
     ) {
         itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
             when (item) {
                 is JsonTreeElement.Collapsable.Array -> {
+                    val searchOccurrence = searchResult.searchOccurrences[index]
+
                     val coloredText = rememberCollapsableText(
                         item = item,
                         type = CollapsableType.ARRAY,
@@ -216,7 +256,8 @@ private fun JsonTreeList(
                         isLastItem = item.isLastItem,
                         showIndices = showIndices,
                         showItemCount = showItemCount,
-                        searchKeyValue = searchKeyValue,
+                        searchOccurrence = searchOccurrence,
+                        searchOccurrenceSelectedResultIndex = searchResult.selectedResultIndex,
                         parentType = item.parentType,
                     )
 
@@ -236,6 +277,8 @@ private fun JsonTreeList(
                     )
                 }
                 is JsonTreeElement.Collapsable.Object -> {
+                    val searchOccurrence = searchResult.searchOccurrences[index]
+
                     val coloredText = rememberCollapsableText(
                         item = item,
                         type = CollapsableType.OBJECT,
@@ -244,7 +287,8 @@ private fun JsonTreeList(
                         state = item.state,
                         colors = colors,
                         isLastItem = item.isLastItem,
-                        searchKeyValue = searchKeyValue,
+                        searchOccurrence = searchOccurrence,
+                        searchOccurrenceSelectedResultIndex = searchResult.selectedResultIndex,
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         parentType = item.parentType
@@ -266,12 +310,15 @@ private fun JsonTreeList(
                     )
                 }
                 is JsonTreeElement.Primitive -> {
+                    val searchOccurrence = searchResult.searchOccurrences[index]
+
                     val coloredText = rememberPrimitiveText(
                         key = item.key,
                         value = item.value,
                         colors = colors,
                         isLastItem = item.isLastItem,
-                        searchKeyValue = searchKeyValue,
+                        searchOccurrence = searchOccurrence,
+                        searchOccurrenceSelectedResultIndex = searchResult.selectedResultIndex,
                         showIndices = showIndices,
                         parentType = item.parentType
                     )

@@ -7,9 +7,9 @@ internal sealed interface JsonTreeElement {
     val level: Int
     val isLastItem: Boolean
 
-    fun hasMatch(searchKeyValue: String?): Boolean
-
-    fun childrenHasMatch(searchKeyValue: String?): Boolean
+//    fun hasMatch(searchKeyValue: String?): Boolean
+//
+//    fun childrenHasMatch(searchKeyValue: String?): Boolean
 
     enum class ParentType { NONE, ARRAY, OBJECT }
 
@@ -22,16 +22,16 @@ internal sealed interface JsonTreeElement {
         val parentType: ParentType,
     ) : JsonTreeElement {
 
-        override fun hasMatch(searchKeyValue: String?): Boolean {
-            if (searchKeyValue.isNullOrEmpty()) return false
-            return (key?.contains(searchKeyValue, ignoreCase = true) == true) ||
-                childrenHasMatch(searchKeyValue)
-        }
-
-        override fun childrenHasMatch(searchKeyValue: String?): Boolean {
-            if (searchKeyValue.isNullOrEmpty()) return false
-            return value.content.contains(searchKeyValue, ignoreCase = true)
-        }
+//        override fun hasMatch(searchKeyValue: String?): Boolean {
+//            if (searchKeyValue.isNullOrEmpty()) return false
+//            return (key?.contains(searchKeyValue, ignoreCase = true) == true) ||
+//                childrenHasMatch(searchKeyValue)
+//        }
+//
+//        override fun childrenHasMatch(searchKeyValue: String?): Boolean {
+//            if (searchKeyValue.isNullOrEmpty()) return false
+//            return value.content.contains(searchKeyValue, ignoreCase = true)
+//        }
     }
 
     sealed interface Collapsable : JsonTreeElement {
@@ -48,16 +48,16 @@ internal sealed interface JsonTreeElement {
             val parentType: ParentType,
         ) : Collapsable {
 
-            override fun hasMatch(searchKeyValue: String?): Boolean {
-                if (searchKeyValue.isNullOrEmpty()) return false
-                return (key?.contains(searchKeyValue, ignoreCase = true) == true) ||
-                    (state == TreeState.COLLAPSED && childrenHasMatch(searchKeyValue))
-            }
-
-            override fun childrenHasMatch(searchKeyValue: String?): Boolean {
-                if (searchKeyValue.isNullOrEmpty()) return false
-                return children.values.any { it.hasMatch(searchKeyValue) }
-            }
+//            override fun hasMatch(searchKeyValue: String?): Boolean {
+//                if (searchKeyValue.isNullOrEmpty()) return false
+//                return (key?.contains(searchKeyValue, ignoreCase = true) == true) ||
+//                    (state == TreeState.COLLAPSED && childrenHasMatch(searchKeyValue))
+//            }
+//
+//            override fun childrenHasMatch(searchKeyValue: String?): Boolean {
+//                if (searchKeyValue.isNullOrEmpty()) return false
+//                return children.values.any { it.hasMatch(searchKeyValue) }
+//            }
         }
 
         data class Array(
@@ -70,16 +70,16 @@ internal sealed interface JsonTreeElement {
             val parentType: ParentType,
         ) : Collapsable {
 
-            override fun hasMatch(searchKeyValue: String?): Boolean {
-                if (searchKeyValue.isNullOrEmpty()) return false
-                return (key?.contains(searchKeyValue, ignoreCase = true) == true) ||
-                    (state == TreeState.COLLAPSED && childrenHasMatch(searchKeyValue))
-            }
-
-            override fun childrenHasMatch(searchKeyValue: String?): Boolean {
-                if (searchKeyValue.isNullOrEmpty()) return false
-                return children.values.any { it.hasMatch(searchKeyValue) }
-            }
+//            override fun hasMatch(searchKeyValue: String?): Boolean {
+//                if (searchKeyValue.isNullOrEmpty()) return false
+//                return (key?.contains(searchKeyValue, ignoreCase = true) == true) ||
+//                    (state == TreeState.COLLAPSED && childrenHasMatch(searchKeyValue))
+//            }
+//
+//            override fun childrenHasMatch(searchKeyValue: String?): Boolean {
+//                if (searchKeyValue.isNullOrEmpty()) return false
+//                return children.values.any { it.hasMatch(searchKeyValue) }
+//            }
         }
     }
 
@@ -91,8 +91,8 @@ internal sealed interface JsonTreeElement {
     ) : JsonTreeElement {
         enum class Type { ARRAY, OBJECT }
 
-        override fun hasMatch(searchKeyValue: String?) = false
-        override fun childrenHasMatch(searchKeyValue: String?) = false
+//        override fun hasMatch(searchKeyValue: String?) = false
+//        override fun childrenHasMatch(searchKeyValue: String?) = false
     }
 }
 
