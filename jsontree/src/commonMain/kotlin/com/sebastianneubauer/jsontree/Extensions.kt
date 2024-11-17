@@ -5,8 +5,32 @@ import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
 import com.sebastianneubauer.jsontree.JsonTreeElement.EndBracket
 import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive
 
-// Expanding
+internal enum class Expansion {
+    /**
+     * No children are expanded.
+     */
+    None,
 
+    /**
+     * All children are expanded.
+     */
+    All,
+
+    /**
+     * Only children without siblings are expanded.
+     */
+    SingleOnly
+}
+
+/**
+ * Expands a JsonTreeElement and its children depending on which [expansion] is chosen.
+ *
+ * `Expansion.None` -> Children will not be expanded.
+ *
+ * `Expansion.All` -> Children will be expanded recursively.
+ *
+ * `Expansion.SingleOnly` -> Only children without siblings will be expanded.
+ */
 internal fun JsonTreeElement.expand(
     expansion: Expansion,
 ): JsonTreeElement {
@@ -32,12 +56,6 @@ internal fun JsonTreeElement.expand(
         is Primitive,
         is EndBracket -> this
     }
-}
-
-internal enum class Expansion {
-    None,
-    All,
-    SingleOnly
 }
 
 private fun Map<String, JsonTreeElement>.expandChildren(
@@ -75,8 +93,10 @@ private fun Map<String, JsonTreeElement>.expandChildren(
     }
 }
 
-// Collapsing
 
+/**
+ * Collapses a JsonTreeElement and all its children.
+ */
 internal fun JsonTreeElement.collapse(): JsonTreeElement {
     return when (this) {
         is Array -> this.copy(
@@ -123,8 +143,10 @@ private fun Map<String, JsonTreeElement>.collapseChildren(): Map<String, JsonTre
     }
 }
 
-// toList
 
+/**
+ * Converts a JsonTreeElement into a list which can be rendered.
+ */
 internal fun JsonTreeElement.toList(): List<JsonTreeElement> {
     val list = mutableListOf<JsonTreeElement>()
 

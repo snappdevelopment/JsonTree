@@ -49,14 +49,15 @@ internal fun rememberCollapsableText(
                     withStyle(SpanStyle(color = colors.keyColor)) {
                         append("\"$key\"")
                     }
+                    // add 1 to the range because the value is rendered with quotes around it
                     searchOccurrence
                         ?.ranges
                         ?.filterIsInstance<SearchOccurrence.Range.Key>()
                         ?.forEach {
                             addStyle(
                                 SpanStyle(background = colors.highlightColor),
-                                start = it.range.first,
-                                end = it.range.last
+                                start = it.range.first + 1,
+                                end = it.range.last + 1
                             )
                         }
                 }
@@ -127,37 +128,45 @@ internal fun rememberPrimitiveText(
                     withStyle(SpanStyle(color = colors.indexColor)) {
                         append(it)
                     }
-                    withStyle(SpanStyle(color = colors.symbolColor)) {
-                        append(": ")
-                    }
                 } else if (parentType != ParentType.ARRAY) {
                     withStyle(SpanStyle(color = colors.keyColor)) {
                         append("\"$it\"")
                     }
+                    // add 1 to the range because the value is rendered with quotes around it
                     searchOccurrence
                         ?.ranges
                         ?.filterIsInstance<SearchOccurrence.Range.Key>()
                         ?.forEach {
                             addStyle(
                                 SpanStyle(background = colors.highlightColor),
-                                start = it.range.first,
-                                end = it.range.last
+                                start = it.range.first + 1,
+                                end = it.range.last + 1
                             )
                         }
-                    withStyle(SpanStyle(color = colors.symbolColor)) {
-                        append(": ")
-                    }
+                }
+                withStyle(SpanStyle(color = colors.symbolColor)) {
+                    append(": ")
                 }
             }
+
+            val keyOffset = this.length
 
             withStyle(SpanStyle(color = valueColor)) {
                 append(value.toString())
             }
+            // add 1 to the range because the value is rendered with quotes around it
             searchOccurrence
                 ?.ranges
                 ?.filterIsInstance<SearchOccurrence.Range.Value>()
                 ?.forEach {
-                    addStyle(SpanStyle(background = colors.highlightColor), start = it.range.first, end = it.range.last)
+                    // add an offset for the key which is already appended to the string
+                    // add 1 to the range because the value is rendered with quotes around it
+                    // add 1 to the end because it is exclusive
+                    addStyle(
+                        SpanStyle(background = colors.highlightColor),
+                        start = keyOffset + it.range.first + 1,
+                        end = keyOffset + it.range.last + 1 + 1
+                    )
                 }
 
             if (!isLastItem) {

@@ -22,6 +22,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlin.math.exp
 
 internal class JsonTreeParser(
     private val json: String,
@@ -60,7 +61,7 @@ internal class JsonTreeParser(
         }
     }
 
-    suspend fun expandAllItems() = withContext(defaultDispatcher) {
+    suspend fun expandAllItems(): List<JsonTreeElement> = withContext(defaultDispatcher) {
         val state = parserState.value
         check(state is Ready)
 
@@ -70,6 +71,7 @@ internal class JsonTreeParser(
         withContext(mainDispatcher) {
             parserState.value = state.copy(expandedList)
         }
+        expandedList
     }
 
     suspend fun expandOrCollapseItem(
