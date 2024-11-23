@@ -34,10 +34,6 @@ internal data class SelectedSearchOccurrence(
 internal class JsonTreeSearch(
     private val defaultDispatcher: CoroutineDispatcher
 ) {
-
-//    private var searchState = mutableStateOf(SearchState(initialSearchQuery = null))
-//    val state: State<SearchState> = searchState
-
     suspend fun search(
         searchQuery: String,
         jsonTreeList: List<JsonTreeElement>,
@@ -66,61 +62,6 @@ internal class JsonTreeSearch(
             },
         )
     }
-
-//        LaunchedEffect(searchQuery) {
-//            jsonSearchResultState.state = SearchResult(
-//                searchQuery = searchQuery,
-//                totalListSize = null,
-//                resultIndices = emptyList(),
-//                selectedResultIndex = -1
-//            )
-//            withContext(defaultDispatcher) {
-//                jsonTreeList.forEach {
-//                    if (it is JsonTreeElement.Collapsable &&
-//                        it.state == TreeState.COLLAPSED &&
-//                        it.childContains(searchQuery)
-//                    ) {
-//                        jsonTreeParser.expandOrCollapseItem(it, true)
-//                    }
-//                }
-//
-//                val resultIndices = jsonTreeList
-//                    .mapIndexed { index, jsonTreeElement ->
-//                        if (jsonTreeElement.contains(searchQuery)) index else null
-//                    }.filterNotNull()
-//
-//                jsonSearchResultState.state = SearchResult(
-//                    searchQuery = searchQuery,
-//                    totalListSize = jsonTreeList.size,
-//                    resultIndices = resultIndices,
-//                    selectedResultIndex = -1,
-//                )
-//            }
-//        }
-//
-//        LaunchedEffect(jsonTreeList.size) {
-//            if (jsonSearchResultState.state.totalListSize == jsonTreeList.size) return@LaunchedEffect
-//
-//            jsonSearchResultState.state = SearchResult(
-//                searchQuery = null,
-//                totalListSize = null,
-//                resultIndices = emptyList(),
-//                selectedResultIndex = -1,
-//            )
-//            withContext(Dispatchers.Default) {
-//                val highlightedLines = jsonTreeList.mapIndexed { index, jsonTreeElement ->
-//                    if (jsonTreeElement.hasMatch(searchQuery)) index else null
-//                }.filterNotNull()
-//                jsonSearchResultState.state =
-//                    SearchResult(
-//                        searchQuery = searchQuery,
-//                        totalListSize = jsonTreeList.size,
-//                        resultIndices = highlightedLines,
-//                        selectedResultIndex = -1,
-//                    )
-//            }
-//        }
-//    }
 
     /**
      * Collects ranges of search results, but ignores the key if it is an index of an array,
@@ -160,31 +101,5 @@ internal class JsonTreeSearch(
             .findAll(this)
             .map { it.range }
             .toList()
-    }
-
-    private fun JsonTreeElement.occurrences(searchQuery: String): Int {
-        return when (this) {
-            is JsonTreeElement.Primitive -> (key?.countOccurrences(searchQuery) ?: 0) + value.content.countOccurrences(searchQuery)
-            is JsonTreeElement.Collapsable.Array -> key?.countOccurrences(searchQuery) ?: 0
-            is JsonTreeElement.Collapsable.Object -> key?.countOccurrences(searchQuery) ?: 0
-            is JsonTreeElement.EndBracket -> 0
-        }
-    }
-
-    private fun String.countOccurrences(searchQuery: String): Int {
-        return split(searchQuery, ignoreCase = true).size - 1
-    }
-
-    private fun JsonTreeElement.contains(searchQuery: String): Boolean {
-        return when (this) {
-            is JsonTreeElement.Primitive -> key?.contains(searchQuery, ignoreCase = true) == true || value.content.contains(searchQuery, ignoreCase = true)
-            is JsonTreeElement.Collapsable.Array -> key?.contains(searchQuery, ignoreCase = true) == true
-            is JsonTreeElement.Collapsable.Object -> key?.contains(searchQuery, ignoreCase = true) == true
-            is JsonTreeElement.EndBracket -> false
-        }
-    }
-
-    private fun JsonTreeElement.Collapsable.childContains(searchQuery: String): Boolean {
-        return children.values.any { it.contains(searchQuery) }
     }
 }
