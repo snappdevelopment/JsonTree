@@ -236,6 +236,11 @@ private fun JsonTreeList(
             when (item) {
                 is JsonTreeElement.Collapsable.Array -> {
                     val searchOccurrence = searchResult.searchOccurrences[index]
+                    val selectedResultIndex = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedSearchOccurrence.rangeIndex
+                    } else {
+                        null
+                    }
 
                     val coloredText = rememberCollapsableText(
                         item = item,
@@ -248,7 +253,7 @@ private fun JsonTreeList(
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         searchOccurrence = searchOccurrence,
-                        searchOccurrenceSelectedResultIndex = searchResult.selectedResultIndex,
+                        searchOccurrenceSelectedResultIndex = selectedResultIndex,
                         parentType = item.parentType,
                     )
 
@@ -269,6 +274,11 @@ private fun JsonTreeList(
                 }
                 is JsonTreeElement.Collapsable.Object -> {
                     val searchOccurrence = searchResult.searchOccurrences[index]
+                    val selectedResultIndex = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedSearchOccurrence.rangeIndex
+                    } else {
+                        null
+                    }
 
                     val coloredText = rememberCollapsableText(
                         item = item,
@@ -279,7 +289,7 @@ private fun JsonTreeList(
                         colors = colors,
                         isLastItem = item.isLastItem,
                         searchOccurrence = searchOccurrence,
-                        searchOccurrenceSelectedResultIndex = searchResult.selectedResultIndex,
+                        searchOccurrenceSelectedResultIndex = selectedResultIndex,
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         parentType = item.parentType
@@ -302,6 +312,11 @@ private fun JsonTreeList(
                 }
                 is JsonTreeElement.Primitive -> {
                     val searchOccurrence = searchResult.searchOccurrences[index]
+                    val selectedResultIndex = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedSearchOccurrence.rangeIndex
+                    } else {
+                        null
+                    }
 
                     val coloredText = rememberPrimitiveText(
                         key = item.key,
@@ -309,7 +324,7 @@ private fun JsonTreeList(
                         colors = colors,
                         isLastItem = item.isLastItem,
                         searchOccurrence = searchOccurrence,
-                        searchOccurrenceSelectedResultIndex = searchResult.selectedResultIndex,
+                        searchOccurrenceSelectedResultIndex = selectedResultIndex,
                         showIndices = showIndices,
                         parentType = item.parentType
                     )

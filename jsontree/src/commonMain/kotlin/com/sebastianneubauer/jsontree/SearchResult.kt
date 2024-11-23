@@ -57,7 +57,7 @@ public class SearchState(
         val updatedSelectedOccurrence = when {
             selectedOccurrence == null -> {
                 SelectedSearchOccurrence(
-                    occurrence = occurrences.getValue(0),
+                    occurrence = occurrences.values.first(),
                     rangeIndex = 0
                 )
             }
@@ -90,7 +90,7 @@ public class SearchState(
         val selectedResultIndex = if (state.selectedResultIndex == maxSelectedResultIndex) {
             0
         } else {
-            maxSelectedResultIndex
+            state.selectedResultIndex + 1
         }
 
         state = state.copy(
@@ -109,8 +109,8 @@ public class SearchState(
         val updatedSelectedOccurrence = when {
             selectedOccurrence == null -> {
                 SelectedSearchOccurrence(
-                    occurrence = occurrences.entries.last().value,
-                    rangeIndex = occurrences.entries.last().value.ranges.lastIndex
+                    occurrence = occurrences.values.last(),
+                    rangeIndex = occurrences.values.last().ranges.lastIndex
                 )
             }
             selectedOccurrence.rangeIndex != 0 -> {
@@ -137,10 +137,11 @@ public class SearchState(
 //            .sumOf { it.rangeCount }
 //            .plus(updatedSelectedOccurrence.rangeIndex) // TODO: check if its off by one
 
-        val selectedResultIndex = if (state.selectedResultIndex == -1) {
-            occurrences.values.sumOf { it.rangeCount } - 1 // TODO: check if its off by one
+        val maxSelectedResultIndex = occurrences.values.sumOf { it.rangeCount } - 1
+        val selectedResultIndex = if (state.selectedResultIndex == 0) {
+            maxSelectedResultIndex // TODO: check if its off by one
         } else {
-            0
+            state.selectedResultIndex - 1
         }
 
         state = state.copy(

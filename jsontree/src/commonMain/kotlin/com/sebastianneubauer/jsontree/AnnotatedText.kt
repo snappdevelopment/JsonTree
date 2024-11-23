@@ -2,6 +2,7 @@ package com.sebastianneubauer.jsontree
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -27,7 +28,7 @@ internal fun rememberCollapsableText(
     colors: TreeColors,
     isLastItem: Boolean,
     searchOccurrence: SearchOccurrence?,
-    searchOccurrenceSelectedResultIndex: Int,
+    searchOccurrenceSelectedResultIndex: Int?,
     showIndices: Boolean,
     showItemCount: Boolean,
     parentType: ParentType,
@@ -50,14 +51,16 @@ internal fun rememberCollapsableText(
                         append("\"$key\"")
                     }
                     // add 1 to the range because the value is rendered with quotes around it
+                    // add 1 to the end because it is exclusive
                     searchOccurrence
                         ?.ranges
                         ?.filterIsInstance<SearchOccurrence.Range.Key>()
-                        ?.forEach {
+                        ?.forEachIndexed { index, keyRange ->
+                            val color = if(index == searchOccurrenceSelectedResultIndex) Color.Blue else colors.highlightColor
                             addStyle(
-                                SpanStyle(background = colors.highlightColor),
-                                start = it.range.first + 1,
-                                end = it.range.last + 1
+                                style = SpanStyle(background = color),
+                                start = keyRange.range.first + 1,
+                                end = keyRange.range.last + 1 + 1
                             )
                         }
                 }
@@ -97,7 +100,7 @@ internal fun rememberPrimitiveText(
     colors: TreeColors,
     isLastItem: Boolean,
     searchOccurrence: SearchOccurrence?,
-    searchOccurrenceSelectedResultIndex: Int,
+    searchOccurrenceSelectedResultIndex: Int?,
     showIndices: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
@@ -133,14 +136,16 @@ internal fun rememberPrimitiveText(
                         append("\"$it\"")
                     }
                     // add 1 to the range because the value is rendered with quotes around it
+                    // add 1 to the end because it is exclusive
                     searchOccurrence
                         ?.ranges
                         ?.filterIsInstance<SearchOccurrence.Range.Key>()
-                        ?.forEach {
+                        ?.forEachIndexed { index, keyRange -> // TODO: if the indices match in key and value then both a colored blue. Maybe save the actual range instead of the index.
+                            val color = if(index == searchOccurrenceSelectedResultIndex) Color.Blue else colors.highlightColor
                             addStyle(
-                                SpanStyle(background = colors.highlightColor),
-                                start = it.range.first + 1,
-                                end = it.range.last + 1
+                                style = SpanStyle(background = color),
+                                start = keyRange.range.first + 1,
+                                end = keyRange.range.last + 1 + 1
                             )
                         }
                 }
@@ -154,18 +159,26 @@ internal fun rememberPrimitiveText(
             withStyle(SpanStyle(color = valueColor)) {
                 append(value.toString())
             }
-            // add 1 to the range because the value is rendered with quotes around it
+
+//            if(searchOccurrence != null) {
+//                highlightSearchResults(
+//                    searchOccurrence = searchOccurrence,
+//                    colors = colors,
+//                    keyOffset = keyOffset
+//                )
+//            }
             searchOccurrence
                 ?.ranges
                 ?.filterIsInstance<SearchOccurrence.Range.Value>()
-                ?.forEach {
+                ?.forEachIndexed { index, valueRange ->
+                    val color = if(index == searchOccurrenceSelectedResultIndex) Color.Blue else colors.highlightColor
                     // add an offset for the key which is already appended to the string
                     // add 1 to the range because the value is rendered with quotes around it
                     // add 1 to the end because it is exclusive
                     addStyle(
-                        SpanStyle(background = colors.highlightColor),
-                        start = keyOffset + it.range.first + 1,
-                        end = keyOffset + it.range.last + 1 + 1
+                        style = SpanStyle(background = color),
+                        start = keyOffset + valueRange.range.first + 1, // TODO: only add one if the value is a string, other values don't have quotes
+                        end = keyOffset + valueRange.range.last + 1 + 1
                     )
                 }
 
@@ -176,6 +189,26 @@ internal fun rememberPrimitiveText(
             }
         }
     }
+}
+
+private fun AnnotatedString.Builder.highlightSearchResults(
+    searchOccurrence: SearchOccurrence,
+    colors: TreeColors,
+    keyOffset: Int,
+) {
+    searchOccurrence
+        .ranges
+        .filterIsInstance<SearchOccurrence.Range.Value>()
+        .forEach {
+            // add an offset for the key which is already appended to the string
+            // add 1 to the range because the value is rendered with quotes around it
+            // add 1 to the end because it is exclusive
+            addStyle(
+                style = SpanStyle(background = colors.highlightColor),
+                start = keyOffset + it.range.first + 1,
+                end = keyOffset + it.range.last + 1 + 1
+            )
+        }
 }
 
 // internal fun searchText(text: String, searchKey: String?): Triple<String, String?, String?> {
