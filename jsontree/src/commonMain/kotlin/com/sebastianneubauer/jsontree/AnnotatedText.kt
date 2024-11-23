@@ -28,14 +28,14 @@ internal fun rememberCollapsableText(
     colors: TreeColors,
     isLastItem: Boolean,
     searchOccurrence: SearchOccurrence?,
-    searchOccurrenceSelectedResultIndex: Int?,
+    searchOccurrenceSelectedRange: SearchOccurrence.Range?,
     showIndices: Boolean,
     showItemCount: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
     val itemCount = pluralStringResource(Res.plurals.jsontree_collapsable_items, childItemCount, childItemCount)
 
-    return remember(key, state, colors, isLastItem, itemCount, type, showIndices, showItemCount, searchOccurrence, searchOccurrenceSelectedResultIndex) {
+    return remember(key, state, colors, isLastItem, itemCount, type, showIndices, showItemCount, searchOccurrence, searchOccurrenceSelectedRange) {
         val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
         val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
 //        val childrenHasMatch = item.childrenHasMatch(searchKeyValue)
@@ -55,8 +55,8 @@ internal fun rememberCollapsableText(
                     searchOccurrence
                         ?.ranges
                         ?.filterIsInstance<SearchOccurrence.Range.Key>()
-                        ?.forEachIndexed { index, keyRange ->
-                            val color = if(index == searchOccurrenceSelectedResultIndex) Color.Blue else colors.highlightColor
+                        ?.forEach { keyRange ->
+                            val color = if(keyRange == searchOccurrenceSelectedRange) Color.Blue else colors.highlightColor
                             addStyle(
                                 style = SpanStyle(background = color),
                                 start = keyRange.range.first + 1,
@@ -100,7 +100,7 @@ internal fun rememberPrimitiveText(
     colors: TreeColors,
     isLastItem: Boolean,
     searchOccurrence: SearchOccurrence?,
-    searchOccurrenceSelectedResultIndex: Int?,
+    searchOccurrenceSelectedRange: SearchOccurrence.Range?,
     showIndices: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
@@ -123,7 +123,7 @@ internal fun rememberPrimitiveText(
         isLastItem,
         showIndices,
         searchOccurrence,
-        searchOccurrenceSelectedResultIndex
+        searchOccurrenceSelectedRange
     ) {
         buildAnnotatedString {
             key?.let {
@@ -140,8 +140,8 @@ internal fun rememberPrimitiveText(
                     searchOccurrence
                         ?.ranges
                         ?.filterIsInstance<SearchOccurrence.Range.Key>()
-                        ?.forEachIndexed { index, keyRange -> // TODO: if the indices match in key and value then both a colored blue. Maybe save the actual range instead of the index.
-                            val color = if(index == searchOccurrenceSelectedResultIndex) Color.Blue else colors.highlightColor
+                        ?.forEach { keyRange ->
+                            val color = if(keyRange == searchOccurrenceSelectedRange) Color.Blue else colors.highlightColor
                             addStyle(
                                 style = SpanStyle(background = color),
                                 start = keyRange.range.first + 1,
@@ -170,8 +170,8 @@ internal fun rememberPrimitiveText(
             searchOccurrence
                 ?.ranges
                 ?.filterIsInstance<SearchOccurrence.Range.Value>()
-                ?.forEachIndexed { index, valueRange ->
-                    val color = if(index == searchOccurrenceSelectedResultIndex) Color.Blue else colors.highlightColor
+                ?.forEach { valueRange ->
+                    val color = if(valueRange == searchOccurrenceSelectedRange) Color.Blue else colors.highlightColor
                     // add an offset for the key which is already appended to the string
                     // add 1 to the range because the value is rendered with quotes around it
                     // add 1 to the end because it is exclusive
