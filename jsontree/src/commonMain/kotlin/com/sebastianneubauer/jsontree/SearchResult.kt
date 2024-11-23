@@ -82,12 +82,7 @@ public class SearchState(
             }
         }
 
-//        val selectedResultIndex = occurrences.entries
-//            .takeWhile { it.value != updatedSelectedOccurrence.occurrence }
-//            .sumOf { it.value.rangeCount }
-//            .plus(updatedSelectedOccurrence.rangeIndex) // TODO: check if its off by one
-
-        val maxSelectedResultIndex = occurrences.values.sumOf { it.rangeCount } - 1 // TODO: check if its off by one
+        val maxSelectedResultIndex = occurrences.values.sumOf { it.rangeCount } - 1
         val selectedResultIndex = if (state.selectedResultIndex == maxSelectedResultIndex) {
             0
         } else {
@@ -134,14 +129,9 @@ public class SearchState(
             }
         }
 
-//        val selectedResultIndex = occurrences
-//            .takeWhile { it != updatedSelectedOccurrence.occurrence }
-//            .sumOf { it.rangeCount }
-//            .plus(updatedSelectedOccurrence.rangeIndex) // TODO: check if its off by one
-
         val maxSelectedResultIndex = occurrences.values.sumOf { it.rangeCount } - 1
         val selectedResultIndex = if (state.selectedResultIndex == 0) {
-            maxSelectedResultIndex // TODO: check if its off by one
+            maxSelectedResultIndex
         } else {
             state.selectedResultIndex - 1
         }

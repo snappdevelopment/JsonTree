@@ -20,7 +20,6 @@ import org.jetbrains.compose.resources.pluralStringResource
 
 @Composable
 internal fun rememberCollapsableText(
-    item: JsonTreeElement,
     type: CollapsableType,
     key: String?,
     childItemCount: Int,
@@ -35,10 +34,20 @@ internal fun rememberCollapsableText(
 ): AnnotatedString {
     val itemCount = pluralStringResource(Res.plurals.jsontree_collapsable_items, childItemCount, childItemCount)
 
-    return remember(key, state, colors, isLastItem, itemCount, type, showIndices, showItemCount, searchOccurrence, searchOccurrenceSelectedRange) {
+    return remember(
+        key,
+        state,
+        colors,
+        isLastItem,
+        itemCount,
+        type,
+        showIndices,
+        showItemCount,
+        searchOccurrence,
+        searchOccurrenceSelectedRange
+    ) {
         val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
         val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
-//        val childrenHasMatch = item.childrenHasMatch(searchKeyValue)
 
         buildAnnotatedString {
             key?.let { key ->
@@ -131,6 +140,9 @@ internal fun rememberPrimitiveText(
                     withStyle(SpanStyle(color = colors.indexColor)) {
                         append(it)
                     }
+                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                        append(": ")
+                    }
                 } else if (parentType != ParentType.ARRAY) {
                     withStyle(SpanStyle(color = colors.keyColor)) {
                         append("\"$it\"")
@@ -148,9 +160,10 @@ internal fun rememberPrimitiveText(
                                 end = keyRange.range.last + 1 + 1
                             )
                         }
-                }
-                withStyle(SpanStyle(color = colors.symbolColor)) {
-                    append(": ")
+
+                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                        append(": ")
+                    }
                 }
             }
 
@@ -160,25 +173,19 @@ internal fun rememberPrimitiveText(
                 append(value.toString())
             }
 
-//            if(searchOccurrence != null) {
-//                highlightSearchResults(
-//                    searchOccurrence = searchOccurrence,
-//                    colors = colors,
-//                    keyOffset = keyOffset
-//                )
-//            }
             searchOccurrence
                 ?.ranges
                 ?.filterIsInstance<SearchOccurrence.Range.Value>()
                 ?.forEach { valueRange ->
                     val color = if(valueRange == searchOccurrenceSelectedRange) Color.Blue else colors.highlightColor
                     // add an offset for the key which is already appended to the string
-                    // add 1 to the range because the value is rendered with quotes around it
+                    // add 1 to the range if the value is a string because it has quotes around it
                     // add 1 to the end because it is exclusive
+                    val stringQuoteOffset = if(value.isString) 1 else 0
                     addStyle(
                         style = SpanStyle(background = color),
-                        start = keyOffset + valueRange.range.first + 1, // TODO: only add one if the value is a string, other values don't have quotes
-                        end = keyOffset + valueRange.range.last + 1 + 1
+                        start = keyOffset + valueRange.range.first + stringQuoteOffset,
+                        end = keyOffset + valueRange.range.last + stringQuoteOffset + 1
                     )
                 }
 
@@ -190,38 +197,3 @@ internal fun rememberPrimitiveText(
         }
     }
 }
-
-private fun AnnotatedString.Builder.highlightSearchResults(
-    searchOccurrence: SearchOccurrence,
-    colors: TreeColors,
-    keyOffset: Int,
-) {
-    searchOccurrence
-        .ranges
-        .filterIsInstance<SearchOccurrence.Range.Value>()
-        .forEach {
-            // add an offset for the key which is already appended to the string
-            // add 1 to the range because the value is rendered with quotes around it
-            // add 1 to the end because it is exclusive
-            addStyle(
-                style = SpanStyle(background = colors.highlightColor),
-                start = keyOffset + it.range.first + 1,
-                end = keyOffset + it.range.last + 1 + 1
-            )
-        }
-}
-
-// internal fun searchText(text: String, searchKey: String?): Triple<String, String?, String?> {
-//    if (!searchKey.isNullOrEmpty()) {
-//        val regex = "(?i)${Regex.escape(searchKey)}".toRegex()
-//        val match = regex.find(text)
-//        if (match != null) {
-//            val before = text.substring(0, match.range.first)
-//            val foundText = match.value // The actual text found in the original string
-//            val after = text.substring(match.range.last + 1)
-//            return Triple(before, foundText, after)
-//        }
-//    }
-//
-//    return Triple(text, null, null)
-// }
