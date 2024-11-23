@@ -129,10 +129,10 @@ public fun JsonTree(
                     }
                 }
 
-                val selectedResultIndex = searchState.state.selectedResultIndex
-                LaunchedEffect(selectedResultIndex) {
-                    if (selectedResultIndex > -1 && !lazyListState.isScrollInProgress) {
-                        lazyListState.animateScrollToItem(selectedResultIndex)
+                val selectedListIndex = searchState.state.selectedSearchOccurrence?.occurrence?.listIndex
+                LaunchedEffect(selectedListIndex) {
+                    if (selectedListIndex != null && selectedListIndex > -1 && !lazyListState.isScrollInProgress) {
+                        lazyListState.animateScrollToItem(selectedListIndex)
                     }
                 }
             }
@@ -236,8 +236,8 @@ private fun JsonTreeList(
             when (item) {
                 is JsonTreeElement.Collapsable.Array -> {
                     val searchOccurrence = searchResult.searchOccurrences[index]
-                    val selectedResultIndex = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
-                        searchResult.selectedSearchOccurrence.rangeIndex
+                    val selectedRange = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedSearchOccurrence.range
                     } else {
                         null
                     }
@@ -253,7 +253,7 @@ private fun JsonTreeList(
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         searchOccurrence = searchOccurrence,
-                        searchOccurrenceSelectedResultIndex = selectedResultIndex,
+                        searchOccurrenceSelectedRange = selectedRange,
                         parentType = item.parentType,
                     )
 
@@ -274,8 +274,8 @@ private fun JsonTreeList(
                 }
                 is JsonTreeElement.Collapsable.Object -> {
                     val searchOccurrence = searchResult.searchOccurrences[index]
-                    val selectedResultIndex = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
-                        searchResult.selectedSearchOccurrence.rangeIndex
+                    val selectedRange = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedSearchOccurrence.range
                     } else {
                         null
                     }
@@ -289,7 +289,7 @@ private fun JsonTreeList(
                         colors = colors,
                         isLastItem = item.isLastItem,
                         searchOccurrence = searchOccurrence,
-                        searchOccurrenceSelectedResultIndex = selectedResultIndex,
+                        searchOccurrenceSelectedRange = selectedRange,
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         parentType = item.parentType
@@ -312,8 +312,8 @@ private fun JsonTreeList(
                 }
                 is JsonTreeElement.Primitive -> {
                     val searchOccurrence = searchResult.searchOccurrences[index]
-                    val selectedResultIndex = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
-                        searchResult.selectedSearchOccurrence.rangeIndex
+                    val selectedRange = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedSearchOccurrence.range
                     } else {
                         null
                     }
@@ -324,7 +324,7 @@ private fun JsonTreeList(
                         colors = colors,
                         isLastItem = item.isLastItem,
                         searchOccurrence = searchOccurrence,
-                        searchOccurrenceSelectedResultIndex = selectedResultIndex,
+                        searchOccurrenceSelectedRange = selectedRange,
                         showIndices = showIndices,
                         parentType = item.parentType
                     )

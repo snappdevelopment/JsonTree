@@ -28,7 +28,7 @@ internal data class SearchOccurrence(
 
 internal data class SelectedSearchOccurrence(
     val occurrence: SearchOccurrence,
-    val rangeIndex: Int, // TODO: Use Range instead of index?
+    val range: SearchOccurrence.Range,
 )
 
 internal class JsonTreeSearch(
@@ -61,7 +61,7 @@ internal class JsonTreeSearch(
             selectedSearchOccurrence = searchOccurrences.values.firstOrNull()?.let {
                 SelectedSearchOccurrence(
                     occurrence = it,
-                    rangeIndex = 0,
+                    range = it.ranges.first(),
                 )
             },
         )

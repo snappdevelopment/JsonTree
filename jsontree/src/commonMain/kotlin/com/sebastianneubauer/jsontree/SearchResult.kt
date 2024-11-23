@@ -58,11 +58,12 @@ public class SearchState(
             selectedOccurrence == null -> {
                 SelectedSearchOccurrence(
                     occurrence = occurrences.values.first(),
-                    rangeIndex = 0
+                    range = occurrences.values.first().ranges.first()
                 )
             }
-            selectedOccurrence.rangeIndex != selectedOccurrence.occurrence.ranges.lastIndex -> {
-                selectedOccurrence.copy(rangeIndex = selectedOccurrence.rangeIndex + 1)
+            selectedOccurrence.range != selectedOccurrence.occurrence.ranges.last() -> {
+                val rangeIndex = selectedOccurrence.occurrence.ranges.indexOf(selectedOccurrence.range)
+                selectedOccurrence.copy(range = selectedOccurrence.occurrence.ranges[rangeIndex + 1])
             }
 
             selectedOccurrence.occurrence.listIndex != occurrences.keys.last() -> {
@@ -70,13 +71,13 @@ public class SearchState(
                 val nextOccurrence = occurrences.values.elementAt(selectedOccurrenceIndex + 1)
                 SelectedSearchOccurrence(
                     occurrence = nextOccurrence,
-                    rangeIndex = 0
+                    range = nextOccurrence.ranges.first()
                 )
             }
             else -> {
                 SelectedSearchOccurrence(
                     occurrence = occurrences.values.first(),
-                    rangeIndex = 0
+                    range = occurrences.values.first().ranges.first()
                 )
             }
         }
@@ -110,24 +111,25 @@ public class SearchState(
             selectedOccurrence == null -> {
                 SelectedSearchOccurrence(
                     occurrence = occurrences.values.last(),
-                    rangeIndex = occurrences.values.last().ranges.lastIndex
+                    range = occurrences.values.last().ranges.last()
                 )
             }
-            selectedOccurrence.rangeIndex != 0 -> {
-                selectedOccurrence.copy(rangeIndex = selectedOccurrence.rangeIndex - 1)
+            selectedOccurrence.range != selectedOccurrence.occurrence.ranges.first() -> {
+                val rangeIndex = selectedOccurrence.occurrence.ranges.indexOf(selectedOccurrence.range)
+                selectedOccurrence.copy(range = selectedOccurrence.occurrence.ranges[rangeIndex - 1])
             }
             selectedOccurrence.occurrence.listIndex != occurrences.keys.first() -> {
                 val selectedOccurrenceIndex = occurrences.keys.indexOf(selectedOccurrence.occurrence.listIndex)
                 val previousOccurrence = occurrences.values.elementAt(selectedOccurrenceIndex - 1)
                 SelectedSearchOccurrence(
                     occurrence = previousOccurrence,
-                    rangeIndex = previousOccurrence.ranges.lastIndex
+                    range = previousOccurrence.ranges.last()
                 )
             }
             else -> {
                 SelectedSearchOccurrence(
                     occurrence = occurrences.values.last(),
-                    rangeIndex = occurrences.values.last().ranges.lastIndex
+                    range = occurrences.values.last().ranges.last()
                 )
             }
         }
