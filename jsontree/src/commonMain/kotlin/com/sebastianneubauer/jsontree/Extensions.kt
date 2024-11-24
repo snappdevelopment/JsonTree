@@ -93,7 +93,6 @@ private fun Map<String, JsonTreeElement>.expandChildren(
     }
 }
 
-
 /**
  * Collapses a JsonTreeElement and all its children.
  */
@@ -152,9 +151,7 @@ internal fun JsonTreeElement.toList(): List<JsonTreeElement> {
 
     fun addToList(element: JsonTreeElement) {
         when (element) {
-            is EndBracket -> list.add(
-                element
-            ) // TODO: check if this is correct //error("EndBracket in initial list creation")
+            is EndBracket -> list.add(element)
             is Primitive -> list.add(element)
             is Array -> {
                 list.add(element)
