@@ -134,7 +134,7 @@ public class ExtensionsTest {
             id = "primitive2",
             level = 3,
             isLastItem = true,
-            key = "0",
+            key = "primitive2",
             value = JsonPrimitive("value2"),
             parentType = JsonTreeElement.ParentType.OBJECT
         )
@@ -189,7 +189,7 @@ public class ExtensionsTest {
             id = "primitive2",
             level = 3,
             isLastItem = true,
-            key = "0",
+            key = "primitive2",
             value = JsonPrimitive("value2"),
             parentType = JsonTreeElement.ParentType.OBJECT
         )
