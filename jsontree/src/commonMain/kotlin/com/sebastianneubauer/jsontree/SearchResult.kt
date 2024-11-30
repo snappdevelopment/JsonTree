@@ -52,15 +52,9 @@ public class SearchState(
         val occurrences = state.searchOccurrences
         val selectedOccurrence = state.selectedSearchOccurrence
 
-        if (occurrences.isEmpty()) return
+        if (occurrences.isEmpty() || selectedOccurrence == null) return
 
         val updatedSelectedOccurrence = when {
-            selectedOccurrence == null -> {
-                SelectedSearchOccurrence(
-                    occurrence = occurrences.values.first(),
-                    range = occurrences.values.first().ranges.first()
-                )
-            }
             selectedOccurrence.range != selectedOccurrence.occurrence.ranges.last() -> {
                 val rangeIndex = selectedOccurrence.occurrence.ranges.indexOf(selectedOccurrence.range)
                 selectedOccurrence.copy(range = selectedOccurrence.occurrence.ranges[rangeIndex + 1])
@@ -100,15 +94,9 @@ public class SearchState(
         val occurrences = state.searchOccurrences
         val selectedOccurrence = state.selectedSearchOccurrence
 
-        if (occurrences.isEmpty()) return
+        if (occurrences.isEmpty() || selectedOccurrence == null) return
 
         val updatedSelectedOccurrence = when {
-            selectedOccurrence == null -> {
-                SelectedSearchOccurrence(
-                    occurrence = occurrences.values.last(),
-                    range = occurrences.values.last().ranges.last()
-                )
-            }
             selectedOccurrence.range != selectedOccurrence.occurrence.ranges.first() -> {
                 val rangeIndex = selectedOccurrence.occurrence.ranges.indexOf(selectedOccurrence.range)
                 selectedOccurrence.copy(range = selectedOccurrence.occurrence.ranges[rangeIndex - 1])
