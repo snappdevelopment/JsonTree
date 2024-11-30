@@ -60,6 +60,7 @@ captures/
 .idea/other.xml
 .idea/studiobot.xml
 .idea/artifacts
+.idea/runConfigurations.xml
 
 .kotlin
 
