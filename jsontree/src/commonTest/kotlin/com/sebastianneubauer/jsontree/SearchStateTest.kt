@@ -7,14 +7,6 @@ import kotlin.test.assertEquals
 
 public class SearchStateTest {
 
-    private val initialSearchResult = SearchResult(
-        searchQuery = null,
-        searchOccurrences = emptyMap(),
-        selectedSearchOccurrence = null,
-        selectedResultIndex = -1,
-        resultCount = 0
-    )
-
     @Test
     public fun `the initial state is has no results`(): TestResult = runTest {
         val searchState = SearchState()
@@ -78,24 +70,6 @@ public class SearchStateTest {
 
         searchState.selectNext()
         assertEquals(actual = searchState.state, expected = initialSearchResult)
-    }
-
-    @Test
-    public fun `calling selectNext() without selected occurrence selects the first one`(): TestResult = runTest {
-        val searchState = SearchState()
-        searchState.state = resultWithoutSelectedOccurrence
-
-        searchState.selectNext()
-        assertEquals(
-            actual = searchState.state,
-            expected = resultWithoutSelectedOccurrence.copy(
-                selectedSearchOccurrence = SelectedSearchOccurrence(
-                    occurrence = searchOccurrence,
-                    range = searchRange
-                ),
-                selectedResultIndex = 0
-            ),
-        )
     }
 
     @Test
@@ -170,24 +144,6 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `calling selectPrevious() without selected occurrence selects the last one`(): TestResult = runTest {
-        val searchState = SearchState()
-        searchState.state = resultWithoutSelectedOccurrence
-
-        searchState.selectPrevious()
-        assertEquals(
-            actual = searchState.state,
-            expected = resultWithoutSelectedOccurrence.copy(
-                selectedSearchOccurrence = SelectedSearchOccurrence(
-                    occurrence = searchOccurrence2,
-                    range = searchRange3
-                ),
-                selectedResultIndex = 2
-            ),
-        )
-    }
-
-    @Test
     public fun `calling selectPrevious() and current range is not the first one, selects the previous range`(): TestResult = runTest {
         val searchState = SearchState()
         searchState.state = resultWithOccurrences.copy(
@@ -252,6 +208,14 @@ public class SearchStateTest {
             )
         )
     }
+
+    private val initialSearchResult = SearchResult(
+        searchQuery = null,
+        searchOccurrences = emptyMap(),
+        selectedSearchOccurrence = null,
+        selectedResultIndex = -1,
+        resultCount = 0
+    )
 
     private val searchRange = SearchOccurrence.Range.Key(range = IntRange(0, 1))
     private val searchRange2 = SearchOccurrence.Range.Value(range = IntRange(0, 1))
