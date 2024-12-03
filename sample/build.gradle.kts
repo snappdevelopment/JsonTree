@@ -93,6 +93,7 @@ kotlin {
         compilations["main"].compilerOptions.options.freeCompilerArgs.add("-Xexport-kdoc")
     }
 
+    jvmToolchain(17)
 }
 
 android {
@@ -106,10 +107,6 @@ android {
     sourceSets["main"].apply {
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
         res.srcDirs("src/androidMain/res")
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
     buildTypes {
         getByName("release")  {

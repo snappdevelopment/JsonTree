@@ -56,7 +56,9 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
                 implementation(libs.kotlinx.coroutines.core)
-                implementation (libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.serialization.json)
+                // needs to be added as a workaround not get atomicfus code stripped
+                implementation(libs.atomicfu)
             }
         }
 

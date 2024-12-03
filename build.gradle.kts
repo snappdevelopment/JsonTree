@@ -4,9 +4,6 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath(libs.atomicfu)
-    }
 }
 
 plugins {
