@@ -85,6 +85,7 @@ public fun JsonTree(
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(jsonParser, initialState) {
+        searchState.reset()
         jsonParser.init(initialState)
     }
 
@@ -108,6 +109,8 @@ public fun JsonTree(
                     lazyListState = lazyListState,
                     onClick = {
                         coroutineScope.launch {
+                            // reset the search state, because the result indices won't match the new list
+                            searchState.reset()
                             jsonParser.expandOrCollapseItem(
                                 item = it,
                                 expandSingleChildren = expandSingleChildren
