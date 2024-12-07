@@ -36,14 +36,23 @@ internal class JsonTreeSearch(
         searchQuery: String,
         jsonTreeList: List<JsonTreeElement>,
     ): SearchResult = withContext(defaultDispatcher) {
+        // create Regex here for better performance
+        val searchRegex = Regex("(?i)${Regex.escape(searchQuery)}")
+
         val searchOccurrences = buildMap {
             jsonTreeList.forEachIndexed { index, jsonTreeElement ->
-                SearchOccurrence(
-                    listIndex = index,
-                    ranges = jsonTreeElement.ranges(searchQuery)
-                )
-                    .takeIf { it.ranges.isNotEmpty() }
-                    ?.let { put(index, it) }
+                jsonTreeElement
+                    .ranges(searchRegex)
+                    .takeIf { it.any() } //isNotEmpty
+                    ?.let { ranges ->
+                        put(
+                            key = index,
+                            value = SearchOccurrence(
+                                listIndex = index,
+                                ranges = ranges.toList()
+                            )
+                        )
+                    }
             }
         }
 
@@ -65,39 +74,42 @@ internal class JsonTreeSearch(
      * Collects ranges of search results, but ignores the key if it is an index of an array,
      * because indices are not always visible.
      */
-    private fun JsonTreeElement.ranges(searchQuery: String): List<SearchOccurrence.Range> {
+    private fun JsonTreeElement.ranges(searchRegex: Regex): Sequence<SearchOccurrence.Range> {
         return when (this) {
             is JsonTreeElement.Primitive -> {
                 if (parentType != JsonTreeElement.ParentType.ARRAY) {
-                    (key?.ranges(searchQuery)?.map { SearchOccurrence.Range.Key(it) }.orEmpty()) +
-                        value.content.ranges(searchQuery).map { SearchOccurrence.Range.Value(it) }
+                    searchRegex.findRanges(key) + searchRegex.findRanges(value.content, isKey = false)
                 } else {
-                    value.content.ranges(searchQuery).map { SearchOccurrence.Range.Value(it) }
+                    searchRegex.findRanges(value.content, isKey = false)
                 }
             }
             is JsonTreeElement.Collapsable.Array -> {
                 if (parentType != JsonTreeElement.ParentType.ARRAY) {
-                    key?.ranges(searchQuery)?.map { SearchOccurrence.Range.Key(it) }.orEmpty()
+                    searchRegex.findRanges(key)
                 } else {
-                    emptyList()
+                    emptySequence()
                 }
             }
             is JsonTreeElement.Collapsable.Object -> {
                 if (parentType != JsonTreeElement.ParentType.ARRAY) {
-                    key?.ranges(searchQuery)?.map { SearchOccurrence.Range.Key(it) }.orEmpty()
+                    searchRegex.findRanges(key)
                 } else {
-                    emptyList()
+                    emptySequence()
                 }
             }
-            is JsonTreeElement.EndBracket -> emptyList()
+            is JsonTreeElement.EndBracket -> emptySequence()
         }
     }
 
-    private fun String.ranges(searchQuery: String): List<IntRange> {
-        return "(?i)${Regex.escape(searchQuery)}"
-            .toRegex()
-            .findAll(this)
-            .map { it.range }
-            .toList()
+    private fun Regex.findRanges(input: String?, isKey: Boolean = true): Sequence<SearchOccurrence.Range> {
+        if(input == null) return emptySequence()
+
+        return findAll(input).map {
+                if(isKey) {
+                    SearchOccurrence.Range.Key(it.range)
+                } else {
+                    SearchOccurrence.Range.Value(it.range)
+                }
+            }
     }
 }
