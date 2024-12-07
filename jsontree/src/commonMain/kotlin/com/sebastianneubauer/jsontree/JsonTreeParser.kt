@@ -11,9 +11,12 @@ import com.sebastianneubauer.jsontree.JsonTreeParserState.Loading
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Error
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Parsed
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Ready
+import com.sebastianneubauer.jsontree.util.Expansion
+import com.sebastianneubauer.jsontree.util.collapse
+import com.sebastianneubauer.jsontree.util.expand
+import com.sebastianneubauer.jsontree.util.toList
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.NonCancellable.children
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -22,7 +25,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import kotlin.math.exp
 
 internal class JsonTreeParser(
     private val json: String,

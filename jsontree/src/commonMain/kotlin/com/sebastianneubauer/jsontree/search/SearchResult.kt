@@ -1,4 +1,4 @@
-package com.sebastianneubauer.jsontree
+package com.sebastianneubauer.jsontree.search
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

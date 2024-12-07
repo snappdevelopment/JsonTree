@@ -1,13 +1,16 @@
-package com.sebastianneubauer.jsontree
+package com.sebastianneubauer.jsontree.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import com.sebastianneubauer.jsontree.CollapsableType
 import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
+import com.sebastianneubauer.jsontree.TreeColors
+import com.sebastianneubauer.jsontree.TreeState
+import com.sebastianneubauer.jsontree.search.SearchOccurrence
 import jsontree.jsontree.generated.resources.Res
 import jsontree.jsontree.generated.resources.jsontree_collapsable_items
 import kotlinx.serialization.json.JsonPrimitive

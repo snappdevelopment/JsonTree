@@ -4,6 +4,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
+import com.sebastianneubauer.jsontree.util.Expansion
+import com.sebastianneubauer.jsontree.util.collapse
+import com.sebastianneubauer.jsontree.util.expand
+import com.sebastianneubauer.jsontree.util.toList
 import kotlinx.serialization.json.JsonPrimitive
 
 public class ExtensionsTest {
