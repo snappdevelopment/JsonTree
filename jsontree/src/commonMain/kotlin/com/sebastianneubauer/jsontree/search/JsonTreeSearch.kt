@@ -11,10 +11,6 @@ internal data class SearchOccurrence(
     // the ranges of the search query matches
     val ranges: List<Range>,
 ) {
-    // the amount of matches
-    val rangeCount: Int
-        get() = ranges.size
-
     sealed interface Range {
         val range: IntRange
 
@@ -46,17 +42,17 @@ internal class JsonTreeSearch(
                     listIndex = index,
                     ranges = jsonTreeElement.ranges(searchQuery)
                 )
-                    .takeIf { it.rangeCount > 0 }
+                    .takeIf { it.ranges.isNotEmpty() }
                     ?.let { put(index, it) }
             }
         }
 
         SearchResult(
-            searchQuery = searchQuery,
-            searchOccurrences = searchOccurrences,
-            resultCount = searchOccurrences.values.sumOf { it.rangeCount },
+            query = searchQuery,
+            occurrences = searchOccurrences,
+            totalResults = searchOccurrences.values.sumOf { it.ranges.size },
             selectedResultIndex = if (searchOccurrences.isNotEmpty()) 0 else -1,
-            selectedSearchOccurrence = searchOccurrences.values.firstOrNull()?.let {
+            selectedOccurrence = searchOccurrences.values.firstOrNull()?.let {
                 SelectedSearchOccurrence(
                     occurrence = it,
                     range = it.ranges.first(),

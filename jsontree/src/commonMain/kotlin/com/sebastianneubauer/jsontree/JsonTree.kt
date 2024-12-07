@@ -137,7 +137,7 @@ public fun JsonTree(
                     }
                 }
 
-                val selectedListIndex = searchState.state.selectedSearchOccurrence?.occurrence?.listIndex
+                val selectedListIndex = searchState.state.selectedOccurrence?.occurrence?.listIndex
                 LaunchedEffect(selectedListIndex) {
                     if (selectedListIndex != null && selectedListIndex > -1 && !lazyListState.isScrollInProgress) {
                         lazyListState.animateScrollToItem(selectedListIndex)
@@ -172,9 +172,9 @@ private fun JsonTreeList(
         itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
             when (item) {
                 is JsonTreeElement.Collapsable.Array -> {
-                    val searchOccurrence = searchResult.searchOccurrences[index]
-                    val selectedRange = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
-                        searchResult.selectedSearchOccurrence.range
+                    val searchOccurrence = searchResult.occurrences[index]
+                    val selectedRange = if(searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedOccurrence.range
                     } else {
                         null
                     }
@@ -209,9 +209,9 @@ private fun JsonTreeList(
                     )
                 }
                 is JsonTreeElement.Collapsable.Object -> {
-                    val searchOccurrence = searchResult.searchOccurrences[index]
-                    val selectedRange = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
-                        searchResult.selectedSearchOccurrence.range
+                    val searchOccurrence = searchResult.occurrences[index]
+                    val selectedRange = if(searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedOccurrence.range
                     } else {
                         null
                     }
@@ -246,9 +246,9 @@ private fun JsonTreeList(
                     )
                 }
                 is JsonTreeElement.Primitive -> {
-                    val searchOccurrence = searchResult.searchOccurrences[index]
-                    val selectedRange = if(searchResult.selectedSearchOccurrence?.occurrence?.listIndex == index) {
-                        searchResult.selectedSearchOccurrence.range
+                    val searchOccurrence = searchResult.occurrences[index]
+                    val selectedRange = if(searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedOccurrence.range
                     } else {
                         null
                     }
