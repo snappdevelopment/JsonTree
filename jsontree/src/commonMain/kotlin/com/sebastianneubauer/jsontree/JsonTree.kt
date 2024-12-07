@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.sebastianneubauer.jsontree.search.JsonTreeSearch
-import com.sebastianneubauer.jsontree.search.SearchResult
+import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
 import com.sebastianneubauer.jsontree.search.SearchState
 import com.sebastianneubauer.jsontree.search.rememberSearchState
 import com.sebastianneubauer.jsontree.util.rememberCollapsableText
@@ -96,7 +96,7 @@ public fun JsonTree(
 
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val searchQuery = searchState.searchQuery
+    val searchQuery = searchState.query
 
     when (val state = jsonParser.state.value) {
         is JsonTreeParserState.Ready -> {

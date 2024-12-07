@@ -1,6 +1,7 @@
 package com.sebastianneubauer.jsontree.search
 
 import com.sebastianneubauer.jsontree.JsonTreeElement
+import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 

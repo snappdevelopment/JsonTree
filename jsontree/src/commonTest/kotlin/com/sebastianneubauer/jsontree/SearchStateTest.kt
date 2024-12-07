@@ -1,43 +1,48 @@
 package com.sebastianneubauer.jsontree
 
 import com.sebastianneubauer.jsontree.search.SearchOccurrence
-import com.sebastianneubauer.jsontree.search.SearchResult
+import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
 import com.sebastianneubauer.jsontree.search.SearchState
 import com.sebastianneubauer.jsontree.search.SelectedSearchOccurrence
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestResult
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 public class SearchStateTest {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val dispatcher = UnconfinedTestDispatcher()
+
     @Test
     public fun `the initial state is has no results`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.state, expected = initialSearchResult)
     }
 
     @Test
     public fun `updating the query in the state should update the query variable`(): TestResult = runTest {
-        val searchState = SearchState()
-        assertEquals(actual = searchState.searchQuery, expected = null)
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
+        assertEquals(actual = searchState.query, expected = null)
 
         searchState.state = searchState.state.copy(searchQuery = "test")
-        assertEquals(actual = searchState.searchQuery, expected = "test")
+        assertEquals(actual = searchState.query, expected = "test")
     }
 
     @Test
     public fun `updating the resultCount in the state should update the resultCount variable`(): TestResult = runTest {
-        val searchState = SearchState()
-        assertEquals(actual = searchState.resultCount, expected = 0)
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
+        assertEquals(actual = searchState.totalResults, expected = 0)
 
         searchState.state = searchState.state.copy(resultCount = 1)
-        assertEquals(actual = searchState.resultCount, expected = 1)
+        assertEquals(actual = searchState.totalResults, expected = 1)
     }
 
     @Test
     public fun `updating the selectedResultIndex in the state should update the selectedResult variable`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.selectedResult, expected = 0)
 
         searchState.state = searchState.state.copy(selectedResultIndex = 0)
@@ -46,7 +51,7 @@ public class SearchStateTest {
 
     @Test
     public fun `calling reset() should reset the state`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         val searchResult = SearchResult(
             searchQuery = "test",
             searchOccurrences = mapOf(0 to SearchOccurrence(0, emptyList())),
@@ -69,7 +74,7 @@ public class SearchStateTest {
 
     @Test
     public fun `calling selectNext() without results does nothing`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.state, expected = initialSearchResult)
 
         searchState.selectNext()
@@ -78,7 +83,7 @@ public class SearchStateTest {
 
     @Test
     public fun `calling selectNext() and current range is not the last one, selects the next range`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences
 
         searchState.selectNext()
@@ -96,7 +101,7 @@ public class SearchStateTest {
 
     @Test
     public fun `calling selectNext() and current range is the last one, selects the next occurrence`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
             selectedSearchOccurrence = SelectedSearchOccurrence(
                 occurrence = searchOccurrence,
@@ -120,7 +125,7 @@ public class SearchStateTest {
 
     @Test
     public fun `calling selectNext() and current occurrence is the last one, selects the first occurrence`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
             selectedSearchOccurrence = SelectedSearchOccurrence(
                 occurrence = searchOccurrence2,
@@ -140,7 +145,7 @@ public class SearchStateTest {
 
     @Test
     public fun `calling selectPrevious() without results does nothing`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.state, expected = initialSearchResult)
 
         searchState.selectPrevious()
@@ -149,7 +154,7 @@ public class SearchStateTest {
 
     @Test
     public fun `calling selectPrevious() and current range is not the first one, selects the previous range`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
             selectedSearchOccurrence = SelectedSearchOccurrence(
                 occurrence = searchOccurrence,
@@ -173,7 +178,7 @@ public class SearchStateTest {
 
     @Test
     public fun `calling selectPrevious() and current range is the first one, selects the previous occurrence`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
             selectedSearchOccurrence = SelectedSearchOccurrence(
                 occurrence = searchOccurrence2,
@@ -197,7 +202,7 @@ public class SearchStateTest {
 
     @Test
     public fun `calling selectPrevious() and current occurrence is the first one, selects the last occurrence`(): TestResult = runTest {
-        val searchState = SearchState()
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences
 
         searchState.selectPrevious()
@@ -242,13 +247,5 @@ public class SearchStateTest {
         ),
         resultCount = 3,
         selectedResultIndex = 0
-    )
-
-    private val resultWithoutSelectedOccurrence = SearchResult(
-        searchQuery = "t",
-        searchOccurrences = mapOf(0 to searchOccurrence, 1 to searchOccurrence2),
-        selectedSearchOccurrence = null,
-        resultCount = 1,
-        selectedResultIndex = -1
     )
 }
