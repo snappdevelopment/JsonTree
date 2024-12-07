@@ -4,7 +4,7 @@ import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
 import com.sebastianneubauer.jsontree.search.JsonTreeSearch
 import com.sebastianneubauer.jsontree.search.SearchOccurrence
-import com.sebastianneubauer.jsontree.search.SearchResult
+import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
 import com.sebastianneubauer.jsontree.search.SelectedSearchOccurrence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestResult

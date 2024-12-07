@@ -5,28 +5,35 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-internal data class SearchResult(
-    val searchQuery: String?,
-    internal val searchOccurrences: Map<Int, SearchOccurrence>,
-    internal val selectedSearchOccurrence: SelectedSearchOccurrence?,
-    internal val resultCount: Int,
-    internal val selectedResultIndex: Int,
-)
-
+/**
+ * Remembers an instance of [SearchState].
+ * Use this to get current search data for a given [SearchState.query].
+ */
 @Composable
 public fun rememberSearchState(
     initialSearchQuery: String? = null,
 ): SearchState {
     return remember {
-        SearchState(initialSearchQuery = initialSearchQuery)
+        SearchState(
+            defaultDispatcher = Dispatchers.Default,
+            mainDispatcher = Dispatchers.Main,
+            initialSearchQuery = initialSearchQuery
+        )
     }
 }
 
-public class SearchState(
-    initialSearchQuery: String? = null,
+/**
+ * Represents the current search data for a given [query].
+ */
+public class SearchState internal constructor(
+    private val defaultDispatcher: CoroutineDispatcher,
+    private val mainDispatcher: CoroutineDispatcher,
+    private val initialSearchQuery: String? = null,
 ) {
-    // Internal state representing the current search result
     internal var state: SearchResult by mutableStateOf(
         SearchResult(
             searchQuery = initialSearchQuery,
@@ -37,22 +44,35 @@ public class SearchState(
         )
     )
 
-    public var searchQuery: String?
+    /**
+     * The search term for which produced the current search results.
+     */
+    public var query: String?
         set(value) { state = state.copy(searchQuery = value) }
         get() = state.searchQuery
 
-    public val resultCount: Int
+    /**
+     * The total amount of results found for the [query].
+     */
+    public val totalResults: Int
         get() = state.resultCount
 
+    /**
+     * The currently selected result. A number between 1 and [totalResults].
+     * Use [selectNext] and [selectPrevious] to select a different result.
+     */
     public val selectedResult: Int
         get() = state.selectedResultIndex + 1
 
-    // Move to the next highlighted line
-    public fun selectNext() {
+    /**
+     * Select the next result.
+     * If the currently selected result is the last one, the first result will be selected.
+     */
+    public suspend fun selectNext(): Unit = withContext(defaultDispatcher) {
         val occurrences = state.searchOccurrences
         val selectedOccurrence = state.selectedSearchOccurrence
 
-        if (occurrences.isEmpty() || selectedOccurrence == null) return
+        if (occurrences.isEmpty() || selectedOccurrence == null) return@withContext
 
         val updatedSelectedOccurrence = when {
             selectedOccurrence.range != selectedOccurrence.occurrence.ranges.last() -> {
@@ -83,18 +103,23 @@ public class SearchState(
             state.selectedResultIndex + 1
         }
 
-        state = state.copy(
-            selectedSearchOccurrence = updatedSelectedOccurrence,
-            selectedResultIndex = selectedResultIndex
-        )
+        withContext(mainDispatcher) {
+            state = state.copy(
+                selectedSearchOccurrence = updatedSelectedOccurrence,
+                selectedResultIndex = selectedResultIndex
+            )
+        }
     }
 
-    // Move to the previous highlighted line
-    public fun selectPrevious() {
+    /**
+     * Select the previous result.
+     * If the currently selected result is the first one, the last result will be selected.
+     */
+    public suspend fun selectPrevious(): Unit = withContext(defaultDispatcher) {
         val occurrences = state.searchOccurrences
         val selectedOccurrence = state.selectedSearchOccurrence
 
-        if (occurrences.isEmpty() || selectedOccurrence == null) return
+        if (occurrences.isEmpty() || selectedOccurrence == null) return@withContext
 
         val updatedSelectedOccurrence = when {
             selectedOccurrence.range != selectedOccurrence.occurrence.ranges.first() -> {
@@ -124,10 +149,12 @@ public class SearchState(
             state.selectedResultIndex - 1
         }
 
-        state = state.copy(
-            selectedSearchOccurrence = updatedSelectedOccurrence,
-            selectedResultIndex = selectedResultIndex
-        )
+        withContext(mainDispatcher) {
+            state = state.copy(
+                selectedSearchOccurrence = updatedSelectedOccurrence,
+                selectedResultIndex = selectedResultIndex
+            )
+        }
     }
 
     internal fun reset() {
@@ -139,4 +166,12 @@ public class SearchState(
             resultCount = 0
         )
     }
+
+    internal data class SearchResult(
+        internal val searchQuery: String?,
+        internal val searchOccurrences: Map<Int, SearchOccurrence>,
+        internal val selectedSearchOccurrence: SelectedSearchOccurrence?,
+        internal val resultCount: Int,
+        internal val selectedResultIndex: Int,
+    )
 }

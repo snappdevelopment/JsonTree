@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +49,7 @@ import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
 import com.sebastianneubauer.jsontree.search.rememberSearchState
 import com.sebastianneubauer.jsontreesample.ui.theme.JsonTreeTheme
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -90,7 +92,8 @@ private fun MainScreen() {
             var showItemCount: Boolean by remember { mutableStateOf(true) }
             var expandSingleChildren: Boolean by remember { mutableStateOf(true) }
             val searchState = rememberSearchState()
-            var searchKeyValue by remember(searchState.searchQuery) { mutableStateOf(searchState.searchQuery.orEmpty()) }
+            var searchKeyValue by remember(searchState.query) { mutableStateOf(searchState.query.orEmpty()) }
+            val coroutineScope = rememberCoroutineScope()
 
             FlowRow(modifier = Modifier.fillMaxWidth()) {
                 Button(
@@ -169,7 +172,7 @@ private fun MainScreen() {
                     value = searchKeyValue,
                     onValueChange = {
                         searchKeyValue = it
-                        searchState.searchQuery = it
+                        searchState.query = it
                     },
                     singleLine = true,
                     label = { Text("Search Key/Value") }
@@ -180,7 +183,9 @@ private fun MainScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = { searchState.selectPrevious() }
+                        onClick = {
+                            coroutineScope.launch { searchState.selectPrevious() }
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowUp,
@@ -189,7 +194,9 @@ private fun MainScreen() {
                     }
 
                     IconButton(
-                        onClick = { searchState.selectNext() }
+                        onClick = {
+                            coroutineScope.launch { searchState.selectNext() }
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
@@ -197,7 +204,7 @@ private fun MainScreen() {
                         )
                     }
 
-                    Text("Found: ${searchState.selectedResult}/${searchState.resultCount}")
+                    Text("Found: ${searchState.selectedResult}/${searchState.totalResults}")
                 }
             }
 
