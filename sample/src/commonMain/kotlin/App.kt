@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -33,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -68,13 +70,11 @@ private fun MainScreen() {
         modifier = Modifier.safeDrawingPadding(),
         topBar = {
             CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White),
                 title = {
                     Text(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         text = "🌳 JsonTree",
                         style = MaterialTheme.typography.headlineMedium,
-                        color = Color.Black
                     )
                 },
             )
@@ -93,12 +93,10 @@ private fun MainScreen() {
             var showIndices: Boolean by remember { mutableStateOf(true) }
             var showItemCount: Boolean by remember { mutableStateOf(true) }
             var expandSingleChildren: Boolean by remember { mutableStateOf(true) }
+            val searchState = rememberSearchState()
+            var searchKeyValue by remember(searchState.searchQuery) { mutableStateOf(searchState.searchQuery.orEmpty()) }
 
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color.White),
-            ) {
+            FlowRow(modifier = Modifier.fillMaxWidth()) {
                 Button(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     onClick = {
@@ -168,51 +166,43 @@ private fun MainScreen() {
                 }
             }
 
-            var searchKeyValue by remember { mutableStateOf("") }
-            val searchState = rememberSearchState()
-
             Spacer(Modifier.height(8.dp))
 
-            Row {
-                Spacer(Modifier.width(8.dp))
-
+            FlowRow(modifier = Modifier.padding(horizontal = 8.dp)) {
                 TextField(
                     value = searchKeyValue,
                     onValueChange = {
                         searchKeyValue = it
                         searchState.searchQuery = it
-                                    },
+                    },
+                    singleLine = true,
                     label = { Text("Search Key/Value") }
                 )
 
-                Spacer(Modifier.height(8.dp))
-
-                if (searchKeyValue.isNotEmpty())
-                    Row(
-                        modifier = Modifier
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                Row(
+                    modifier = Modifier.padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = { searchState.selectPrevious() }
                     ) {
-                        IconButton(onClick = {
-                            searchState.selectPrevious()
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowUp,
-                                contentDescription = "prev"
-                            )
-                        }
-
-                        Text("Found: ${searchState.selectedResult}/${searchState.resultCount}")
-
-                        IconButton(onClick = {
-                            searchState.selectNext()
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = "next"
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = "prev"
+                        )
                     }
+
+                    IconButton(
+                        onClick = { searchState.selectNext() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "next"
+                        )
+                    }
+
+                    Text("Found: ${searchState.selectedResult}/${searchState.resultCount}")
+                }
             }
 
             Spacer(Modifier.height(8.dp))
@@ -251,7 +241,11 @@ private fun MainScreen() {
                                     json = json,
                                     onLoading = {
                                         Box(
-                                            modifier = Modifier.fillMaxSize(),
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(
+                                                    if (colors == defaultLightColors) Color.White else Color.Black
+                                                ),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(

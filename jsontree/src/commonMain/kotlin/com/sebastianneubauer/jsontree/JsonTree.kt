@@ -82,7 +82,6 @@ public fun JsonTree(
     val jsonSearch = remember {
         JsonTreeSearch(defaultDispatcher = Dispatchers.Default)
     }
-    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(jsonParser, initialState) {
         searchState.reset()
@@ -90,7 +89,7 @@ public fun JsonTree(
     }
 
     val lazyListState = rememberLazyListState()
-
+    val coroutineScope = rememberCoroutineScope()
     val searchQuery = searchState.searchQuery
 
     when (val state = jsonParser.state.value) {

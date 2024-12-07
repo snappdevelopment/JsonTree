@@ -65,7 +65,7 @@ internal fun rememberCollapsableText(
                         ?.ranges
                         ?.filterIsInstance<SearchOccurrence.Range.Key>()
                         ?.forEach { keyRange ->
-                            val color = if(keyRange == searchOccurrenceSelectedRange) Color.Blue else colors.highlightColor
+                            val color = if(keyRange == searchOccurrenceSelectedRange) colors.selectedHighlightColor else colors.highlightColor
                             addStyle(
                                 style = SpanStyle(background = color),
                                 start = keyRange.range.first + 1,
@@ -153,7 +153,7 @@ internal fun rememberPrimitiveText(
                         ?.ranges
                         ?.filterIsInstance<SearchOccurrence.Range.Key>()
                         ?.forEach { keyRange ->
-                            val color = if(keyRange == searchOccurrenceSelectedRange) Color.Blue else colors.highlightColor
+                            val color = if(keyRange == searchOccurrenceSelectedRange) colors.selectedHighlightColor else colors.highlightColor
                             addStyle(
                                 style = SpanStyle(background = color),
                                 start = keyRange.range.first + 1,
@@ -177,7 +177,7 @@ internal fun rememberPrimitiveText(
                 ?.ranges
                 ?.filterIsInstance<SearchOccurrence.Range.Value>()
                 ?.forEach { valueRange ->
-                    val color = if(valueRange == searchOccurrenceSelectedRange) Color.Blue else colors.highlightColor
+                    val color = if(valueRange == searchOccurrenceSelectedRange) colors.selectedHighlightColor else colors.highlightColor
                     // add an offset for the key which is already appended to the string
                     // add 1 to the range if the value is a string because it has quotes around it
                     // add 1 to the end because it is exclusive
