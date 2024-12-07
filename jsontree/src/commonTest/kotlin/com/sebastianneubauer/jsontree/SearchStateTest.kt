@@ -1,5 +1,9 @@
 package com.sebastianneubauer.jsontree
 
+import com.sebastianneubauer.jsontree.search.SearchOccurrence
+import com.sebastianneubauer.jsontree.search.SearchResult
+import com.sebastianneubauer.jsontree.search.SearchState
+import com.sebastianneubauer.jsontree.search.SelectedSearchOccurrence
 import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test

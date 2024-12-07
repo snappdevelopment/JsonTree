@@ -1,9 +1,12 @@
-package com.sebastianneubauer.jsontree
+package com.sebastianneubauer.jsontree.util
 
+import com.sebastianneubauer.jsontree.JsonTreeElement
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
 import com.sebastianneubauer.jsontree.JsonTreeElement.EndBracket
 import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive
+import com.sebastianneubauer.jsontree.TreeState
+import com.sebastianneubauer.jsontree.endBracket
 
 internal enum class Expansion {
     /**

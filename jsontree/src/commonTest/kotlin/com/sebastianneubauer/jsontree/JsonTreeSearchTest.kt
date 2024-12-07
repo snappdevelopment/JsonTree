@@ -2,7 +2,10 @@ package com.sebastianneubauer.jsontree
 
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
-import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Error
+import com.sebastianneubauer.jsontree.search.JsonTreeSearch
+import com.sebastianneubauer.jsontree.search.SearchOccurrence
+import com.sebastianneubauer.jsontree.search.SearchResult
+import com.sebastianneubauer.jsontree.search.SelectedSearchOccurrence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -10,7 +13,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 public class JsonTreeSearchTest {
 

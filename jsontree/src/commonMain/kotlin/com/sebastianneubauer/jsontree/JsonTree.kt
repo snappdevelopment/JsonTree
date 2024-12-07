@@ -28,6 +28,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import com.sebastianneubauer.jsontree.search.JsonTreeSearch
+import com.sebastianneubauer.jsontree.search.SearchResult
+import com.sebastianneubauer.jsontree.search.SearchState
+import com.sebastianneubauer.jsontree.search.rememberSearchState
+import com.sebastianneubauer.jsontree.util.rememberCollapsableText
+import com.sebastianneubauer.jsontree.util.rememberPrimitiveText
 import jsontree.jsontree.generated.resources.Res
 import jsontree.jsontree.generated.resources.jsontree_arrow_right
 import kotlinx.coroutines.Dispatchers
