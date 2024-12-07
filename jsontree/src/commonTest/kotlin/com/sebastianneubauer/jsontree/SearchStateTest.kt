@@ -27,7 +27,7 @@ public class SearchStateTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.query, expected = null)
 
-        searchState.state = searchState.state.copy(searchQuery = "test")
+        searchState.state = searchState.state.copy(query = "test")
         assertEquals(actual = searchState.query, expected = "test")
     }
 
@@ -36,7 +36,7 @@ public class SearchStateTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.totalResults, expected = 0)
 
-        searchState.state = searchState.state.copy(resultCount = 1)
+        searchState.state = searchState.state.copy(totalResults = 1)
         assertEquals(actual = searchState.totalResults, expected = 1)
     }
 
@@ -53,12 +53,12 @@ public class SearchStateTest {
     public fun `calling reset() should reset the state`(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         val searchResult = SearchResult(
-            searchQuery = "test",
-            searchOccurrences = mapOf(0 to SearchOccurrence(0, emptyList())),
-            selectedSearchOccurrence = SelectedSearchOccurrence(
+            query = "test",
+            occurrences = mapOf(0 to SearchOccurrence(0, emptyList())),
+            selectedOccurrence = SelectedSearchOccurrence(
                 occurrence = SearchOccurrence(0, emptyList()),
                 range = SearchOccurrence.Range.Key(IntRange(0,1))),
-            resultCount = 1,
+            totalResults = 1,
             selectedResultIndex = 0
         )
         searchState.state = searchResult
@@ -90,7 +90,7 @@ public class SearchStateTest {
         assertEquals(
             actual = searchState.state,
             expected = resultWithOccurrences.copy(
-                selectedSearchOccurrence = SelectedSearchOccurrence(
+                selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = searchOccurrence,
                     range = searchRange2,
                 ),
@@ -103,7 +103,7 @@ public class SearchStateTest {
     public fun `calling selectNext() and current range is the last one, selects the next occurrence`(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
-            selectedSearchOccurrence = SelectedSearchOccurrence(
+            selectedOccurrence = SelectedSearchOccurrence(
                 occurrence = searchOccurrence,
                 range = searchRange2,
             ),
@@ -114,7 +114,7 @@ public class SearchStateTest {
         assertEquals(
             actual = searchState.state,
             expected = resultWithOccurrences.copy(
-                selectedSearchOccurrence = SelectedSearchOccurrence(
+                selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = searchOccurrence2,
                     range = searchRange3,
                 ),
@@ -127,7 +127,7 @@ public class SearchStateTest {
     public fun `calling selectNext() and current occurrence is the last one, selects the first occurrence`(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
-            selectedSearchOccurrence = SelectedSearchOccurrence(
+            selectedOccurrence = SelectedSearchOccurrence(
                 occurrence = searchOccurrence2,
                 range = searchRange3,
             ),
@@ -156,7 +156,7 @@ public class SearchStateTest {
     public fun `calling selectPrevious() and current range is not the first one, selects the previous range`(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
-            selectedSearchOccurrence = SelectedSearchOccurrence(
+            selectedOccurrence = SelectedSearchOccurrence(
                 occurrence = searchOccurrence,
                 range = searchRange2,
             ),
@@ -167,7 +167,7 @@ public class SearchStateTest {
         assertEquals(
             actual = searchState.state,
             expected = resultWithOccurrences.copy(
-                selectedSearchOccurrence = SelectedSearchOccurrence(
+                selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = searchOccurrence,
                     range = searchRange,
                 ),
@@ -180,7 +180,7 @@ public class SearchStateTest {
     public fun `calling selectPrevious() and current range is the first one, selects the previous occurrence`(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
-            selectedSearchOccurrence = SelectedSearchOccurrence(
+            selectedOccurrence = SelectedSearchOccurrence(
                 occurrence = searchOccurrence2,
                 range = searchRange3,
             ),
@@ -191,7 +191,7 @@ public class SearchStateTest {
         assertEquals(
             actual = searchState.state,
             expected = resultWithOccurrences.copy(
-                selectedSearchOccurrence = SelectedSearchOccurrence(
+                selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = searchOccurrence,
                     range = searchRange2,
                 ),
@@ -209,7 +209,7 @@ public class SearchStateTest {
         assertEquals(
             actual = searchState.state,
             expected = resultWithOccurrences.copy(
-                selectedSearchOccurrence = SelectedSearchOccurrence(
+                selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = searchOccurrence2,
                     range = searchRange3,
                 ),
@@ -219,11 +219,11 @@ public class SearchStateTest {
     }
 
     private val initialSearchResult = SearchResult(
-        searchQuery = null,
-        searchOccurrences = emptyMap(),
-        selectedSearchOccurrence = null,
+        query = null,
+        occurrences = emptyMap(),
+        selectedOccurrence = null,
         selectedResultIndex = -1,
-        resultCount = 0
+        totalResults = 0
     )
 
     private val searchRange = SearchOccurrence.Range.Key(range = IntRange(0, 1))
@@ -239,13 +239,13 @@ public class SearchStateTest {
     )
 
     private val resultWithOccurrences = SearchResult(
-        searchQuery = "t",
-        searchOccurrences = mapOf(0 to searchOccurrence, 1 to searchOccurrence2),
-        selectedSearchOccurrence = SelectedSearchOccurrence(
+        query = "t",
+        occurrences = mapOf(0 to searchOccurrence, 1 to searchOccurrence2),
+        selectedOccurrence = SelectedSearchOccurrence(
             occurrence = searchOccurrence,
             range = searchRange,
         ),
-        resultCount = 3,
+        totalResults = 3,
         selectedResultIndex = 0
     )
 }

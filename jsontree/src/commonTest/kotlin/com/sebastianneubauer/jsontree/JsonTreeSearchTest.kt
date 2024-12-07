@@ -33,14 +33,14 @@ public class JsonTreeSearchTest {
         assertEquals(
             actual = result,
             expected = SearchResult(
-                searchQuery = "array1",
-                searchOccurrences = mapOf(1 to occurrence),
-                selectedSearchOccurrence = SelectedSearchOccurrence(
+                query = "array1",
+                occurrences = mapOf(1 to occurrence),
+                selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
                     range = range
                 ),
                 selectedResultIndex = 0,
-                resultCount = 1
+                totalResults = 1
             )
         )
     }
@@ -59,14 +59,14 @@ public class JsonTreeSearchTest {
         assertEquals(
             actual = result,
             expected = SearchResult(
-                searchQuery = "i",
-                searchOccurrences = mapOf(4 to occurrence),
-                selectedSearchOccurrence = SelectedSearchOccurrence(
+                query = "i",
+                occurrences = mapOf(4 to occurrence),
+                selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
                     range = range1
                 ),
                 selectedResultIndex = 0,
-                resultCount = 3
+                totalResults = 3
             )
         )
     }
@@ -83,14 +83,14 @@ public class JsonTreeSearchTest {
         assertEquals(
             actual = result,
             expected = SearchResult(
-                searchQuery = "value1",
-                searchOccurrences = mapOf(2 to occurrence),
-                selectedSearchOccurrence = SelectedSearchOccurrence(
+                query = "value1",
+                occurrences = mapOf(2 to occurrence),
+                selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
                     range = range
                 ),
                 selectedResultIndex = 0,
-                resultCount = 1
+                totalResults = 1
             )
         )
     }
@@ -108,14 +108,14 @@ public class JsonTreeSearchTest {
         assertEquals(
             actual = result,
             expected = SearchResult(
-                searchQuery = "second",
-                searchOccurrences = mapOf(4 to occurrence),
-                selectedSearchOccurrence = SelectedSearchOccurrence(
+                query = "second",
+                occurrences = mapOf(4 to occurrence),
+                selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
                     range = range1
                 ),
                 selectedResultIndex = 0,
-                resultCount = 2
+                totalResults = 2
             )
         )
     }
@@ -137,14 +137,14 @@ public class JsonTreeSearchTest {
         assertEquals(
             actual = result,
             expected = SearchResult(
-                searchQuery = "r",
-                searchOccurrences = mapOf(1 to occurrence, 4 to occurrence2),
-                selectedSearchOccurrence = SelectedSearchOccurrence(
+                query = "r",
+                occurrences = mapOf(1 to occurrence, 4 to occurrence2),
+                selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
                     range = range1
                 ),
                 selectedResultIndex = 0,
-                resultCount = 3
+                totalResults = 3
             )
         )
     }

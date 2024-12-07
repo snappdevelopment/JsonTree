@@ -36,10 +36,10 @@ public class SearchState internal constructor(
 ) {
     internal var state: SearchResult by mutableStateOf(
         SearchResult(
-            searchQuery = initialSearchQuery,
-            searchOccurrences = emptyMap(),
-            selectedSearchOccurrence = null,
-            resultCount = 0,
+            query = initialSearchQuery,
+            occurrences = emptyMap(),
+            selectedOccurrence = null,
+            totalResults = 0,
             selectedResultIndex = -1
         )
     )
@@ -48,14 +48,14 @@ public class SearchState internal constructor(
      * The search term for which produced the current search results.
      */
     public var query: String?
-        set(value) { state = state.copy(searchQuery = value) }
-        get() = state.searchQuery
+        set(value) { state = state.copy(query = value) }
+        get() = state.query
 
     /**
      * The total amount of results found for the [query].
      */
     public val totalResults: Int
-        get() = state.resultCount
+        get() = state.totalResults
 
     /**
      * The currently selected result. A number between 1 and [totalResults].
@@ -69,8 +69,8 @@ public class SearchState internal constructor(
      * If the currently selected result is the last one, the first result will be selected.
      */
     public suspend fun selectNext(): Unit = withContext(defaultDispatcher) {
-        val occurrences = state.searchOccurrences
-        val selectedOccurrence = state.selectedSearchOccurrence
+        val occurrences = state.occurrences
+        val selectedOccurrence = state.selectedOccurrence
 
         if (occurrences.isEmpty() || selectedOccurrence == null) return@withContext
 
@@ -96,7 +96,7 @@ public class SearchState internal constructor(
             }
         }
 
-        val maxSelectedResultIndex = occurrences.values.sumOf { it.rangeCount } - 1
+        val maxSelectedResultIndex = occurrences.values.sumOf { it.ranges.size } - 1
         val selectedResultIndex = if (state.selectedResultIndex == maxSelectedResultIndex) {
             0
         } else {
@@ -105,7 +105,7 @@ public class SearchState internal constructor(
 
         withContext(mainDispatcher) {
             state = state.copy(
-                selectedSearchOccurrence = updatedSelectedOccurrence,
+                selectedOccurrence = updatedSelectedOccurrence,
                 selectedResultIndex = selectedResultIndex
             )
         }
@@ -116,8 +116,8 @@ public class SearchState internal constructor(
      * If the currently selected result is the first one, the last result will be selected.
      */
     public suspend fun selectPrevious(): Unit = withContext(defaultDispatcher) {
-        val occurrences = state.searchOccurrences
-        val selectedOccurrence = state.selectedSearchOccurrence
+        val occurrences = state.occurrences
+        val selectedOccurrence = state.selectedOccurrence
 
         if (occurrences.isEmpty() || selectedOccurrence == null) return@withContext
 
@@ -142,7 +142,7 @@ public class SearchState internal constructor(
             }
         }
 
-        val maxSelectedResultIndex = occurrences.values.sumOf { it.rangeCount } - 1
+        val maxSelectedResultIndex = occurrences.values.sumOf { it.ranges.size } - 1
         val selectedResultIndex = if (state.selectedResultIndex == 0) {
             maxSelectedResultIndex
         } else {
@@ -151,7 +151,7 @@ public class SearchState internal constructor(
 
         withContext(mainDispatcher) {
             state = state.copy(
-                selectedSearchOccurrence = updatedSelectedOccurrence,
+                selectedOccurrence = updatedSelectedOccurrence,
                 selectedResultIndex = selectedResultIndex
             )
         }
@@ -159,19 +159,19 @@ public class SearchState internal constructor(
 
     internal fun reset() {
         state = SearchResult(
-            searchQuery = null,
-            searchOccurrences = emptyMap(),
-            selectedSearchOccurrence = null,
+            query = null,
+            occurrences = emptyMap(),
+            selectedOccurrence = null,
             selectedResultIndex = -1,
-            resultCount = 0
+            totalResults = 0
         )
     }
 
     internal data class SearchResult(
-        internal val searchQuery: String?,
-        internal val searchOccurrences: Map<Int, SearchOccurrence>,
-        internal val selectedSearchOccurrence: SelectedSearchOccurrence?,
-        internal val resultCount: Int,
+        internal val query: String?,
+        internal val occurrences: Map<Int, SearchOccurrence>,
+        internal val selectedOccurrence: SelectedSearchOccurrence?,
+        internal val totalResults: Int,
         internal val selectedResultIndex: Int,
     )
 }
