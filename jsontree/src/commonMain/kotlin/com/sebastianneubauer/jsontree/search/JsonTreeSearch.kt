@@ -104,12 +104,13 @@ internal class JsonTreeSearch(
     private fun Regex.findRanges(input: String?, isKey: Boolean = true): Sequence<SearchOccurrence.Range> {
         if(input == null) return emptySequence()
 
-        return findAll(input).map {
-                if(isKey) {
-                    SearchOccurrence.Range.Key(it.range)
-                } else {
-                    SearchOccurrence.Range.Value(it.range)
-                }
+        return findAll(input).mapNotNull {
+            if(it.value.isEmpty()) return@mapNotNull null
+            if(isKey) {
+                SearchOccurrence.Range.Key(it.range)
+            } else {
+                SearchOccurrence.Range.Value(it.range)
             }
+        }
     }
 }
