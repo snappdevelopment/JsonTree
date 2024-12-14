@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -14,14 +15,11 @@ import kotlinx.coroutines.withContext
  * Use this to get current search data for a given [SearchState.query].
  */
 @Composable
-public fun rememberSearchState(
-    initialSearchQuery: String? = null,
-): SearchState {
+public fun rememberSearchState(): SearchState {
     return remember {
         SearchState(
             defaultDispatcher = Dispatchers.Default,
             mainDispatcher = Dispatchers.Main,
-            initialSearchQuery = initialSearchQuery
         )
     }
 }
@@ -32,11 +30,10 @@ public fun rememberSearchState(
 public class SearchState internal constructor(
     private val defaultDispatcher: CoroutineDispatcher,
     private val mainDispatcher: CoroutineDispatcher,
-    private val initialSearchQuery: String? = null,
 ) {
     internal var state: SearchResult by mutableStateOf(
         SearchResult(
-            query = initialSearchQuery,
+            query = null,
             occurrences = emptyMap(),
             selectedOccurrence = null,
             totalResults = 0,
@@ -168,10 +165,10 @@ public class SearchState internal constructor(
     }
 
     internal data class SearchResult(
-        internal val query: String?,
-        internal val occurrences: Map<Int, SearchOccurrence>,
-        internal val selectedOccurrence: SelectedSearchOccurrence?,
-        internal val totalResults: Int,
-        internal val selectedResultIndex: Int,
+        val query: String?,
+        val occurrences: Map<Int, SearchOccurrence>,
+        val selectedOccurrence: SelectedSearchOccurrence?,
+        val totalResults: Int,
+        val selectedResultIndex: Int,
     )
 }

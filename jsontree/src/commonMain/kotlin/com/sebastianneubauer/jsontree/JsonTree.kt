@@ -96,7 +96,6 @@ public fun JsonTree(
 
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val searchQuery = searchState.query
 
     when (val state = jsonParser.state.value) {
         is JsonTreeParserState.Ready -> {
@@ -124,8 +123,9 @@ public fun JsonTree(
                     }
                 )
 
+                val searchQuery = searchState.state.query
                 LaunchedEffect(searchQuery) {
-                    if (searchQuery.isNullOrEmpty()) {
+                    if (searchQuery == null) {
                         searchState.reset()
                     } else {
                         val expandedList = jsonParser.expandAllItems()

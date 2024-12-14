@@ -33,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -92,7 +93,7 @@ private fun MainScreen() {
             var showItemCount: Boolean by remember { mutableStateOf(true) }
             var expandSingleChildren: Boolean by remember { mutableStateOf(true) }
             val searchState = rememberSearchState()
-            var searchKeyValue by remember(searchState.query) { mutableStateOf(searchState.query.orEmpty()) }
+            val searchQuery by remember(searchState.query) { mutableStateOf(searchState.query.orEmpty()) }
             val coroutineScope = rememberCoroutineScope()
 
             FlowRow(modifier = Modifier.fillMaxWidth()) {
@@ -169,11 +170,8 @@ private fun MainScreen() {
 
             FlowRow(modifier = Modifier.padding(horizontal = 8.dp)) {
                 TextField(
-                    value = searchKeyValue,
-                    onValueChange = {
-                        searchKeyValue = it
-                        searchState.query = it
-                    },
+                    value = searchQuery,
+                    onValueChange = { searchState.query = it },
                     singleLine = true,
                     label = { Text("Search Key/Value") }
                 )
@@ -184,23 +182,23 @@ private fun MainScreen() {
                 ) {
                     IconButton(
                         onClick = {
-                            coroutineScope.launch { searchState.selectPrevious() }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = "prev"
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
                             coroutineScope.launch { searchState.selectNext() }
                         }
                     ) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
                             contentDescription = "next"
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch { searchState.selectPrevious() }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = "prev"
                         )
                     }
 
@@ -265,6 +263,11 @@ private fun MainScreen() {
                                     searchState = searchState,
                                     onError = { errorMessage = it.message },
                                 )
+
+                                // optional: set an initial search query
+                                // LaunchedEffect(Unit) {
+                                //   searchState.query = "o"
+                                // }
                             }
 
                         }
