@@ -58,6 +58,9 @@ internal fun rememberCollapsableText(
                     withStyle(SpanStyle(color = colors.indexColor)) {
                         append(key)
                     }
+                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                        append(": ")
+                    }
                 } else if (parentType != ParentType.ARRAY) {
                     withStyle(SpanStyle(color = colors.keyColor)) {
                         append("\"$key\"")
@@ -75,10 +78,10 @@ internal fun rememberCollapsableText(
                                 end = keyRange.range.last + 1 + 1
                             )
                         }
-                }
 
-                withStyle(SpanStyle(color = colors.symbolColor)) {
-                    append(": ")
+                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                        append(": ")
+                    }
                 }
             }
 
