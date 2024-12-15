@@ -55,7 +55,9 @@ public class SearchState internal constructor(
         get() = state.totalResults
 
     /**
-     * The currently selected result. A number between 1 and [totalResults].
+     * The currently selected result.
+     * A number between 1 and [totalResults] if there are any results for the current query.
+     * 0 in case there are no results.
      * Use [selectNext] and [selectPrevious] to select a different result.
      */
     public val selectedResult: Int
