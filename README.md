@@ -1,7 +1,7 @@
 # 🌳 JsonTree
 
-![](https://img.shields.io/maven-central/v/com.sebastianneubauer.jsontree/jsontree) ![](https://img.shields.io/badge/Kotlin-2.0.20-orange) ![](https://img.shields.io/badge/Android_Weekly-Issue_584-yellow)
-![](https://img.shields.io/badge/Platform-Android|iOS|Jvm-darkgrey)
+![](https://img.shields.io/maven-central/v/com.sebastianneubauer.jsontree/jsontree) ![](https://img.shields.io/nexus/s/com.sebastianneubauer.jsontree/jsontree?server=https%3A%2F%2Fs01.oss.sonatype.org&label=snapshot&color=blue)
+![](https://img.shields.io/badge/Platform-Android|iOS|Desktop|Web-orange) ![](https://img.shields.io/badge/Android_Weekly-Issue_584-yellow)
 <br /><br />
 JsonTree is a Compose Multiplatform library to display JSON data in Compose with syntax highlighting and more.
 <br /><br />
@@ -11,7 +11,6 @@ JsonTree is a Compose Multiplatform library to display JSON data in Compose with
 <img src="screenshots/jsonTreeGif.gif" height="450">
 </p>
 <img src="screenshots/jsonTree-macos.png" height="450">
-
 
 ## About
 
@@ -28,6 +27,14 @@ dependencies {
     // add this to commonMain in a multiplatform project
     implementation("com.sebastianneubauer.jsontree:jsontree:latest-version")
 }
+```
+
+### Snapshots
+
+Add the sonatype snapshot repository to your gradle setup and add the dependency from above. See `snapshot` tag at the top for the latest version.
+
+```kotlin
+maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/") }
 ```
 
 ## How to use
@@ -96,6 +103,10 @@ JsonTree(
 - API validation
 - GitHub Actions
 - Gradle version catalog
+
+## Contributing
+
+This repository is open for contributions. However, PRs might get rejected if they don't fit the current structure or goals of the project. If you want to contribute, it might be a good idea to open a issue to describe your idea before spending a lot of time implementing it.
 
 ## License
 
