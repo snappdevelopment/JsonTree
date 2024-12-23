@@ -12,7 +12,7 @@ api-validator = "0.16.3"
 atomicfu = "0.26.1"
 androidx-activity-compose = "1.9.2"
 kotlinx-serialization-json = "1.7.3"
-kotlinx-coroutines = "1.9.0"
+kotlinx-coroutines = "1.10.1"
 detekt = "1.23.6"
 
 [libraries]
