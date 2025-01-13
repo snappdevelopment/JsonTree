@@ -61,6 +61,7 @@ captures/
 .idea/studiobot.xml
 .idea/artifacts
 .idea/runConfigurations.xml
+.idea/AndroidProjectSystem.xml
 
 .kotlin
 

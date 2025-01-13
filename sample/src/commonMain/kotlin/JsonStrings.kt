@@ -22,7 +22,7 @@ internal val complexJson = """
         			"url": "https://user.com",
         			"description": "bargains independence smell sharing electric extra failures wallpaper freelance higher mathematics disaster directed clicking elder anyone encountered living mattress drill",
         			"verified": true,
-        			"salary": 38775,
+        			"salary": "38775",
                     "newValue": null
         		},
         		{

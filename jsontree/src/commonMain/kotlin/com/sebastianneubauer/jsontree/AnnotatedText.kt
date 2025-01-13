@@ -88,12 +88,12 @@ internal fun rememberPrimitiveText(
 ): AnnotatedString {
     val valueColor = remember(value) {
         when {
-            value.doubleOrNull != null ||
-                value.intOrNull != null ||
-                value.floatOrNull != null ||
-                value.longOrNull != null -> colors.numberValueColor
-            value.booleanOrNull != null -> colors.booleanValueColor
             value.isString -> colors.stringValueColor
+            value.booleanOrNull != null -> colors.booleanValueColor
+            value.doubleOrNull != null ||
+                    value.intOrNull != null ||
+                    value.floatOrNull != null ||
+                    value.longOrNull != null -> colors.numberValueColor
             else -> colors.nullValueColor
         }
     }
