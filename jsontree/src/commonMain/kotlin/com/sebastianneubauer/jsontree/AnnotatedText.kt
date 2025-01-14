@@ -91,9 +91,9 @@ internal fun rememberPrimitiveText(
             value.isString -> colors.stringValueColor
             value.booleanOrNull != null -> colors.booleanValueColor
             value.doubleOrNull != null ||
-                    value.intOrNull != null ||
-                    value.floatOrNull != null ||
-                    value.longOrNull != null -> colors.numberValueColor
+                value.intOrNull != null ||
+                value.floatOrNull != null ||
+                value.longOrNull != null -> colors.numberValueColor
             else -> colors.nullValueColor
         }
     }
