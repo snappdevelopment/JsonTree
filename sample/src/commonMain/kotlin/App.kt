@@ -8,20 +8,31 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,6 +48,7 @@ import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
+import com.sebastianneubauer.jsontree.rememberJsonSearchResultState
 import com.sebastianneubauer.jsontreesample.ui.theme.JsonTreeTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -156,6 +168,55 @@ private fun MainScreen() {
                 }
             }
 
+            var searchKeyValue by remember { mutableStateOf("") }
+            val jsonSearchResult = rememberJsonSearchResultState()
+
+            Spacer(Modifier.height(8.dp))
+
+            Row {
+                Spacer(Modifier.width(8.dp))
+
+                TextField(
+                    value = searchKeyValue,
+                    onValueChange = {
+                        searchKeyValue = it
+                        jsonSearchResult.state = jsonSearchResult.state.copy(searchKeyValue = it)
+                                    },
+                    label = { Text("Search Key/Value") }
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                if (searchKeyValue.isNotEmpty())
+                    Row(
+                        modifier = Modifier
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = {
+                            jsonSearchResult.previous()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowUp,
+                                contentDescription = "prev"
+                            )
+                        }
+
+                        Text("Found: ${jsonSearchResult.currentFound()}/${jsonSearchResult.totalFound()}")
+
+                        IconButton(onClick = {
+                            jsonSearchResult.next()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "next"
+                            )
+                        }
+                    }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
             val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
 
             //Pager to test leaving composition
@@ -178,33 +239,37 @@ private fun MainScreen() {
                                 color = if (colors == defaultLightColors) Color.Black else Color.White,
                             )
                         } else {
-                            JsonTree(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .horizontalScroll(rememberScrollState())
-                                    .background(
-                                        if (colors == defaultLightColors) Color.White else Color.Black
-                                    ),
-                                contentPadding = PaddingValues(16.dp),
-                                json = json,
-                                onLoading = {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "Loading...",
-                                            color = if (colors == defaultLightColors) Color.Black else Color.White
-                                        )
-                                    }
-                                },
-                                initialState = initialState,
-                                colors = colors,
-                                showIndices = showIndices,
-                                showItemCount = showItemCount,
-                                expandSingleChildren = expandSingleChildren,
-                                onError = { errorMessage = it.message },
-                            )
+                            SelectionContainer {
+                                JsonTree(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .horizontalScroll(rememberScrollState())
+                                        .background(
+                                            if (colors == defaultLightColors) Color.White else Color.Black
+                                        ),
+                                    contentPadding = PaddingValues(16.dp),
+                                    json = json,
+                                    onLoading = {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "Loading...",
+                                                color = if (colors == defaultLightColors) Color.Black else Color.White
+                                            )
+                                        }
+                                    },
+                                    initialState = initialState,
+                                    colors = colors,
+                                    showIndices = showIndices,
+                                    showItemCount = showItemCount,
+                                    expandSingleChildren = expandSingleChildren,
+                                    jsonSearchResultState = jsonSearchResult,
+                                    onError = { errorMessage = it.message },
+                                )
+                            }
+
                         }
                     }
 
