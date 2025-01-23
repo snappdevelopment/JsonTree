@@ -235,7 +235,7 @@ internal class JsonTreeParser(
                     children = childElements,
                     isLastItem = isLastItem,
                     parentType = parentType,
-                )
+                ).apply { children.forEach { c -> c.value.parent = this } }
             }
             is JsonObject -> {
                 val childElements = jsonObject.entries.associate {
@@ -260,7 +260,7 @@ internal class JsonTreeParser(
                     children = childElements,
                     isLastItem = isLastItem,
                     parentType = parentType,
-                )
+                ).apply { children.forEach { c -> c.value.parent = this } }
             }
         }
     }

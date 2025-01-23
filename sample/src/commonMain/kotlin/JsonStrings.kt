@@ -2114,7 +2114,18 @@ internal val simpleJson = """
             "array": [
                 "value",
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-            ]
+            ],
+            "object": {
+                "array": [
+                    "value",
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+                    {
+                    	"object":  {
+                    		"key": "value"
+                        }
+                    }
+                ]
+            }
     	},
         "string": "Lorem ipsum"
     }

@@ -19,26 +19,50 @@ import org.jetbrains.compose.resources.pluralStringResource
 
 @Composable
 internal fun rememberCollapsableText(
+    item: JsonTreeElement,
     type: CollapsableType,
     key: String?,
     childItemCount: Int,
     state: TreeState,
     colors: TreeColors,
     isLastItem: Boolean,
+    searchKeyValue: String?,
+    jsonQuery: String?,
     showIndices: Boolean,
     showItemCount: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
     val itemCount = pluralStringResource(Res.plurals.jsontree_collapsable_items, childItemCount, childItemCount)
 
-    return remember(key, state, colors, isLastItem, itemCount, type, showIndices, showItemCount) {
+    return remember(
+        key, state, colors, isLastItem, itemCount, type,
+        showIndices, showItemCount, searchKeyValue, jsonQuery
+    ) {
         val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
         val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
+        val childrenHasMatch = item.childrenHasMatch(searchKeyValue)
 
         buildAnnotatedString {
             key?.let {
+                val (jsonQueryKey, jsonQueryIndex) = splitArrayNotation(jsonQuery)
+
+                val (before, highlightedText, after) = searchText(
+                    it,
+                    jsonQueryKey ?: searchKeyValue,
+                    !jsonQueryKey.isNullOrEmpty()
+                )
+
                 if (parentType == ParentType.ARRAY && showIndices) {
-                    withStyle(SpanStyle(color = colors.indexColor)) {
+                    withStyle(
+                        if (it == jsonQueryIndex) {
+                            SpanStyle(
+                                color = colors.highlightTextColor,
+                                background = colors.highlightColor
+                            )
+                        } else {
+                            SpanStyle(color = colors.indexColor)
+                        }
+                    ) {
                         append(it)
                     }
                     withStyle(SpanStyle(color = colors.symbolColor)) {
@@ -46,7 +70,20 @@ internal fun rememberCollapsableText(
                     }
                 } else if (parentType != ParentType.ARRAY) {
                     withStyle(SpanStyle(color = colors.keyColor)) {
-                        append("\"$it\"")
+                        if (highlightedText != null) {
+                            append("\"$before")
+                            withStyle(
+                                SpanStyle(
+                                    color = colors.highlightTextColor,
+                                    background = colors.highlightColor
+                                )
+                            ) {
+                                append(highlightedText)
+                            }
+                            append("$after\"")
+                        } else {
+                            append("\"$it\"")
+                        }
                     }
                     withStyle(SpanStyle(color = colors.symbolColor)) {
                         append(": ")
@@ -60,11 +97,29 @@ internal fun rememberCollapsableText(
 
             if (state == TreeState.COLLAPSED) {
                 if (showItemCount) {
-                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                    withStyle(
+                        if (childrenHasMatch) {
+                            SpanStyle(
+                                color = colors.highlightTextColor,
+                                background = colors.highlightColor
+                            )
+                        } else {
+                            SpanStyle(color = colors.symbolColor)
+                        }
+                    ) {
                         append(itemCount)
                     }
                 } else {
-                    withStyle(SpanStyle(color = colors.symbolColor)) {
+                    withStyle(
+                        if (childrenHasMatch) {
+                            SpanStyle(
+                                color = colors.highlightTextColor,
+                                background = colors.highlightColor
+                            )
+                        } else {
+                            SpanStyle(color = colors.symbolColor)
+                        }
+                    ) {
                         append(" ... ")
                     }
                 }
@@ -83,6 +138,8 @@ internal fun rememberPrimitiveText(
     value: JsonPrimitive,
     colors: TreeColors,
     isLastItem: Boolean,
+    searchKeyValue: String?,
+    jsonQuery: String?,
     showIndices: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
@@ -98,11 +155,28 @@ internal fun rememberPrimitiveText(
         }
     }
 
-    return remember(key, value, colors, isLastItem, showIndices) {
+    return remember(key, value, colors, isLastItem, showIndices, searchKeyValue, jsonQuery) {
         buildAnnotatedString {
             key?.let {
+                val (jsonQueryKey, jsonQueryIndex) = splitArrayNotation(jsonQuery)
+
+                val (before, highlightedText, after) = searchText(
+                    it,
+                    jsonQueryKey ?: searchKeyValue,
+                    jsonQueryKey != null
+                )
+
                 if (parentType == ParentType.ARRAY && showIndices) {
-                    withStyle(SpanStyle(color = colors.indexColor)) {
+                    withStyle(
+                        if (it == jsonQueryIndex) {
+                            SpanStyle(
+                                color = colors.highlightTextColor,
+                                background = colors.highlightColor
+                            )
+                        } else {
+                            SpanStyle(color = colors.indexColor)
+                        }
+                    ) {
                         append(it)
                     }
                     withStyle(SpanStyle(color = colors.symbolColor)) {
@@ -110,7 +184,20 @@ internal fun rememberPrimitiveText(
                     }
                 } else if (parentType != ParentType.ARRAY) {
                     withStyle(SpanStyle(color = colors.keyColor)) {
-                        append("\"$it\"")
+                        if (highlightedText != null) {
+                            append("\"$before")
+                            withStyle(
+                                SpanStyle(
+                                    color = colors.highlightTextColor,
+                                    background = colors.highlightColor
+                                )
+                            ) {
+                                append(highlightedText)
+                            }
+                            append("$after\"")
+                        } else {
+                            append("\"$it\"")
+                        }
                     }
                     withStyle(SpanStyle(color = colors.symbolColor)) {
                         append(": ")
@@ -119,7 +206,21 @@ internal fun rememberPrimitiveText(
             }
 
             withStyle(SpanStyle(color = valueColor)) {
-                append(value.toString())
+                val (before, highlightedText, after) = searchText(value.toString(), searchKeyValue)
+                if (highlightedText != null) {
+                    append(before)
+                    withStyle(
+                        SpanStyle(
+                            color = colors.highlightTextColor,
+                            background = colors.highlightColor
+                        )
+                    ) {
+                        append(highlightedText)
+                    }
+                    append(after)
+                } else {
+                    append(before)
+                }
             }
 
             if (!isLastItem) {
