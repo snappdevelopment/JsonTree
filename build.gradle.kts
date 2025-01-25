@@ -29,6 +29,7 @@ val kotlinFiles = "**/*.kt"
 val sampleModuleFiles = "**/sample/**"
 val resourceFiles = "**/resources/**"
 val buildFiles = "**/build/**"
+val testFiles = "**/commonTest/**"
 
 tasks.register<Detekt>("detektAll") {
     val autoFix = project.hasProperty("detektAutoFix")
@@ -57,13 +58,13 @@ tasks.register<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>("detektGene
     baseline.set(baselineFile)
     config.setFrom(configFiles)
     include(kotlinFiles)
-    exclude(sampleModuleFiles, resourceFiles, buildFiles)
+    exclude(sampleModuleFiles, resourceFiles, buildFiles, testFiles)
 }
 
 
 tasks.withType<Detekt>().configureEach {
     include(kotlinFiles)
-    exclude(sampleModuleFiles, resourceFiles, buildFiles)
+    exclude(sampleModuleFiles, resourceFiles, buildFiles, testFiles)
 }
 
 dependencies {

@@ -77,7 +77,11 @@ jobs:
           java-version: '17'
 
       - name: Run tests
-        run: ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.JsonTreeParserTest --stacktrace
+        run: |
+          ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.JsonTreeParserTest --stacktrace
+          ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.JsonTreeSearchTest --stacktrace
+          ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.SearchStateTest --stacktrace
+          ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.ExtensionsTest --stacktrace
 
   detekt:
     runs-on: macos-latest

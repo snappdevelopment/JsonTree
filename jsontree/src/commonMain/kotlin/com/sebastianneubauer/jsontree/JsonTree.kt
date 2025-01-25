@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
@@ -26,6 +28,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import com.sebastianneubauer.jsontree.search.JsonTreeSearch
+import com.sebastianneubauer.jsontree.search.SearchState
+import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
+import com.sebastianneubauer.jsontree.search.rememberSearchState
+import com.sebastianneubauer.jsontree.util.rememberCollapsableText
+import com.sebastianneubauer.jsontree.util.rememberPrimitiveText
 import jsontree.jsontree.generated.resources.Res
 import jsontree.jsontree.generated.resources.jsontree_arrow_right
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +75,7 @@ public fun JsonTree(
     showIndices: Boolean = false,
     showItemCount: Boolean = true,
     expandSingleChildren: Boolean = false,
+    searchState: SearchState = rememberSearchState(),
     onError: (Throwable) -> Unit = {}
 ) {
     val jsonParser = remember(json) {
@@ -76,11 +85,17 @@ public fun JsonTree(
             mainDispatcher = Dispatchers.Main
         )
     }
-    val coroutineScope = rememberCoroutineScope()
+    val jsonSearch = remember {
+        JsonTreeSearch(defaultDispatcher = Dispatchers.Default)
+    }
 
     LaunchedEffect(jsonParser, initialState) {
+        searchState.reset()
         jsonParser.init(initialState)
     }
+
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     when (val state = jsonParser.state.value) {
         is JsonTreeParserState.Ready -> {
@@ -94,8 +109,12 @@ public fun JsonTree(
                     textStyle = textStyle,
                     showIndices = showIndices,
                     showItemCount = showItemCount,
+                    searchResult = searchState.state,
+                    lazyListState = lazyListState,
                     onClick = {
                         coroutineScope.launch {
+                            // reset the search state, because the result indices won't match the new list
+                            searchState.reset()
                             jsonParser.expandOrCollapseItem(
                                 item = it,
                                 expandSingleChildren = expandSingleChildren
@@ -103,6 +122,27 @@ public fun JsonTree(
                         }
                     }
                 )
+
+                val searchQuery = searchState.state.query
+                LaunchedEffect(searchQuery) {
+                    if (searchQuery == null) {
+                        searchState.reset()
+                    } else {
+                        val expandedList = jsonParser.expandAllItems()
+                        val searchResult = jsonSearch.search(
+                            searchQuery = searchQuery,
+                            jsonTreeList = expandedList,
+                        )
+                        searchState.state = searchResult
+                    }
+                }
+
+                val selectedListIndex = searchState.state.selectedOccurrence?.occurrence?.listIndex
+                LaunchedEffect(selectedListIndex) {
+                    if (selectedListIndex != null && selectedListIndex > -1 && !lazyListState.isScrollInProgress) {
+                        lazyListState.animateScrollToItem(selectedListIndex)
+                    }
+                }
             }
         }
         is JsonTreeParserState.Loading -> onLoading()
@@ -121,14 +161,24 @@ private fun JsonTreeList(
     textStyle: TextStyle,
     showIndices: Boolean,
     showItemCount: Boolean,
+    searchResult: SearchResult,
+    lazyListState: LazyListState,
     onClick: (JsonTreeElement) -> Unit,
 ) {
     LazyColumn(
+        state = lazyListState,
         contentPadding = contentPadding
     ) {
         itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
             when (item) {
                 is JsonTreeElement.Collapsable.Array -> {
+                    val searchOccurrence = searchResult.occurrences[index]
+                    val selectedRange = if (searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedOccurrence.range
+                    } else {
+                        null
+                    }
+
                     val coloredText = rememberCollapsableText(
                         type = CollapsableType.ARRAY,
                         key = item.key,
@@ -138,7 +188,9 @@ private fun JsonTreeList(
                         isLastItem = item.isLastItem,
                         showIndices = showIndices,
                         showItemCount = showItemCount,
-                        parentType = item.parentType
+                        searchOccurrence = searchOccurrence,
+                        searchOccurrenceSelectedRange = selectedRange,
+                        parentType = item.parentType,
                     )
 
                     Collapsable(
@@ -157,6 +209,13 @@ private fun JsonTreeList(
                     )
                 }
                 is JsonTreeElement.Collapsable.Object -> {
+                    val searchOccurrence = searchResult.occurrences[index]
+                    val selectedRange = if (searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedOccurrence.range
+                    } else {
+                        null
+                    }
+
                     val coloredText = rememberCollapsableText(
                         type = CollapsableType.OBJECT,
                         key = item.key,
@@ -164,6 +223,8 @@ private fun JsonTreeList(
                         state = item.state,
                         colors = colors,
                         isLastItem = item.isLastItem,
+                        searchOccurrence = searchOccurrence,
+                        searchOccurrenceSelectedRange = selectedRange,
                         showIndices = showIndices,
                         showItemCount = showItemCount,
                         parentType = item.parentType
@@ -185,11 +246,20 @@ private fun JsonTreeList(
                     )
                 }
                 is JsonTreeElement.Primitive -> {
+                    val searchOccurrence = searchResult.occurrences[index]
+                    val selectedRange = if (searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
+                        searchResult.selectedOccurrence.range
+                    } else {
+                        null
+                    }
+
                     val coloredText = rememberPrimitiveText(
                         key = item.key,
                         value = item.value,
                         colors = colors,
                         isLastItem = item.isLastItem,
+                        searchOccurrence = searchOccurrence,
+                        searchOccurrenceSelectedRange = selectedRange,
                         showIndices = showIndices,
                         parentType = item.parentType
                     )

@@ -8,25 +8,36 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +48,9 @@ import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
+import com.sebastianneubauer.jsontree.search.rememberSearchState
 import com.sebastianneubauer.jsontreesample.ui.theme.JsonTreeTheme
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -56,13 +69,11 @@ private fun MainScreen() {
         modifier = Modifier.safeDrawingPadding(),
         topBar = {
             CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White),
                 title = {
                     Text(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         text = "🌳 JsonTree",
                         style = MaterialTheme.typography.headlineMedium,
-                        color = Color.Black
                     )
                 },
             )
@@ -81,12 +92,11 @@ private fun MainScreen() {
             var showIndices: Boolean by remember { mutableStateOf(true) }
             var showItemCount: Boolean by remember { mutableStateOf(true) }
             var expandSingleChildren: Boolean by remember { mutableStateOf(true) }
+            val searchState = rememberSearchState()
+            val searchQuery by remember(searchState.query) { mutableStateOf(searchState.query.orEmpty()) }
+            val coroutineScope = rememberCoroutineScope()
 
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = Color.White),
-            ) {
+            FlowRow(modifier = Modifier.fillMaxWidth()) {
                 Button(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     onClick = {
@@ -156,6 +166,48 @@ private fun MainScreen() {
                 }
             }
 
+            Spacer(Modifier.height(8.dp))
+
+            FlowRow(modifier = Modifier.padding(horizontal = 8.dp)) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { searchState.query = it },
+                    singleLine = true,
+                    label = { Text("Search Key/Value") }
+                )
+
+                Row(
+                    modifier = Modifier.padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch { searchState.selectNext() }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "next"
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch { searchState.selectPrevious() }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = "prev"
+                        )
+                    }
+
+                    Text("Found: ${searchState.selectedResult}/${searchState.totalResults}")
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
             val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
 
             //Pager to test leaving composition
@@ -178,33 +230,46 @@ private fun MainScreen() {
                                 color = if (colors == defaultLightColors) Color.Black else Color.White,
                             )
                         } else {
-                            JsonTree(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .horizontalScroll(rememberScrollState())
-                                    .background(
-                                        if (colors == defaultLightColors) Color.White else Color.Black
-                                    ),
-                                contentPadding = PaddingValues(16.dp),
-                                json = json,
-                                onLoading = {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "Loading...",
-                                            color = if (colors == defaultLightColors) Color.Black else Color.White
-                                        )
-                                    }
-                                },
-                                initialState = initialState,
-                                colors = colors,
-                                showIndices = showIndices,
-                                showItemCount = showItemCount,
-                                expandSingleChildren = expandSingleChildren,
-                                onError = { errorMessage = it.message },
-                            )
+                            SelectionContainer {
+                                JsonTree(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .horizontalScroll(rememberScrollState())
+                                        .background(
+                                            if (colors == defaultLightColors) Color.White else Color.Black
+                                        ),
+                                    contentPadding = PaddingValues(16.dp),
+                                    json = json,
+                                    onLoading = {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(
+                                                    if (colors == defaultLightColors) Color.White else Color.Black
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "Loading...",
+                                                color = if (colors == defaultLightColors) Color.Black else Color.White
+                                            )
+                                        }
+                                    },
+                                    initialState = initialState,
+                                    colors = colors,
+                                    showIndices = showIndices,
+                                    showItemCount = showItemCount,
+                                    expandSingleChildren = expandSingleChildren,
+                                    searchState = searchState,
+                                    onError = { errorMessage = it.message },
+                                )
+
+                                // optional: set an initial search query
+                                // LaunchedEffect(Unit) {
+                                //   searchState.query = "o"
+                                // }
+                            }
+
                         }
                     }
 

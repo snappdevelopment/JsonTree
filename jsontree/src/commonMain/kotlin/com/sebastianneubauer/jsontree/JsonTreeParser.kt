@@ -11,6 +11,10 @@ import com.sebastianneubauer.jsontree.JsonTreeParserState.Loading
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Error
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Parsed
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Ready
+import com.sebastianneubauer.jsontree.util.Expansion
+import com.sebastianneubauer.jsontree.util.collapse
+import com.sebastianneubauer.jsontree.util.expand
+import com.sebastianneubauer.jsontree.util.toList
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -41,7 +45,7 @@ internal class JsonTreeParser(
             is Parsed -> {
                 Ready(
                     list = parsingState.jsonElement
-                        .toJsonTree(
+                        .toJsonTreeElement(
                             idGenerator = AtomicLongWrapper(),
                             state = initialState,
                             level = 0,
@@ -57,6 +61,19 @@ internal class JsonTreeParser(
         withContext(mainDispatcher) {
             parserState.value = state
         }
+    }
+
+    suspend fun expandAllItems(): List<JsonTreeElement> = withContext(defaultDispatcher) {
+        val state = parserState.value
+        check(state is Ready)
+
+        // take root element and expand everything
+        val expandedList = state.list.first().expand(expansion = Expansion.All).toList()
+
+        withContext(mainDispatcher) {
+            parserState.value = state.copy(expandedList)
+        }
+        expandedList
     }
 
     suspend fun expandOrCollapseItem(
@@ -90,45 +107,15 @@ internal class JsonTreeParser(
         }
     }
 
-    private fun List<JsonTreeElement>.collapseItem(item: JsonTreeElement.Collapsable): List<JsonTreeElement> {
+    private fun List<JsonTreeElement>.collapseItem(
+        item: JsonTreeElement.Collapsable
+    ): List<JsonTreeElement> {
         return toMutableList().apply {
-            val newItem = when (item) {
-                is Object -> item.copy(state = TreeState.COLLAPSED, children = item.children.collapse())
-                is Array -> item.copy(state = TreeState.COLLAPSED, children = item.children.collapse())
-            }
+            val newItem = item.collapse()
             val itemIndex = indexOfFirst { it.id == item.id }
             val endBracketIndex = indexOfFirst { it.id == item.endBracket.id }
             subList(itemIndex, endBracketIndex + 1).clear()
             add(itemIndex, newItem)
-        }
-    }
-
-    private fun Map<String, JsonTreeElement>.collapse(): Map<String, JsonTreeElement> {
-        return mapValues {
-            when (val child = it.value) {
-                is Primitive -> child
-                is EndBracket -> child
-                is Array -> {
-                    if (child.state != TreeState.COLLAPSED) {
-                        child.copy(
-                            state = TreeState.COLLAPSED,
-                            children = child.children.collapse()
-                        )
-                    } else {
-                        child
-                    }
-                }
-                is Object -> {
-                    if (child.state != TreeState.COLLAPSED) {
-                        child.copy(
-                            state = TreeState.COLLAPSED,
-                            children = child.children.collapse()
-                        )
-                    } else {
-                        child
-                    }
-                }
-            }
         }
     }
 
@@ -137,62 +124,17 @@ internal class JsonTreeParser(
         expandSingleChildren: Boolean
     ): List<JsonTreeElement> {
         return toMutableList().apply {
-            val newItem = when (item) {
-                is Object -> item.copy(
-                    state = TreeState.EXPANDED,
-                    children = if (expandSingleChildren) item.children.expand() else item.children
-                )
-                is Array -> item.copy(
-                    state = TreeState.EXPANDED,
-                    children = if (expandSingleChildren) item.children.expand() else item.children
-                )
-            }
-            val children = if (expandSingleChildren) {
-                newItem.children.values.flatMap { it.toList() }
-            } else {
-                newItem.children.values
-            }
+            val newItems = item
+                .expand(expansion = if (expandSingleChildren) Expansion.SingleOnly else Expansion.None)
+                .toList()
+
             val itemIndex = indexOfFirst { it.id == item.id }
             removeAt(itemIndex)
-            addAll(itemIndex, listOf(newItem) + children + item.endBracket)
+            addAll(itemIndex, newItems)
         }
     }
 
-    // expand every Collapsables child if it has no siblings
-    private fun Map<String, JsonTreeElement>.expand(): Map<String, JsonTreeElement> {
-        return if (this.size == 1) {
-            mapValues {
-                when (val child = it.value) {
-                    is Primitive -> child
-                    is EndBracket -> child
-                    is Array -> {
-                        if (child.state == TreeState.COLLAPSED) {
-                            child.copy(
-                                state = TreeState.EXPANDED,
-                                children = child.children.expand()
-                            )
-                        } else {
-                            child
-                        }
-                    }
-                    is Object -> {
-                        if (child.state == TreeState.COLLAPSED) {
-                            child.copy(
-                                state = TreeState.EXPANDED,
-                                children = child.children.expand()
-                            )
-                        } else {
-                            child
-                        }
-                    }
-                }
-            }
-        } else {
-            this
-        }
-    }
-
-    private fun JsonElement.toJsonTree(
+    private fun JsonElement.toJsonTreeElement(
         idGenerator: AtomicLongWrapper,
         state: TreeState,
         level: Int,
@@ -215,7 +157,7 @@ internal class JsonTreeParser(
                 val childElements = jsonArray.mapIndexed { index, item ->
                     Pair(
                         index.toString(),
-                        item.toJsonTree(
+                        item.toJsonTreeElement(
                             idGenerator = idGenerator,
                             state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
                             level = level + 1,
@@ -241,7 +183,7 @@ internal class JsonTreeParser(
                 val childElements = jsonObject.entries.associate {
                     Pair(
                         it.key,
-                        it.value.toJsonTree(
+                        it.value.toJsonTreeElement(
                             idGenerator = idGenerator,
                             state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
                             level = level + 1,
@@ -263,38 +205,6 @@ internal class JsonTreeParser(
                 )
             }
         }
-    }
-
-    private fun JsonTreeElement.toList(): List<JsonTreeElement> {
-        val list = mutableListOf<JsonTreeElement>()
-
-        fun addToList(jsonTree: JsonTreeElement) {
-            when (jsonTree) {
-                is EndBracket -> error("EndBracket in initial list creation")
-                is Primitive -> list.add(jsonTree)
-                is Array -> {
-                    list.add(jsonTree)
-                    if (jsonTree.state != TreeState.COLLAPSED) {
-                        jsonTree.children.forEach {
-                            addToList(it.value)
-                        }
-                        list.add(jsonTree.endBracket)
-                    }
-                }
-                is Object -> {
-                    list.add(jsonTree)
-                    if (jsonTree.state != TreeState.COLLAPSED) {
-                        jsonTree.children.forEach {
-                            addToList(it.value)
-                        }
-                        list.add(jsonTree.endBracket)
-                    }
-                }
-            }
-        }
-
-        addToList(this)
-        return list
     }
 }
 

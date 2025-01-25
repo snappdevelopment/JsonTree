@@ -1,4 +1,4 @@
-package com.sebastianneubauer.jsontree
+package com.sebastianneubauer.jsontree.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -6,7 +6,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import com.sebastianneubauer.jsontree.CollapsableType
 import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
+import com.sebastianneubauer.jsontree.TreeColors
+import com.sebastianneubauer.jsontree.TreeState
+import com.sebastianneubauer.jsontree.search.SearchOccurrence
 import jsontree.jsontree.generated.resources.Res
 import jsontree.jsontree.generated.resources.jsontree_collapsable_items
 import kotlinx.serialization.json.JsonPrimitive
@@ -25,29 +29,60 @@ internal fun rememberCollapsableText(
     state: TreeState,
     colors: TreeColors,
     isLastItem: Boolean,
+    searchOccurrence: SearchOccurrence?,
+    searchOccurrenceSelectedRange: SearchOccurrence.Range?,
     showIndices: Boolean,
     showItemCount: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
     val itemCount = pluralStringResource(Res.plurals.jsontree_collapsable_items, childItemCount, childItemCount)
 
-    return remember(key, state, colors, isLastItem, itemCount, type, showIndices, showItemCount) {
+    return remember(
+        key,
+        state,
+        colors,
+        isLastItem,
+        itemCount,
+        type,
+        showIndices,
+        showItemCount,
+        searchOccurrence,
+        searchOccurrenceSelectedRange
+    ) {
         val openBracket = if (type == CollapsableType.OBJECT) "{" else "["
         val closingBracket = if (type == CollapsableType.OBJECT) "}" else "]"
 
         buildAnnotatedString {
-            key?.let {
+            key?.let { key ->
                 if (parentType == ParentType.ARRAY && showIndices) {
                     withStyle(SpanStyle(color = colors.indexColor)) {
-                        append(it)
+                        append(key)
                     }
                     withStyle(SpanStyle(color = colors.symbolColor)) {
                         append(": ")
                     }
                 } else if (parentType != ParentType.ARRAY) {
                     withStyle(SpanStyle(color = colors.keyColor)) {
-                        append("\"$it\"")
+                        append("\"$key\"")
                     }
+                    // add 1 to the range because the value is rendered with quotes around it
+                    // add 1 to the end because it is exclusive
+                    searchOccurrence
+                        ?.ranges
+                        ?.filterIsInstance<SearchOccurrence.Range.Key>()
+                        ?.forEach { keyRange ->
+                            val color = if (keyRange == searchOccurrenceSelectedRange) {
+                                colors.selectedHighlightColor
+                            } else {
+                                colors.highlightColor
+                            }
+                            addStyle(
+                                style = SpanStyle(background = color),
+                                start = keyRange.range.first + 1,
+                                end = keyRange.range.last + 1 + 1
+                            )
+                        }
+
                     withStyle(SpanStyle(color = colors.symbolColor)) {
                         append(": ")
                     }
@@ -83,6 +118,8 @@ internal fun rememberPrimitiveText(
     value: JsonPrimitive,
     colors: TreeColors,
     isLastItem: Boolean,
+    searchOccurrence: SearchOccurrence?,
+    searchOccurrenceSelectedRange: SearchOccurrence.Range?,
     showIndices: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
@@ -98,7 +135,15 @@ internal fun rememberPrimitiveText(
         }
     }
 
-    return remember(key, value, colors, isLastItem, showIndices) {
+    return remember(
+        key,
+        value,
+        colors,
+        isLastItem,
+        showIndices,
+        searchOccurrence,
+        searchOccurrenceSelectedRange
+    ) {
         buildAnnotatedString {
             key?.let {
                 if (parentType == ParentType.ARRAY && showIndices) {
@@ -112,15 +157,55 @@ internal fun rememberPrimitiveText(
                     withStyle(SpanStyle(color = colors.keyColor)) {
                         append("\"$it\"")
                     }
+                    // add 1 to the range because the value is rendered with quotes around it
+                    // add 1 to the end because it is exclusive
+                    searchOccurrence
+                        ?.ranges
+                        ?.filterIsInstance<SearchOccurrence.Range.Key>()
+                        ?.forEach { keyRange ->
+                            val color = if (keyRange == searchOccurrenceSelectedRange) {
+                                colors.selectedHighlightColor
+                            } else {
+                                colors.highlightColor
+                            }
+                            addStyle(
+                                style = SpanStyle(background = color),
+                                start = keyRange.range.first + 1,
+                                end = keyRange.range.last + 1 + 1
+                            )
+                        }
+
                     withStyle(SpanStyle(color = colors.symbolColor)) {
                         append(": ")
                     }
                 }
             }
 
+            val keyOffset = this.length
+
             withStyle(SpanStyle(color = valueColor)) {
                 append(value.toString())
             }
+
+            searchOccurrence
+                ?.ranges
+                ?.filterIsInstance<SearchOccurrence.Range.Value>()
+                ?.forEach { valueRange ->
+                    val color = if (valueRange == searchOccurrenceSelectedRange) {
+                        colors.selectedHighlightColor
+                    } else {
+                        colors.highlightColor
+                    }
+                    // add an offset for the key which is already appended to the string
+                    // add 1 to the range if the value is a string because it has quotes around it
+                    // add 1 to the end because it is exclusive
+                    val stringQuoteOffset = if (value.isString) 1 else 0
+                    addStyle(
+                        style = SpanStyle(background = color),
+                        start = keyOffset + valueRange.range.first + stringQuoteOffset,
+                        end = keyOffset + valueRange.range.last + stringQuoteOffset + 1
+                    )
+                }
 
             if (!isLastItem) {
                 withStyle(SpanStyle(color = colors.symbolColor)) {

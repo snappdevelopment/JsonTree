@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.Color
  * @param indexColor The color for indices in arrays.
  * @param symbolColor The color for all symbols like brackets, colons and commas.
  * @param iconColor The color for the icon in front of collapsable items.
+ * @param highlightColor The color for highlighted text like search results.
+ * @param selectedHighlightColor The color for the currently highlighted text like a selected search result.
  */
 public data class TreeColors(
     val keyColor: Color,
@@ -23,6 +25,8 @@ public data class TreeColors(
     val indexColor: Color,
     val symbolColor: Color,
     val iconColor: Color,
+    val highlightColor: Color,
+    val selectedHighlightColor: Color,
 )
 
 /**
@@ -37,6 +41,8 @@ public val defaultLightColors: TreeColors = TreeColors(
     indexColor = Color(0x991D4555),
     symbolColor = Color(0xFF1D4555),
     iconColor = Color(0xFF1D4555),
+    highlightColor = Color(0xFF5AC8FA),
+    selectedHighlightColor = Color(0xFF0072BB),
 )
 
 /**
@@ -51,4 +57,6 @@ public val defaultDarkColors: TreeColors = TreeColors(
     indexColor = Color(0xE6798199),
     symbolColor = Color(0xFF798199),
     iconColor = Color(0xFF798199),
+    highlightColor = Color(0xFF3F51B5),
+    selectedHighlightColor = Color(0xFF6FCFFF),
 )
