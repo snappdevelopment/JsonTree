@@ -1,8 +1,8 @@
 package com.sebastianneubauer.jsontree
 
 import com.sebastianneubauer.jsontree.search.SearchOccurrence
-import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
 import com.sebastianneubauer.jsontree.search.SearchState
+import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
 import com.sebastianneubauer.jsontree.search.SelectedSearchOccurrence
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestResult
@@ -57,7 +57,8 @@ public class SearchStateTest {
             occurrences = mapOf(0 to SearchOccurrence(0, emptyList())),
             selectedOccurrence = SelectedSearchOccurrence(
                 occurrence = SearchOccurrence(0, emptyList()),
-                range = SearchOccurrence.Range.Key(IntRange(0,1))),
+                range = SearchOccurrence.Range.Key(IntRange(0, 1))
+            ),
             totalResults = 1,
             selectedResultIndex = 0
         )
@@ -140,8 +141,6 @@ public class SearchStateTest {
             expected = resultWithOccurrences
         )
     }
-
-
 
     @Test
     public fun `calling selectPrevious() without results does nothing`(): TestResult = runTest {

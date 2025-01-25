@@ -43,7 +43,7 @@ internal class JsonTreeSearch(
             jsonTreeList.forEachIndexed { index, jsonTreeElement ->
                 jsonTreeElement
                     .ranges(searchRegex)
-                    .takeIf { it.any() } //isNotEmpty
+                    .takeIf { it.any() } // isNotEmpty
                     ?.let { ranges ->
                         put(
                             key = index,
@@ -102,11 +102,11 @@ internal class JsonTreeSearch(
     }
 
     private fun Regex.findRanges(input: String?, isKey: Boolean = true): Sequence<SearchOccurrence.Range> {
-        if(input == null) return emptySequence()
+        if (input == null) return emptySequence()
 
         return findAll(input).mapNotNull {
-            if(it.value.isEmpty()) return@mapNotNull null
-            if(isKey) {
+            if (it.value.isEmpty()) return@mapNotNull null
+            if (isKey) {
                 SearchOccurrence.Range.Key(it.range)
             } else {
                 SearchOccurrence.Range.Value(it.range)

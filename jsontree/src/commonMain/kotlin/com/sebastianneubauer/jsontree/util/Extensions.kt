@@ -145,7 +145,6 @@ private fun Map<String, JsonTreeElement>.collapseChildren(): Map<String, JsonTre
     }
 }
 
-
 /**
  * Converts a JsonTreeElement into a list which can be rendered.
  */

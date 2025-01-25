@@ -29,8 +29,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.sebastianneubauer.jsontree.search.JsonTreeSearch
-import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
 import com.sebastianneubauer.jsontree.search.SearchState
+import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
 import com.sebastianneubauer.jsontree.search.rememberSearchState
 import com.sebastianneubauer.jsontree.util.rememberCollapsableText
 import com.sebastianneubauer.jsontree.util.rememberPrimitiveText
@@ -173,7 +173,7 @@ private fun JsonTreeList(
             when (item) {
                 is JsonTreeElement.Collapsable.Array -> {
                     val searchOccurrence = searchResult.occurrences[index]
-                    val selectedRange = if(searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
+                    val selectedRange = if (searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
                         searchResult.selectedOccurrence.range
                     } else {
                         null
@@ -210,7 +210,7 @@ private fun JsonTreeList(
                 }
                 is JsonTreeElement.Collapsable.Object -> {
                     val searchOccurrence = searchResult.occurrences[index]
-                    val selectedRange = if(searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
+                    val selectedRange = if (searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
                         searchResult.selectedOccurrence.range
                     } else {
                         null
@@ -247,7 +247,7 @@ private fun JsonTreeList(
                 }
                 is JsonTreeElement.Primitive -> {
                     val searchOccurrence = searchResult.occurrences[index]
-                    val selectedRange = if(searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
+                    val selectedRange = if (searchResult.selectedOccurrence?.occurrence?.listIndex == index) {
                         searchResult.selectedOccurrence.range
                     } else {
                         null
