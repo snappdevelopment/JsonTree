@@ -98,7 +98,7 @@ kotlin {
 
 android {
     namespace = "com.sebastianneubauer.jsontreesample"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 21
