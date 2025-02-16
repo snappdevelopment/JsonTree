@@ -235,7 +235,7 @@ private fun MainScreen() {
                         )
                     }
 
-                    Text("Found: ${searchState.selectedResult}/${searchState.totalResults}")
+                    Text("Found: ${searchState.selectedResultIndex?.let { it + 1 } ?: 0}/${searchState.totalResults}")
                 }
             }
 

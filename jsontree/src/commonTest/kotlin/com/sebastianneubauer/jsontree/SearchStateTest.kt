@@ -43,10 +43,10 @@ public class SearchStateTest {
     @Test
     public fun `updating the selectedResultIndex in the state should update the selectedResult variable`(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
-        assertEquals(actual = searchState.selectedResult, expected = 0)
+        assertEquals(actual = searchState.selectedResultIndex, expected = null)
 
         searchState.state = searchState.state.copy(selectedResultIndex = 0)
-        assertEquals(actual = searchState.selectedResult, expected = 1)
+        assertEquals(actual = searchState.selectedResultIndex, expected = 0)
     }
 
     @Test
@@ -221,7 +221,7 @@ public class SearchStateTest {
         query = null,
         occurrences = emptyMap(),
         selectedOccurrence = null,
-        selectedResultIndex = -1,
+        selectedResultIndex = null,
         totalResults = 0
     )
 
