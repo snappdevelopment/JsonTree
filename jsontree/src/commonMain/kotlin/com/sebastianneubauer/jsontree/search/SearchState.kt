@@ -63,6 +63,13 @@ public class SearchState internal constructor(
         get() = state.selectedResultIndex + 1
 
     /**
+     * The index of the list item in which the selected result is located, or null if there are
+     * no results.
+     */
+    public val selectedResultListIndex: Int?
+        get() = state.selectedOccurrence?.occurrence?.listIndex
+
+    /**
      * Select the next result.
      * If the currently selected result is the last one, the first result will be selected.
      */

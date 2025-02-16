@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -42,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.JsonTree
 import com.sebastianneubauer.jsontree.TreeColors
@@ -95,6 +97,10 @@ private fun MainScreen() {
             val searchState = rememberSearchState()
             val searchQuery by remember(searchState.query) { mutableStateOf(searchState.query.orEmpty()) }
             val coroutineScope = rememberCoroutineScope()
+            val listState = rememberLazyListState()
+            val density = LocalDensity.current
+            val jsonTreePadding = 32.dp
+            val jsonTreePaddingPx = remember(density) { with(density) { jsonTreePadding.roundToPx() } }
 
             FlowRow(modifier = Modifier.fillMaxWidth()) {
                 Button(
@@ -163,6 +169,33 @@ private fun MainScreen() {
                     onClick = { expandSingleChildren = !expandSingleChildren }
                 ) {
                     Text(text = if (expandSingleChildren) "Expand children" else "Don't expand children")
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            Row {
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = {
+                        coroutineScope.launch {
+                            listState.animateScrollToItem(0)
+                        }
+                    }
+                ) {
+                    Text(text = "To Top")
+                }
+
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = {
+                        coroutineScope.launch {
+                            val lastIndex = listState.layoutInfo.totalItemsCount - 1
+                            listState.animateScrollToItem(lastIndex.coerceAtLeast(0))
+                        }
+                    }
+                ) {
+                    Text(text = "To Bottom")
                 }
             }
 
@@ -238,7 +271,7 @@ private fun MainScreen() {
                                         .background(
                                             if (colors == defaultLightColors) Color.White else Color.Black
                                         ),
-                                    contentPadding = PaddingValues(16.dp),
+                                    contentPadding = PaddingValues(vertical = jsonTreePadding),
                                     json = json,
                                     onLoading = {
                                         Box(
@@ -261,6 +294,7 @@ private fun MainScreen() {
                                     showItemCount = showItemCount,
                                     expandSingleChildren = expandSingleChildren,
                                     searchState = searchState,
+                                    lazyListState = listState,
                                     onError = { errorMessage = it.message },
                                 )
 
@@ -268,8 +302,14 @@ private fun MainScreen() {
                                 // LaunchedEffect(Unit) {
                                 //   searchState.query = "o"
                                 // }
-                            }
 
+                                val resultIndex = searchState.selectedResultListIndex
+                                LaunchedEffect(resultIndex) {
+                                    if(resultIndex != null && !listState.isScrollInProgress) {
+                                        listState.animateScrollToItem(resultIndex, jsonTreePaddingPx)
+                                    }
+                                }
+                            }
                         }
                     }
 
