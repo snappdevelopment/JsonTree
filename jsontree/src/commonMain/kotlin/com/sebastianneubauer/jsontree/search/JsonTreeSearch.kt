@@ -60,7 +60,7 @@ internal class JsonTreeSearch(
             query = searchQuery,
             occurrences = searchOccurrences,
             totalResults = searchOccurrences.values.sumOf { it.ranges.size },
-            selectedResultIndex = if (searchOccurrences.isNotEmpty()) 0 else -1,
+            selectedResultIndex = if (searchOccurrences.isNotEmpty()) 0 else null,
             selectedOccurrence = searchOccurrences.values.firstOrNull()?.let {
                 SelectedSearchOccurrence(
                     occurrence = it,

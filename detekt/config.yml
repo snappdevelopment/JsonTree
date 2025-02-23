@@ -15,7 +15,7 @@ complexity:
   LongMethod:
     threshold: 200
   LongParameterList:
-    functionThreshold: 15
+    functionThreshold: 20
   CyclomaticComplexMethod:
     threshold: 20
   LargeClass:

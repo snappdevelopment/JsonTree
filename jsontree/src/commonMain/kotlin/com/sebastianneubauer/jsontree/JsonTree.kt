@@ -58,6 +58,8 @@ import org.jetbrains.compose.resources.vectorResource
  * @param showItemCount If true, arrays and objects will show their amount of child items when collapsed.
  * @param expandSingleChildren If true, children of collapsable items that have no siblings will be
  * automatically expanded with their parent.
+ * @param searchState The current search state. Can be used to search the json for keys and values. See [SearchState].
+ * @param lazyListState The `LazyListState` which is used for the JsonTree list.
  * @param onError A callback which is called when the json can't be parsed and thus won't
  * be rendered. Receives the throwable of the error.
  */
@@ -76,8 +78,11 @@ public fun JsonTree(
     showItemCount: Boolean = true,
     expandSingleChildren: Boolean = false,
     searchState: SearchState = rememberSearchState(),
+    lazyListState: LazyListState = rememberLazyListState(),
     onError: (Throwable) -> Unit = {}
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     val jsonParser = remember(json) {
         JsonTreeParser(
             json = json,
@@ -93,9 +98,6 @@ public fun JsonTree(
         searchState.reset()
         jsonParser.init(initialState)
     }
-
-    val lazyListState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
 
     when (val state = jsonParser.state.value) {
         is JsonTreeParserState.Ready -> {
@@ -134,13 +136,6 @@ public fun JsonTree(
                             jsonTreeList = expandedList,
                         )
                         searchState.state = searchResult
-                    }
-                }
-
-                val selectedListIndex = searchState.state.selectedOccurrence?.occurrence?.listIndex
-                LaunchedEffect(selectedListIndex) {
-                    if (selectedListIndex != null && selectedListIndex > -1 && !lazyListState.isScrollInProgress) {
-                        lazyListState.animateScrollToItem(selectedListIndex)
                     }
                 }
             }
