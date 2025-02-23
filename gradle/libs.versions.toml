@@ -6,7 +6,7 @@ java-toolchain = "17"
 
 compose = "1.7.3"
 agp = "8.7.2"
-kotlin = "2.1.0"
+kotlin = "2.1.10"
 publish = "0.30.0"
 api-validator = "0.16.3"
 atomicfu = "0.27.0"
