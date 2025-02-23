@@ -56,7 +56,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-internal fun App() = JsonTreeTheme {
+internal fun App() = JsonTreeTheme(darkTheme = false) {
     MainScreen()
 }
 
@@ -257,7 +257,7 @@ private fun MainScreen() {
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .background(
-                                        color = if (colors == defaultLightColors) Color.White else Color.Black
+                                        color = if (colors == defaultLightColors) Color.Unspecified else Color.Black
                                     ),
                                 text = error,
                                 color = if (colors == defaultLightColors) Color.Black else Color.White,
@@ -269,7 +269,7 @@ private fun MainScreen() {
                                         .fillMaxSize()
                                         .horizontalScroll(rememberScrollState())
                                         .background(
-                                            if (colors == defaultLightColors) Color.White else Color.Black
+                                            if (colors == defaultLightColors) Color.Unspecified else Color.Black
                                         ),
                                     contentPadding = PaddingValues(vertical = jsonTreePadding),
                                     json = json,
@@ -278,7 +278,7 @@ private fun MainScreen() {
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .background(
-                                                    if (colors == defaultLightColors) Color.White else Color.Black
+                                                    if (colors == defaultLightColors) Color.Unspecified else Color.Black
                                                 ),
                                             contentAlignment = Alignment.Center
                                         ) {

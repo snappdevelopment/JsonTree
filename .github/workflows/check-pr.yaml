@@ -83,6 +83,23 @@ jobs:
           ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.SearchStateTest --stacktrace
           ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.ExtensionsTest --stacktrace
 
+  apiCheck:
+    runs-on: macos-latest
+    needs: [assembleAndroidDebug, assembleAndroidRelease]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Run apiCheck
+        run: ./gradlew apiCheck
+
   detekt:
     runs-on: macos-latest
     needs: [assembleAndroidDebug, assembleAndroidRelease]

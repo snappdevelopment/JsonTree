@@ -84,10 +84,30 @@ JsonTree(
     // If true, then children without siblings will be expanded automatically with their parents, 
     // until there are none or multiple on a level.
     expandSingleChildren = false,
+    // The current state of the search result. Can be used to search the json for keys and values.
+    searchState = rememberSearchState(),
+    // The LazyListState of the LazyColumn which renders the json tree.
+    lazyListState = rememberLazyListState(),
     // A callback method which is called when the provided json data can't be parsed.
     onError = { throwable: Throwable -> /* Do something */ }
 )
 ```
+
+## Search
+
+JsonTree can be searched for keys and values by using the `searchState` parameter. The SearchState provides the following data about the current results. For an example on how to implement a search UI see the sample [here](sample/src/commonMain/kotlin/App.kt).
+
+- `query` - The string which should be searched in the JsonTree
+- `totalResults` - The total count of results for the query
+- `selectedResultIndex` - The index of the currently selected result
+- `selectedResultListIndex` - The index of the list item in which the selected result is located
+- `selectNext()` - Selects the next result
+- `selectPrevious()` - Selects the previous result
+
+### Limitations
+
+- Using the search will always expand the whole JsonTree to find and show all results
+- Changing the JsonTree list by collapsing an item will clear the search state, since the new list won't match the search state anymore
 
 ## Minimum Requirements
 
