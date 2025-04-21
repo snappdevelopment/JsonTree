@@ -9,6 +9,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlinx.atomicfu)
     alias(libs.plugins.publish)
+    alias(libs.plugins.kotlinx.benchmark)
+    kotlin("plugin.allopen") version "2.1.10"
 }
 
 kotlin {
@@ -59,6 +61,9 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
                 // needs to be added as a workaround not get atomicfus code stripped
                 implementation(libs.atomicfu)
+                implementation(libs.benchmark)
+                implementation(libs.jmh)
+                implementation(libs.jmh.annotation)
             }
         }
 
@@ -91,6 +96,16 @@ kotlin {
                 implementation(compose.desktop.currentOs)
             }
         }
+    }
+}
+
+allOpen {
+    annotation("org.openjdk.jmh.annotations.State")
+}
+
+benchmark {
+    targets {
+        register("jvm")
     }
 }
 

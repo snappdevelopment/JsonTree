@@ -178,7 +178,7 @@ public class SearchState internal constructor(
         )
     }
 
-    internal data class SearchResult(
+    public data class SearchResult(
         val query: String?,
         val occurrences: Map<Int, SearchOccurrence>,
         val selectedOccurrence: SelectedSearchOccurrence?,

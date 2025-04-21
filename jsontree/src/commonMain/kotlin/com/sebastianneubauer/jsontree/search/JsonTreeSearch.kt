@@ -5,26 +5,26 @@ import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
-internal data class SearchOccurrence(
+public data class SearchOccurrence(
     // the index in the JsonTree list
     val listIndex: Int,
     // the ranges of the search query matches
     val ranges: List<Range>,
 ) {
-    sealed interface Range {
-        val range: IntRange
+    public sealed interface Range {
+        public val range: IntRange
 
-        data class Key(
+        public data class Key(
             override val range: IntRange
         ) : Range
 
-        data class Value(
+        public data class Value(
             override val range: IntRange
         ) : Range
     }
 }
 
-internal data class SelectedSearchOccurrence(
+public data class SelectedSearchOccurrence(
     val occurrence: SearchOccurrence,
     val range: SearchOccurrence.Range,
 )
