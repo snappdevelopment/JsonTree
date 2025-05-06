@@ -4,7 +4,7 @@ android-compileSdk = "35"
 
 java-toolchain = "17"
 
-compose = "1.7.3"
+compose = "1.8.0"
 agp = "8.7.2"
 kotlin = "2.1.0"
 publish = "0.30.0"
