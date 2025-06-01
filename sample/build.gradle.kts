@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlinx.atomicfu)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.hotreload)
 }
 
 group = "com.sebastianneubauer.jsontreesample"
