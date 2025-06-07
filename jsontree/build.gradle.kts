@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.kotlinx.atomicfu)
     alias(libs.plugins.publish)
     alias(libs.plugins.kotlinx.benchmark)
-    kotlin("plugin.allopen") version "2.1.10"
+    kotlin("plugin.allopen") version "2.1.20"
 }
 
 kotlin {

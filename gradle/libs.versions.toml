@@ -15,8 +15,8 @@ kotlinx-serialization-json = "1.8.0"
 kotlinx-coroutines = "1.10.1"
 detekt = "1.23.8"
 hotreload = "1.0.0-alpha10"
-benchmark = "0.4.13"
-jmh = "1.37"
+benchmark = "0.4.14"
+jmh = "1.21"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -43,8 +43,5 @@ publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
 api-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "api-validator" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlinx-atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "atomicfu" }
-<<<<<<< HEAD
 hotreload = { id = "org.jetbrains.compose.hot-reload", version.ref = "hotreload" }
-=======
 kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "benchmark" }
->>>>>>> 2b8de1b (Setup benchmark)
