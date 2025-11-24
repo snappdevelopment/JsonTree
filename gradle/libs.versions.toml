@@ -14,7 +14,7 @@ androidx-activity-compose = "1.10.0"
 kotlinx-serialization-json = "1.8.0"
 kotlinx-coroutines = "1.10.1"
 detekt = "1.23.8"
-hotreload = "1.0.0-alpha10"
+hotreload = "1.0.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
