@@ -111,23 +111,21 @@ internal class JsonTreeParser(
         item: JsonTreeElement.Collapsable
     ): List<JsonTreeElement> {
         val newItem = item.collapse()
-        var itemIndex = -1
-        var endBracketIndex = -1
+        var itemFound = false
 
-        for (i in indices) {
-            val element = get(i)
-            if (itemIndex == -1 && element.id == item.id) {
-                itemIndex = i
-            } else if (itemIndex != -1 && element.id == item.endBracket.id) {
-                endBracketIndex = i
-                break
+        return buildList(capacity = size) {
+            for (element in this@collapseItem) {
+                when {
+                    !itemFound && element.id == item.id -> {
+                        add(newItem)
+                        itemFound = true
+                    }
+                    itemFound && element.id == item.endBracket.id -> {
+                        return@buildList
+                    }
+                    !itemFound -> add(element)
+                }
             }
-        }
-
-        return buildList(size - (endBracketIndex - itemIndex)) {
-            addAll(this@collapseItem.subList(0, itemIndex))
-            add(newItem)
-            addAll(this@collapseItem.subList(endBracketIndex + 1, this@collapseItem.size))
         }
     }
 
@@ -139,12 +137,14 @@ internal class JsonTreeParser(
             .expand(expansion = if (expandSingleChildren) Expansion.SingleOnly else Expansion.None)
             .toList()
 
-        val itemIndex = indexOfFirst { it.id == item.id }
-
-        return buildList(size - 1 + newItems.size) {
-            addAll(this@expandItem.subList(0, itemIndex))
-            addAll(newItems)
-            addAll(this@expandItem.subList(itemIndex + 1, this@expandItem.size))
+        return buildList(capacity = size + newItems.size) {
+            for (element in this@expandItem) {
+                if (element.id == item.id) {
+                    addAll(newItems)
+                } else {
+                    add(element)
+                }
+            }
         }
     }
 
