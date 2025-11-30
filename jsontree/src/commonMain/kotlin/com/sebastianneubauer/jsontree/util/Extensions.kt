@@ -64,36 +64,43 @@ internal fun JsonTreeElement.expand(
 private fun Map<String, JsonTreeElement>.expandChildren(
     singleChildrenOnly: Boolean
 ): Map<String, JsonTreeElement> {
-    return if (singleChildrenOnly && this.size > 1) {
-        this
-    } else {
-        mapValues {
-            when (val child = it.value) {
-                is Primitive -> child
-                is EndBracket -> child
-                is Array -> {
-                    if (child.state == TreeState.COLLAPSED) {
-                        child.copy(
-                            state = TreeState.EXPANDED,
-                            children = child.children.expandChildren(singleChildrenOnly)
-                        )
-                    } else {
-                        child
-                    }
+    if (singleChildrenOnly && this.size > 1) {
+        return this
+    }
+
+    var hasChanges = false
+    val result = LinkedHashMap<String, JsonTreeElement>(size)
+
+    for ((key, child) in this) {
+        val newChild = when (child) {
+            is Primitive, is EndBracket -> child
+            is Array -> {
+                if (child.state == TreeState.COLLAPSED) {
+                    hasChanges = true
+                    child.copy(
+                        state = TreeState.EXPANDED,
+                        children = child.children.expandChildren(singleChildrenOnly)
+                    )
+                } else {
+                    child
                 }
-                is Object -> {
-                    if (child.state == TreeState.COLLAPSED) {
-                        child.copy(
-                            state = TreeState.EXPANDED,
-                            children = child.children.expandChildren(singleChildrenOnly)
-                        )
-                    } else {
-                        child
-                    }
+            }
+            is Object -> {
+                if (child.state == TreeState.COLLAPSED) {
+                    hasChanges = true
+                    child.copy(
+                        state = TreeState.EXPANDED,
+                        children = child.children.expandChildren(singleChildrenOnly)
+                    )
+                } else {
+                    child
                 }
             }
         }
+        result[key] = newChild
     }
+
+    return if (hasChanges) result else this
 }
 
 /**
@@ -117,12 +124,15 @@ internal fun JsonTreeElement.collapse(): JsonTreeElement {
 }
 
 private fun Map<String, JsonTreeElement>.collapseChildren(): Map<String, JsonTreeElement> {
-    return mapValues {
-        when (val child = it.value) {
-            is Primitive -> child
-            is EndBracket -> child
+    var hasChanges = false
+    val result = LinkedHashMap<String, JsonTreeElement>(size)
+
+    for ((key, child) in this) {
+        val newChild = when (child) {
+            is Primitive, is EndBracket -> child
             is Array -> {
                 if (child.state != TreeState.COLLAPSED) {
+                    hasChanges = true
                     child.copy(
                         state = TreeState.COLLAPSED,
                         children = child.children.collapseChildren()
@@ -133,6 +143,7 @@ private fun Map<String, JsonTreeElement>.collapseChildren(): Map<String, JsonTre
             }
             is Object -> {
                 if (child.state != TreeState.COLLAPSED) {
+                    hasChanges = true
                     child.copy(
                         state = TreeState.COLLAPSED,
                         children = child.children.collapseChildren()
@@ -142,40 +153,41 @@ private fun Map<String, JsonTreeElement>.collapseChildren(): Map<String, JsonTre
                 }
             }
         }
+        result[key] = newChild
     }
+
+    return if (hasChanges) result else this
 }
 
 /**
  * Converts a JsonTreeElement into a list which can be rendered.
  */
 internal fun JsonTreeElement.toList(): List<JsonTreeElement> {
-    val list = mutableListOf<JsonTreeElement>()
+    return buildList {
+        addTreeElement(this@toList)
+    }
+}
 
-    fun addToList(element: JsonTreeElement) {
-        when (element) {
-            is EndBracket -> list.add(element)
-            is Primitive -> list.add(element)
-            is Array -> {
-                list.add(element)
-                if (element.state != TreeState.COLLAPSED) {
-                    element.children.forEach {
-                        addToList(it.value)
-                    }
-                    list.add(element.endBracket)
+private fun MutableList<JsonTreeElement>.addTreeElement(element: JsonTreeElement) {
+    when (element) {
+        is EndBracket, is Primitive -> add(element)
+        is Array -> {
+            add(element)
+            if (element.state != TreeState.COLLAPSED) {
+                for (child in element.children.values) {
+                    addTreeElement(child)
                 }
+                add(element.endBracket)
             }
-            is Object -> {
-                list.add(element)
-                if (element.state != TreeState.COLLAPSED) {
-                    element.children.forEach {
-                        addToList(it.value)
-                    }
-                    list.add(element.endBracket)
+        }
+        is Object -> {
+            add(element)
+            if (element.state != TreeState.COLLAPSED) {
+                for (child in element.children.values) {
+                    addTreeElement(child)
                 }
+                add(element.endBracket)
             }
         }
     }
-
-    addToList(this)
-    return list
 }
