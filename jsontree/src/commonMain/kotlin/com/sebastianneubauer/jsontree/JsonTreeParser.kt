@@ -110,12 +110,24 @@ internal class JsonTreeParser(
     private fun List<JsonTreeElement>.collapseItem(
         item: JsonTreeElement.Collapsable
     ): List<JsonTreeElement> {
-        return toMutableList().apply {
-            val newItem = item.collapse()
-            val itemIndex = indexOfFirst { it.id == item.id }
-            val endBracketIndex = indexOfFirst { it.id == item.endBracket.id }
-            subList(itemIndex, endBracketIndex + 1).clear()
-            add(itemIndex, newItem)
+        val newItem = item.collapse()
+        var itemIndex = -1
+        var endBracketIndex = -1
+
+        for (i in indices) {
+            val element = get(i)
+            if (itemIndex == -1 && element.id == item.id) {
+                itemIndex = i
+            } else if (itemIndex != -1 && element.id == item.endBracket.id) {
+                endBracketIndex = i
+                break
+            }
+        }
+
+        return buildList(size - (endBracketIndex - itemIndex)) {
+            addAll(this@collapseItem.subList(0, itemIndex))
+            add(newItem)
+            addAll(this@collapseItem.subList(endBracketIndex + 1, this@collapseItem.size))
         }
     }
 
@@ -123,14 +135,16 @@ internal class JsonTreeParser(
         item: JsonTreeElement.Collapsable,
         expandSingleChildren: Boolean
     ): List<JsonTreeElement> {
-        return toMutableList().apply {
-            val newItems = item
-                .expand(expansion = if (expandSingleChildren) Expansion.SingleOnly else Expansion.None)
-                .toList()
+        val newItems = item
+            .expand(expansion = if (expandSingleChildren) Expansion.SingleOnly else Expansion.None)
+            .toList()
 
-            val itemIndex = indexOfFirst { it.id == item.id }
-            removeAt(itemIndex)
-            addAll(itemIndex, newItems)
+        val itemIndex = indexOfFirst { it.id == item.id }
+
+        return buildList(size - 1 + newItems.size) {
+            addAll(this@expandItem.subList(0, itemIndex))
+            addAll(newItems)
+            addAll(this@expandItem.subList(itemIndex + 1, this@expandItem.size))
         }
     }
 
