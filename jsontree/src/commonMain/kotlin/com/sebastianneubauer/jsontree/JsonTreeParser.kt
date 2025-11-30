@@ -154,20 +154,16 @@ internal class JsonTreeParser(
                 )
             }
             is JsonArray -> {
-                val childElements = jsonArray.mapIndexed { index, item ->
-                    Pair(
-                        index.toString(),
-                        item.toJsonTreeElement(
-                            idGenerator = idGenerator,
-                            state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
-                            level = level + 1,
-                            key = index.toString(),
-                            isLastItem = index == (jsonArray.size - 1),
-                            parentType = ParentType.ARRAY,
-                        )
+                val childElements = jsonArray.withIndex().associate { (index, item) ->
+                    index.toString() to item.toJsonTreeElement(
+                        idGenerator = idGenerator,
+                        state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
+                        level = level + 1,
+                        key = index.toString(),
+                        isLastItem = index == (jsonArray.size - 1),
+                        parentType = ParentType.ARRAY,
                     )
                 }
-                    .toMap()
 
                 Array(
                     id = idGenerator.incrementAndGet().toString(),
@@ -181,16 +177,13 @@ internal class JsonTreeParser(
             }
             is JsonObject -> {
                 val childElements = jsonObject.entries.associate {
-                    Pair(
-                        it.key,
-                        it.value.toJsonTreeElement(
-                            idGenerator = idGenerator,
-                            state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
-                            level = level + 1,
-                            key = it.key,
-                            isLastItem = it == jsonObject.entries.last(),
-                            parentType = ParentType.OBJECT
-                        )
+                    it.key to it.value.toJsonTreeElement(
+                        idGenerator = idGenerator,
+                        state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
+                        level = level + 1,
+                        key = it.key,
+                        isLastItem = it == jsonObject.entries.last(),
+                        parentType = ParentType.OBJECT
                     )
                 }
 
