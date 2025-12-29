@@ -108,4 +108,9 @@ android {
             minCompileSdk = libs.versions.android.minSdk.get().toInt()
         }
     }
+
+    // fixes lint error in release builds for compose 1.9.3
+    lint {
+        disable.add("NullSafeMutableLiveData")
+    }
 }
