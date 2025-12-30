@@ -5,7 +5,7 @@ android-compileSdk = "36"
 java-toolchain = "17"
 
 compose = "1.9.3"
-agp = "8.12.2"
+agp = "8.13.2"
 kotlin = "2.2.0"
 publish = "0.35.0"
 api-validator = "0.18.1"
