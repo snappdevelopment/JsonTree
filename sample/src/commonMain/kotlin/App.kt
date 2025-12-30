@@ -21,9 +21,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,8 +48,13 @@ import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
 import com.sebastianneubauer.jsontree.search.rememberSearchState
+import com.sebastianneubauer.jsontreesample.sample.generated.resources.Res
+import com.sebastianneubauer.jsontreesample.sample.generated.resources.arrow_down
+import com.sebastianneubauer.jsontreesample.sample.generated.resources.arrow_up
 import com.sebastianneubauer.jsontreesample.ui.theme.JsonTreeTheme
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -219,7 +221,7 @@ private fun MainScreen() {
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
+                            painter = painterResource(Res.drawable.arrow_down),
                             contentDescription = "next"
                         )
                     }
@@ -230,7 +232,7 @@ private fun MainScreen() {
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
+                            painter = painterResource(Res.drawable.arrow_up),
                             contentDescription = "prev"
                         )
                     }

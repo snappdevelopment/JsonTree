@@ -124,6 +124,11 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // fixes lint error in release builds for compose 1.9.3
+    lint {
+        disable.add("NullSafeMutableLiveData")
+    }
 }
 
 compose.desktop {
