@@ -31,11 +31,7 @@ kotlin {
 
     js {
         outputModuleName = "jsontree"
-        browser {
-            commonWebpackConfig {
-                outputFileName = "jsontree.js"
-            }
-        }
+        browser()
         binaries.executable()
         useEsModules()
     }

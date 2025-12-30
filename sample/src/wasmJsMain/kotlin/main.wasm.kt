@@ -1,6 +1,7 @@
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.window.CanvasBasedWindow
+import androidx.compose.ui.window.ComposeViewport
 import com.sebastianneubauer.jsontreesample.App
+import kotlinx.browser.document
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.configureWebResources
 
@@ -9,7 +10,7 @@ fun main() {
     configureWebResources {
         resourcePathMapping { path -> "./$path" }
     }
-    CanvasBasedWindow("JsonTree") {
+    ComposeViewport(document.body!!) {
         App()
     }
 }
