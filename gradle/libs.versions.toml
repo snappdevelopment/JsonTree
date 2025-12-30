@@ -1,17 +1,17 @@
 [versions]
 android-minSdk = "21"
-android-compileSdk = "35"
+android-compileSdk = "36"
 
 java-toolchain = "17"
 
 compose = "1.9.3"
-agp = "8.7.2"
-kotlin = "2.1.20"
+agp = "8.12.2"
+kotlin = "2.2.0"
 publish = "0.30.0"
 api-validator = "0.18.1"
-atomicfu = "0.27.0"
-androidx-activity-compose = "1.10.0"
-kotlinx-serialization-json = "1.8.0"
+atomicfu = "0.29.0"
+androidx-activity-compose = "1.12.2"
+kotlinx-serialization-json = "1.9.0"
 kotlinx-coroutines = "1.10.2"
 detekt = "1.23.8"
 hotreload = "1.0.0"

@@ -30,7 +30,7 @@ kotlin {
     }
 
     js {
-        moduleName = "jsontree"
+        outputModuleName = "jsontree"
         browser {
             commonWebpackConfig {
                 outputFileName = "jsontree.js"
@@ -42,7 +42,7 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "jsontree"
+        outputModuleName = "jsontree"
         browser()
         binaries.executable()
     }
@@ -99,11 +99,11 @@ kotlin {
 
 android {
     namespace = "com.sebastianneubauer.jsontreesample"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
-        targetSdk = 34
+        minSdk = 23
+        targetSdk = 36
     }
     sourceSets["main"].apply {
         manifest.srcFile("src/androidMain/AndroidManifest.xml")
