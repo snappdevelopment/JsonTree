@@ -62,6 +62,7 @@ captures/
 .idea/artifacts
 .idea/runConfigurations.xml
 .idea/AndroidProjectSystem.xml
+.idea/deviceManager.xml
 
 .kotlin
 
