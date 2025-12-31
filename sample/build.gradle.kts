@@ -31,11 +31,7 @@ kotlin {
 
     js {
         outputModuleName = "jsontree"
-        browser {
-            commonWebpackConfig {
-                outputFileName = "jsontree.js"
-            }
-        }
+        browser()
         binaries.executable()
         useEsModules()
     }
@@ -53,16 +49,14 @@ kotlin {
                 optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
             }
         }
-        val commonMain by getting {
-            dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material3)
-                implementation(compose.components.resources)
-                implementation(compose.components.uiToolingPreview)
-                implementation(libs.kotlinx.serialization.json)
-                implementation(project(":jsontree"))
-            }
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.components.resources)
+            implementation(compose.components.uiToolingPreview)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(project(":jsontree"))
         }
 
         commonTest.dependencies {
@@ -76,16 +70,6 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
-        }
-
-        val jsWasmMain by creating {
-            dependsOn(commonMain)
-        }
-        val jsMain by getting {
-            dependsOn(jsWasmMain)
-        }
-        val wasmJsMain by getting {
-            dependsOn(jsWasmMain)
         }
     }
 
