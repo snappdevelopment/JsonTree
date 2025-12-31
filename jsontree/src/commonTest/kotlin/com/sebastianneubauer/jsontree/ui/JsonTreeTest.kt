@@ -32,6 +32,7 @@ import com.sebastianneubauer.jsontree.arrayOfArraysJson
 import com.sebastianneubauer.jsontree.nestedJson2
 import com.sebastianneubauer.jsontree.rootArrayJson
 import com.sebastianneubauer.jsontree.rootStringJson
+import kotlinx.coroutines.test.TestResult
 import kotlin.test.Test
 
 public class JsonTreeTest {
@@ -50,7 +51,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun initial_state_is_first_item_expanded(): Unit = runComposeUiTest {
+    public fun initial_state_is_first_item_expanded(): TestResult = runComposeUiTest {
         setJson(nestedJson2)
 
         waitForIdle()
@@ -63,7 +64,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun initial_state_is_collapsed(): Unit = runComposeUiTest {
+    public fun initial_state_is_collapsed(): TestResult = runComposeUiTest {
         setJson(nestedJson2, initialState = TreeState.COLLAPSED)
 
         waitUntilExactlyOneExists(hasText("{ 3 items }"))
@@ -73,7 +74,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun initial_state_is_expanded(): Unit = runComposeUiTest {
+    public fun initial_state_is_expanded(): TestResult = runComposeUiTest {
         setJson(nestedJson2, initialState = TreeState.EXPANDED)
 
         // fix flakiness by waiting until first item appears
@@ -100,43 +101,45 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun click_on_collapsed_object_or_array_expands_it(): Unit = runComposeUiTest {
+    public fun click_on_collapsed_object_or_array_expands_it(): TestResult = runComposeUiTest {
         setJson(nestedJson2)
         // fix flakiness by waiting until first item appears
         waitUntilExactlyOneExists(hasText("\"topLevelObject\": { 2 items },"))
 
         onNodeWithText("\"topLevelObject\": { 2 items },").performClick()
+        waitUntilExactlyOneExists(hasText("\"topLevelObject\": {"))
         onNodeWithText("\"topLevelObject\": {").assertIsDisplayed()
         onNodeWithText("\"string\": \"stringValue\",").assertIsDisplayed()
         onNodeWithText("\"nestedObject\": { 3 items }").assertIsDisplayed()
 
         onNodeWithText("\"topLevelArray\": [ 2 items ],").performClick()
+        waitUntilExactlyOneExists(hasText("\"topLevelArray\": ["))
         onNodeWithText("\"topLevelArray\": [").assertIsDisplayed()
         onNodeWithText("\"hello\",").assertIsDisplayed()
         onNodeWithText("\"world\"").assertIsDisplayed()
     }
 
     @Test
-    public fun click_on_expanded_object_or_array_collapses_it(): Unit = runComposeUiTest {
+    public fun click_on_expanded_object_or_array_collapses_it(): TestResult = runComposeUiTest {
         setJson(nestedJson2, initialState = TreeState.EXPANDED)
 
         waitForIdle()
 
         onNodeWithText("\"arrayOfObjects\": [").performClick()
-        waitForIdle()
+        waitUntilExactlyOneExists(hasText("\"arrayOfObjects\": [ 2 items ]"))
         onNodeWithText("\"arrayOfObjects\": [ 2 items ]").assertIsDisplayed()
 
         onNodeWithText("\"nestedObject\": {").performClick()
-        waitForIdle()
+        waitUntilExactlyOneExists(hasText("\"nestedObject\": { 3 items }"))
         onNodeWithText("\"nestedObject\": { 3 items }").assertIsDisplayed()
 
         onNodeWithText("\"topLevelObject\": {").performClick()
-        waitForIdle()
+        waitUntilExactlyOneExists(hasText("\"topLevelObject\": { 2 items },"))
         onNodeWithText("\"topLevelObject\": { 2 items },").assertIsDisplayed()
     }
 
     @Test
-    public fun array_of_arrays_is_rendered_correctly(): Unit = runComposeUiTest {
+    public fun array_of_arrays_is_rendered_correctly(): TestResult = runComposeUiTest {
         setJson(arrayOfArraysJson)
         // fix flakiness by waiting until first item appears
         waitUntilExactlyOneExists(hasText("\"array\": [ 2 items ]"))
@@ -150,40 +153,43 @@ public class JsonTreeTest {
         onNodeWithText("[ 2 items ]").assertIsDisplayed()
 
         onNodeWithText("[ 1 item ],").performClick()
-        onNodeWithText("[ 2 items ]").performClick()
-
+        waitUntilExactlyOneExists(hasText("\"stringValue\""))
         onNodeWithText("\"stringValue\"").assertIsDisplayed()
         onNodeWithText("],").assertIsDisplayed()
+
+        onNodeWithText("[ 2 items ]").performClick()
+        waitUntilExactlyOneExists(hasText("42,"))
         onNodeWithText("42,").assertIsDisplayed()
         onNodeWithText("52").assertIsDisplayed()
     }
 
     @Test
-    public fun root_array_is_rendered_correctly(): Unit = runComposeUiTest {
+    public fun root_array_is_rendered_correctly(): TestResult = runComposeUiTest {
         setJson(rootArrayJson)
 
         assertRootArrayIsDisplayed()
     }
 
     @Test
-    public fun root_string_is_rendered_correctly(): Unit = runComposeUiTest {
+    public fun root_string_is_rendered_correctly(): TestResult = runComposeUiTest {
         setJson(rootStringJson)
 
         assertRootStringIsDisplayed()
     }
 
     @Test
-    public fun empty_object_is_rendered_correctly(): Unit = runComposeUiTest {
+    public fun empty_object_is_rendered_correctly(): TestResult = runComposeUiTest {
         setJson(EMPTY_OBJECT_JSON)
         waitForIdle()
         assertEmptyObjectIsDisplayed()
 
         onNodeWithText("{").performClick()
+        waitUntilExactlyOneExists(hasText("{ 0 items }"))
         onNodeWithText("{ 0 items }").assertIsDisplayed()
     }
 
     @Test
-    public fun invalid_json_shows_an_error(): Unit = runComposeUiTest {
+    public fun invalid_json_shows_an_error(): TestResult = runComposeUiTest {
         setContent {
             Box {
                 var errorMessage: String? by remember { mutableStateOf(null) }
@@ -208,7 +214,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun changing_json_is_handled_correctly(): Unit = runComposeUiTest {
+    public fun changing_json_is_handled_correctly(): TestResult = runComposeUiTest {
         setContent {
             var jsonString: String by remember { mutableStateOf(rootStringJson) }
 
@@ -230,7 +236,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun changing_json_while_collapsed_is_handled_correctly(): Unit = runComposeUiTest {
+    public fun changing_json_while_collapsed_is_handled_correctly(): TestResult = runComposeUiTest {
         setContent {
             var jsonString: String by remember { mutableStateOf(nestedJson2) }
 
@@ -256,7 +262,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun changing_json_from_invalid_to_valid_is_handled_correctly(): Unit = runComposeUiTest {
+    public fun changing_json_from_invalid_to_valid_is_handled_correctly(): TestResult = runComposeUiTest {
         setContent {
             var jsonString: String by remember { mutableStateOf(INVALID_JSON) }
 
@@ -279,7 +285,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun changing_json_from_valid_to_invalid_is_handled_correctly(): Unit = runComposeUiTest {
+    public fun changing_json_from_valid_to_invalid_is_handled_correctly(): TestResult = runComposeUiTest {
         setContent {
             var jsonString: String by remember { mutableStateOf(rootStringJson) }
             var errorMessage: String? by remember { mutableStateOf(null) }
@@ -318,7 +324,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun changing_initial_state_is_handled_correctly(): Unit = runComposeUiTest {
+    public fun changing_initial_state_is_handled_correctly(): TestResult = runComposeUiTest {
         setContent {
             var initalState: TreeState by remember { mutableStateOf(TreeState.EXPANDED) }
 
@@ -353,7 +359,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun showing_and_hiding_indices_is_handled_correctly(): Unit = runComposeUiTest {
+    public fun showing_and_hiding_indices_is_handled_correctly(): TestResult = runComposeUiTest {
         setContent {
             var showIndices: Boolean by remember { mutableStateOf(true) }
 
@@ -387,7 +393,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun showing_and_hiding_item_count_is_handled_correctly(): Unit = runComposeUiTest {
+    public fun showing_and_hiding_item_count_is_handled_correctly(): TestResult = runComposeUiTest {
         setContent {
             var showItemCount: Boolean by remember { mutableStateOf(true) }
 
@@ -418,7 +424,7 @@ public class JsonTreeTest {
     }
 
     @Test
-    public fun expanding_single_children_is_handled_correctly(): Unit = runComposeUiTest {
+    public fun expanding_single_children_is_handled_correctly(): TestResult = runComposeUiTest {
         setContent {
             JsonTree(
                 json = arrayOfArraysJson,
@@ -438,11 +444,12 @@ public class JsonTreeTest {
 
         // collapse root
         onNodeWithText("{").performClick()
+        waitUntilExactlyOneExists(hasText("{ 1 item }"))
         onNodeWithText("{ 1 item }").assertIsDisplayed()
     }
 
     @Test
-    public fun not_expanding_single_children_is_handled_correctly(): Unit = runComposeUiTest {
+    public fun not_expanding_single_children_is_handled_correctly(): TestResult = runComposeUiTest {
         setContent {
             JsonTree(
                 json = arrayOfArraysJson,
@@ -458,13 +465,13 @@ public class JsonTreeTest {
         onNodeWithText("\"array\": [ 2 items ]").assertIsDisplayed()
         onNodeWithText("\"array\": [ 2 items ]").performClick()
 
-        waitForIdle()
+        waitUntilExactlyOneExists(hasText("[ 1 item ],"))
         onNodeWithText("[ 1 item ],").assertIsDisplayed()
         onNodeWithText("[ 2 items ]").assertIsDisplayed()
 
-        waitForIdle()
         // collapse root
         onNodeWithText("{").performClick()
+        waitUntilExactlyOneExists(hasText("{ 1 item }"))
         onNodeWithText("{ 1 item }").assertIsDisplayed()
     }
 }

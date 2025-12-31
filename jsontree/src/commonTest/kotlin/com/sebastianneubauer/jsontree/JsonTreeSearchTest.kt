@@ -22,7 +22,7 @@ public class JsonTreeSearchTest {
     )
 
     @Test
-    public fun `query with one occurrence in key should return result with one occurrence in key`(): TestResult = runTest {
+    public fun query_with_one_occurrence_in_key_should_return_result_with_one_occurrence_in_key(): TestResult = runTest {
         val result = underTest.search(searchQuery = "array1", jsonTreeList = TestData.expandedList)
 
         val range = SearchOccurrence.Range.Key(range = IntRange(0, 5))
@@ -46,7 +46,7 @@ public class JsonTreeSearchTest {
     }
 
     @Test
-    public fun `query with multiple occurrences in key should return result with multiple occurrence in key`(): TestResult = runTest {
+    public fun query_with_multiple_occurrences_in_key_should_return_result_with_multiple_occurrence_in_key(): TestResult = runTest {
         val result = underTest.search(searchQuery = "i", jsonTreeList = TestData.expandedList)
 
         val range1 = SearchOccurrence.Range.Key(range = IntRange(2, 2))
@@ -72,7 +72,7 @@ public class JsonTreeSearchTest {
     }
 
     @Test
-    public fun `query with one occurrence in value should return result with one occurrence in value`(): TestResult = runTest {
+    public fun query_with_one_occurrence_in_value_should_return_result_with_one_occurrence_in_value(): TestResult = runTest {
         val result = underTest.search(searchQuery = "value1", jsonTreeList = TestData.expandedList)
 
         val range = SearchOccurrence.Range.Value(range = IntRange(0, 5))
@@ -96,7 +96,7 @@ public class JsonTreeSearchTest {
     }
 
     @Test
-    public fun `query with multiple occurrences in value should return result with multiple occurrence in value`(): TestResult = runTest {
+    public fun query_with_multiple_occurrences_in_value_should_return_result_with_multiple_occurrence_in_value(): TestResult = runTest {
         val result = underTest.search(searchQuery = "second", jsonTreeList = TestData.expandedList)
 
         val range1 = SearchOccurrence.Range.Value(range = IntRange(0, 5))
@@ -121,7 +121,7 @@ public class JsonTreeSearchTest {
     }
 
     @Test
-    public fun `query with occurrences in key and value should return result with occurrences in key and value`(): TestResult = runTest {
+    public fun query_with_occurrences_in_key_and_value_should_return_result_with_occurrences_in_key_and_value(): TestResult = runTest {
         val result = underTest.search(searchQuery = "r", jsonTreeList = TestData.expandedList)
 
         val range1 = SearchOccurrence.Range.Key(range = IntRange(1, 1))

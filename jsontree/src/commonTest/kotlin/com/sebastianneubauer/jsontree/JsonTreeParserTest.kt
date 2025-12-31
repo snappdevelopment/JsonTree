@@ -23,14 +23,14 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `invalid json - shows error state`(): TestResult = runTest {
+    public fun invalid_json_shows_error_state(): TestResult = runTest {
         val underTest = underTest(INVALID_JSON, TreeState.COLLAPSED)
         // produces Error state with any throwable
         assertTrue(underTest.state.value is Error)
     }
 
     @Test
-    public fun `empty json - collapsed - shows collapsed empty json`(): TestResult = runTest {
+    public fun empty_json_collapsed_shows_collapsed_empty_json(): TestResult = runTest {
         val underTest = underTest(EMPTY_OBJECT_JSON, TreeState.COLLAPSED)
         assertEquals(
             Ready(
@@ -51,7 +51,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `empty json - first item expanded - shows expanded empty json`(): TestResult = runTest {
+    public fun empty_json_first_item_expanded_shows_expanded_empty_json(): TestResult = runTest {
         val underTest = underTest(EMPTY_OBJECT_JSON, TreeState.FIRST_ITEM_EXPANDED)
         assertEquals(
             Ready(
@@ -78,7 +78,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `empty json - expanded - shows expanded empty json`(): TestResult = runTest {
+    public fun empty_json_expanded_shows_expanded_empty_json(): TestResult = runTest {
         val underTest = underTest(EMPTY_OBJECT_JSON, TreeState.EXPANDED)
         assertEquals(
             Ready(
@@ -105,7 +105,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `root string json - collapsed - shows root string`(): TestResult = runTest {
+    public fun root_string_json_collapsed_shows_root_string(): TestResult = runTest {
         val underTest = underTest(rootStringJson, TreeState.COLLAPSED)
         assertEquals(
             Ready(
@@ -125,7 +125,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `root string json - expanded - shows root string`(): TestResult = runTest {
+    public fun root_string_json_expanded_shows_root_string(): TestResult = runTest {
         val underTest = underTest(rootStringJson, TreeState.EXPANDED)
         assertEquals(
             Ready(
@@ -145,7 +145,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `root string json - first item expanded - shows root string`(): TestResult = runTest {
+    public fun root_string_json_first_item_expanded_shows_root_string(): TestResult = runTest {
         val underTest = underTest(rootStringJson, TreeState.FIRST_ITEM_EXPANDED)
         assertEquals(
             Ready(
@@ -165,7 +165,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `root array json - collapsed - shows collapsed array`(): TestResult = runTest {
+    public fun root_array_json_collapsed_shows_collapsed_array(): TestResult = runTest {
         val underTest = underTest(rootArrayJson, TreeState.COLLAPSED)
         assertEquals(
             Ready(
@@ -195,7 +195,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `root array json - first item expanded - shows expanded array`(): TestResult = runTest {
+    public fun root_array_json_first_item_expanded_shows_expanded_array(): TestResult = runTest {
         val underTest = underTest(rootArrayJson, TreeState.FIRST_ITEM_EXPANDED)
         assertEquals(
             Ready(
@@ -239,7 +239,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `root array json - expanded - shows expanded array`(): TestResult = runTest {
+    public fun root_array_json_expanded_shows_expanded_array(): TestResult = runTest {
         val underTest = underTest(rootArrayJson, TreeState.EXPANDED)
         assertEquals(
             Ready(
@@ -283,7 +283,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `nested json - collapsed - shows collapsed json`(): TestResult = runTest {
+    public fun nested_json_collapsed_shows_collapsed_json(): TestResult = runTest {
         val underTest = underTest(nestedJson, TreeState.COLLAPSED)
         assertEquals(
             Ready(list = listOf(jsonTreeElement())),
@@ -292,7 +292,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `nested json - first item expanded - shows first item expanded`(): TestResult = runTest {
+    public fun nested_json_first_item_expanded_shows_first_item_expanded(): TestResult = runTest {
         val underTest = underTest(nestedJson, TreeState.FIRST_ITEM_EXPANDED)
         assertEquals(
             Ready(
@@ -315,7 +315,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `nested json - expanded - shows expanded json`(): TestResult = runTest {
+    public fun nested_json_expanded_shows_expanded_json(): TestResult = runTest {
         val underTest = underTest(nestedJson, TreeState.EXPANDED)
         assertEquals(
             Ready(
@@ -365,7 +365,7 @@ public class JsonTreeParserTest {
     }
 
     @Test
-    public fun `nested json - expandSingleChildren is false - expands and collapses correctly`(): TestResult =
+    public fun nested_json_expandSingleChildren_is_false_expands_and_collapses_correctly(): TestResult =
         runTest {
             val underTest = underTest(nestedJson, TreeState.COLLAPSED)
             assertEquals(
@@ -504,7 +504,7 @@ public class JsonTreeParserTest {
         }
 
     @Test
-    public fun `nested json - expandSingleChildren is true - expands and collapses correctly`(): TestResult = runTest {
+    public fun nested_json_expandSingleChildren_is_true_expands_and_collapses_correctly(): TestResult = runTest {
         val underTest = underTest(nestedJson, TreeState.COLLAPSED)
         assertEquals(
             Ready(list = listOf(jsonTreeElement())),
