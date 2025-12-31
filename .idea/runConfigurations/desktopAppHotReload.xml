@@ -10,8 +10,8 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value=":sample:jvmRunHot" />
-          <option value="--auto" />
+          <option value=":sample:hotRunJvm" />
+          <option value="--autoReload" />
           <option value="--mainClass" />
           <option value="MainKt" />
         </list>
