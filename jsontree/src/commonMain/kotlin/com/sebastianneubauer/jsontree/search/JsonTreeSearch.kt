@@ -1,16 +1,19 @@
 package com.sebastianneubauer.jsontree.search
 
+import androidx.compose.runtime.Immutable
 import com.sebastianneubauer.jsontree.JsonTreeElement
 import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
+@Immutable
 internal data class SearchOccurrence(
     // the index in the JsonTree list
     val listIndex: Int,
     // the ranges of the search query matches
     val ranges: List<Range>,
 ) {
+    @Immutable
     sealed interface Range {
         val range: IntRange
 

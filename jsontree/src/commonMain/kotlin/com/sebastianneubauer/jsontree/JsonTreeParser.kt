@@ -71,7 +71,7 @@ internal class JsonTreeParser(
         val expandedList = state.list.first().expand(expansion = Expansion.All).toList()
 
         withContext(mainDispatcher) {
-            parserState.value = state.copy(expandedList)
+            parserState.value = state.copy(list = expandedList)
         }
         expandedList
     }
@@ -103,7 +103,7 @@ internal class JsonTreeParser(
         }
 
         withContext(mainDispatcher) {
-            parserState.value = state.copy(newList)
+            parserState.value = state.copy(list = newList)
         }
     }
 

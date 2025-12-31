@@ -1,7 +1,9 @@
 package com.sebastianneubauer.jsontree
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.json.JsonElement
 
+@Immutable
 internal sealed interface JsonTreeParserState {
     data object Loading : JsonTreeParserState
     data class Ready(val list: List<JsonTreeElement>) : JsonTreeParserState
