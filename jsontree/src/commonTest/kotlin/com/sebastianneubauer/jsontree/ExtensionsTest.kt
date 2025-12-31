@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 public class ExtensionsTest {
 
     @Test
-    public fun `expand object with expansion none should not expand children`() {
+    public fun expand_object_with_expansion_none_should_not_expand_children() {
         val result = ExpandTestData.testObject.expand(Expansion.None)
 
         assertEquals(
@@ -23,7 +23,7 @@ public class ExtensionsTest {
     }
 
     @Test
-    public fun `expand object with expansion singleOnly should expand only single children`() {
+    public fun expand_object_with_expansion_singleOnly_should_expand_only_single_children() {
         val result = ExpandTestData.testObject.expand(Expansion.SingleOnly)
 
         assertEquals(
@@ -36,7 +36,7 @@ public class ExtensionsTest {
     }
 
     @Test
-    public fun `expand object with expansion all should expand all children`() {
+    public fun expand_object_with_expansion_all_should_expand_all_children() {
         val result = ExpandTestData.testObject.expand(Expansion.All)
 
         assertEquals(
@@ -59,7 +59,7 @@ public class ExtensionsTest {
     }
 
     @Test
-    public fun `collapse object should collapse all children`() {
+    public fun collapse_object_should_collapse_all_children() {
         val result = CollapseTestData.testObject.collapse()
 
         assertEquals(
@@ -82,7 +82,7 @@ public class ExtensionsTest {
     }
 
     @Test
-    public fun `collapsed object should be the only element in list`() {
+    public fun collapsed_object_should_be_the_only_element_in_list() {
         val result = ExpandTestData.testObject.toList()
 
         assertEquals(
@@ -92,7 +92,7 @@ public class ExtensionsTest {
     }
 
     @Test
-    public fun `expanded object with collapsed children should only have direct children in list`() {
+    public fun expanded_object_with_collapsed_children_should_only_have_direct_children_in_list() {
         val result = ExpandTestData.testObject.copy(state = TreeState.EXPANDED).toList()
 
         assertEquals(
@@ -106,7 +106,7 @@ public class ExtensionsTest {
     }
 
     @Test
-    public fun `expanded object with expanded children should have all children in list`() {
+    public fun expanded_object_with_expanded_children_should_have_all_children_in_list() {
         val result = CollapseTestData.testObject.toList()
 
         assertEquals(

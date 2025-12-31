@@ -17,13 +17,13 @@ public class SearchStateTest {
     private val dispatcher = UnconfinedTestDispatcher()
 
     @Test
-    public fun `the initial state is has no results`(): TestResult = runTest {
+    public fun the_initial_state_is_has_no_results(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.state, expected = initialSearchResult)
     }
 
     @Test
-    public fun `updating the query in the state should update the query variable`(): TestResult = runTest {
+    public fun updating_the_query_in_the_state_should_update_the_query_variable(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.query, expected = null)
 
@@ -32,7 +32,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `updating the resultCount in the state should update the resultCount variable`(): TestResult = runTest {
+    public fun updating_the_resultCount_in_the_state_should_update_the_resultCount_variable(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.totalResults, expected = 0)
 
@@ -41,7 +41,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `updating the selectedResultIndex in the state should update the selectedResult variable`(): TestResult = runTest {
+    public fun updating_the_selectedResultIndex_in_the_state_should_update_the_selectedResult_variable(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.selectedResultIndex, expected = null)
 
@@ -50,7 +50,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `calling reset() should reset the state`(): TestResult = runTest {
+    public fun calling_reset_should_reset_the_state(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         val searchResult = SearchResult(
             query = "test",
@@ -74,7 +74,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `calling selectNext() without results does nothing`(): TestResult = runTest {
+    public fun calling_selectNext_without_results_does_nothing(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.state, expected = initialSearchResult)
 
@@ -83,7 +83,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `calling selectNext() and current range is not the last one, selects the next range`(): TestResult = runTest {
+    public fun calling_selectNext_and_current_range_is_not_the_last_one_selects_the_next_range(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences
 
@@ -101,7 +101,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `calling selectNext() and current range is the last one, selects the next occurrence`(): TestResult = runTest {
+    public fun calling_selectNext_and_current_range_is_the_last_one_selects_the_next_occurrence(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
             selectedOccurrence = SelectedSearchOccurrence(
@@ -125,7 +125,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `calling selectNext() and current occurrence is the last one, selects the first occurrence`(): TestResult = runTest {
+    public fun calling_selectNext_and_current_occurrence_is_the_last_one_selects_the_first_occurrence(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
             selectedOccurrence = SelectedSearchOccurrence(
@@ -143,7 +143,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `calling selectPrevious() without results does nothing`(): TestResult = runTest {
+    public fun calling_selectPrevious_without_results_does_nothing(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.state, expected = initialSearchResult)
 
@@ -152,7 +152,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `calling selectPrevious() and current range is not the first one, selects the previous range`(): TestResult = runTest {
+    public fun calling_selectPrevious_and_current_range_is_not_the_first_one_selects_the_previous_range(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
             selectedOccurrence = SelectedSearchOccurrence(
@@ -176,7 +176,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `calling selectPrevious() and current range is the first one, selects the previous occurrence`(): TestResult = runTest {
+    public fun calling_selectPrevious_and_current_range_is_the_first_one_selects_the_previous_occurrence(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences.copy(
             selectedOccurrence = SelectedSearchOccurrence(
@@ -200,7 +200,7 @@ public class SearchStateTest {
     }
 
     @Test
-    public fun `calling selectPrevious() and current occurrence is the first one, selects the last occurrence`(): TestResult = runTest {
+    public fun calling_selectPrevious_and_current_occurrence_is_the_first_one_selects_the_last_occurrence(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         searchState.state = resultWithOccurrences
 

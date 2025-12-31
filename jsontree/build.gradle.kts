@@ -17,14 +17,6 @@ kotlin {
         publishLibraryVariants("release")
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
-
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        instrumentedTestVariant {
-            sourceSetTree.set(KotlinSourceSetTree.test)
-            dependencies {
-                implementation(libs.kotlinx.coroutines.test)
-            }
-        }
     }
     iosX64()
     iosArm64()
@@ -84,6 +76,12 @@ kotlin {
             implementation(compose.desktop.currentOs)
         }
     }
+}
+
+dependencies {
+    implementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.compose.ui.test.android)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
 
 android {
