@@ -103,7 +103,7 @@ public fun JsonTree(
         is JsonTreeParserState.Ready -> {
             Box(modifier = modifier) {
                 JsonTreeList(
-                    items = state.list,
+                    state = state,
                     contentPadding = contentPadding,
                     colors = colors,
                     icon = icon,
@@ -148,7 +148,7 @@ public fun JsonTree(
 
 @Composable
 private fun JsonTreeList(
-    items: List<JsonTreeElement>,
+    state: JsonTreeParserState.Ready,
     contentPadding: PaddingValues,
     colors: TreeColors,
     icon: ImageVector,
@@ -160,6 +160,8 @@ private fun JsonTreeList(
     lazyListState: LazyListState,
     onClick: (JsonTreeElement) -> Unit,
 ) {
+    val items = state.list
+
     LazyColumn(
         state = lazyListState,
         contentPadding = contentPadding
