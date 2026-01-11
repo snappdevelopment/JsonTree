@@ -1,21 +1,5 @@
 package com.sebastianneubauer.jsontree
 
-internal val nestedJson = """
-    {
-        "array": [
-            [
-                {
-                    "string": "aString"
-                }
-            ],
-            [
-                42,
-                52
-            ]
-        ]
-    }
-""".trimIndent()
-
 internal val nestedJson2 = """
     {
     	"topLevelObject": {

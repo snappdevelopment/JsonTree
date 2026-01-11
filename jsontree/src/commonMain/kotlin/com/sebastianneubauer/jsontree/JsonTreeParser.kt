@@ -15,7 +15,6 @@ import com.sebastianneubauer.jsontree.util.Expansion
 import com.sebastianneubauer.jsontree.util.collapse
 import com.sebastianneubauer.jsontree.util.expand
 import com.sebastianneubauer.jsontree.util.toList
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -25,6 +24,9 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlin.concurrent.atomics.AtomicLong
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.incrementAndFetch
 
 internal class JsonTreeParser(
     private val json: String,
@@ -208,9 +210,10 @@ internal class JsonTreeParser(
     }
 }
 
+@OptIn(ExperimentalAtomicApi::class)
 internal class AtomicLongWrapper {
-    private val atomicLong = atomic(0L)
+    private val atomicLong = AtomicLong(0L)
     fun incrementAndGet(): Long {
-        return atomicLong.incrementAndGet()
+        return atomicLong.incrementAndFetch()
     }
 }

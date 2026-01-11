@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalTestApi::class)
 
-package com.sebastianneubauer.jsontree.ui
+package com.sebastianneubauer.jsontree
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi

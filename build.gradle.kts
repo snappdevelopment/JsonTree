@@ -8,11 +8,10 @@ buildscript {
 
 plugins {
     alias(libs.plugins.android.application).apply(false)
-    alias(libs.plugins.android.library).apply(false)
+    alias(libs.plugins.multiplatform.library).apply(false)
     alias(libs.plugins.kotlinMultiplatform).apply(false)
     alias(libs.plugins.compose).apply(false)
     alias(libs.plugins.compose.compiler).apply(false)
-    alias(libs.plugins.kotlinx.atomicfu).apply(false)
     alias(libs.plugins.publish).apply(false)
     alias(libs.plugins.api.validator)
     alias(libs.plugins.detekt)
