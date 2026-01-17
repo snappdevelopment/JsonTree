@@ -11,11 +11,10 @@ publish = "0.35.0"
 api-validator = "0.18.1"
 atomicfu = "0.29.0"
 androidx-activity-compose = "1.12.2"
-androidx-compose-ui-test = "1.10.0"
+androidx-compose-ui-test = "1.10.1"
 kotlinx-serialization-json = "1.9.0"
 kotlinx-coroutines = "1.10.2"
 detekt = "1.23.8"
-hotreload = "1.0.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -41,4 +40,3 @@ publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
 api-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "api-validator" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kotlinx-atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "atomicfu" }
-hotreload = { id = "org.jetbrains.compose.hot-reload", version.ref = "hotreload" }
