@@ -43,11 +43,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.jb.compose.runtime)
+            implementation(libs.jb.compose.foundation)
+            implementation(libs.jb.compose.material3)
+            implementation(libs.jb.compose.ui.tooling.preview)
+            implementation(libs.jb.compose.components.resources)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
             // needs to be added as a workaround not get atomicfus code stripped
@@ -59,7 +59,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
 
             @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-            implementation(compose.uiTest)
+            implementation(libs.jb.compose.ui.test)
         }
 
         androidMain.dependencies {
@@ -72,7 +72,7 @@ kotlin {
         }
 
         jvmTest.dependencies {
-            implementation(compose.desktop.uiTestJUnit4)
+            implementation(libs.jb.compose.ui.test.junit4)
             implementation(compose.desktop.currentOs)
         }
     }

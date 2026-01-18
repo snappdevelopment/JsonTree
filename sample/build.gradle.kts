@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.kotlinx.atomicfu)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.hotreload)
 }
 
 group = "com.sebastianneubauer.jsontreesample"
@@ -50,11 +49,11 @@ kotlin {
             }
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.jb.compose.runtime)
+            implementation(libs.jb.compose.foundation)
+            implementation(libs.jb.compose.material3)
+            implementation(libs.jb.compose.ui.tooling.preview)
+            implementation(libs.jb.compose.components.resources)
             implementation(libs.kotlinx.serialization.json)
             implementation(project(":jsontree"))
         }
@@ -64,7 +63,7 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(compose.uiTooling)
+            implementation(libs.jb.compose.ui.tooling)
             implementation(libs.androidx.activity.compose)
         }
 
