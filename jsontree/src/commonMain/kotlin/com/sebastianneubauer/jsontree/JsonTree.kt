@@ -99,6 +99,11 @@ public fun JsonTree(
         jsonParser.init(initialState)
     }
 
+    LaunchedEffect(Unit) {
+        val differ = JsonTreeDiffer2()
+        differ.diff(original = differ.original, revised = differ.revised)
+    }
+
     when (val state = jsonParser.state.value) {
         is JsonTreeParserState.Ready -> {
             Box(modifier = modifier) {

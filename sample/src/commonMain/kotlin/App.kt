@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.JsonTree
+import com.sebastianneubauer.jsontree.SideBySideDiff
 import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
@@ -240,6 +241,10 @@ private fun MainScreen() {
                     Text("Found: ${searchState.selectedResultIndex?.let { it + 1 } ?: 0}/${searchState.totalResults}")
                 }
             }
+
+            Spacer(Modifier.height(8.dp))
+
+            SideBySideDiff()
 
             Spacer(Modifier.height(8.dp))
 
