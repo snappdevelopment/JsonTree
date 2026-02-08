@@ -3,42 +3,49 @@ package com.sebastianneubauer.jsontree
 import io.github.petertrr.diffutils.text.DiffRow
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import io.github.petertrr.diffutils.text.DiffTagGenerator
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.withContext
 
-internal class JsonTreeDiffer2 {
+internal class JsonTreeDiffer2(
+    val defaultDispatcher: CoroutineDispatcher,
+    val mainDispatcher: CoroutineDispatcher
+) {
 
     val state = MutableStateFlow<JsonTreeDiffer2State>(JsonTreeDiffer2State.Loading)
 
     suspend fun diff(
         original: String,
         revised: String,
-    ) {
-        val originalParser = JsonTreeParser(
-            json = original,
-            defaultDispatcher = Dispatchers.Default,
-            mainDispatcher = Dispatchers.Main
-        ).also { it.init(TreeState.EXPANDED) }
+    ) = withContext(defaultDispatcher) {
+        val originalJsonTreeListDeferred = async { getJsonTreeList(original) }
+        val revisedJsonTreeListDeferred = async { getJsonTreeList(revised) }
 
-        val revisedParser = JsonTreeParser(
-            json = revised,
-            defaultDispatcher = Dispatchers.Default,
-            mainDispatcher = Dispatchers.Main
-        ).also { it.init(TreeState.EXPANDED) }
-
-        //todo  actually subscribe to the state
-        val originalJsonTreeList = (originalParser.state.value as JsonTreeParserState.Ready).list
-        val revisedJsonTreeList = (revisedParser.state.value as JsonTreeParserState.Ready).list
+        val originalJsonTreeListResult = originalJsonTreeListDeferred.await()
+        val revisedJsonTreeListResult = revisedJsonTreeListDeferred.await()
+        val (originalJsonTreeList, revisedJsonTreeList) = when {
+            originalJsonTreeListResult is JsonTreeParserState.Parsing.Error -> {
+                withContext(mainDispatcher) {
+                    state.value = JsonTreeDiffer2State.Error.OriginalJsonError(originalJsonTreeListResult.throwable)
+                }
+                return@withContext
+            }
+            revisedJsonTreeListResult is JsonTreeParserState.Parsing.Error -> {
+                withContext(mainDispatcher) {
+                    state.value = JsonTreeDiffer2State.Error.RevisedJsonError(revisedJsonTreeListResult.throwable)
+                }
+                return@withContext
+            }
+            else -> {
+                (originalJsonTreeListResult as JsonTreeParserState.Ready).list to (revisedJsonTreeListResult as JsonTreeParserState.Ready).list
+            }
+        }
 
         val diffRowGenerator =  object : DiffTagGenerator {
-            override fun generateClose(tag: DiffRow.Tag): String {
-                return inlineDiffTagClosed
-            }
-
-            override fun generateOpen(tag: DiffRow.Tag): String {
-                return inlineDiffTagOpen
-            }
+            override fun generateClose(tag: DiffRow.Tag): String = inlineDiffTagClosed
+            override fun generateOpen(tag: DiffRow.Tag): String = inlineDiffTagOpen
         }
 
         val diffRows = DiffRowGenerator(
@@ -50,112 +57,137 @@ internal class JsonTreeDiffer2 {
             revisedJsonTreeList.map { it.toDiffString() }
         )
 
-        println(diffRows)
-
-        val inlineDiffs = diffRows.map { diffRow ->
+        val inlineDiffsIndices = diffRows.map { diffRow ->
             if(diffRow.tag == DiffRow.Tag.CHANGE) {
-                val oldLineIndices = diffRow.oldLine.trim().findBoldTagIndicesStripped()
-                val newLineIndices = diffRow.newLine.trim().findBoldTagIndicesStripped()
-                println("OldLine: ${diffRow.oldLine}, indices: $oldLineIndices, NewLine: ${diffRow.newLine}, indices: $newLineIndices")
+                val oldLineIndices = diffRow.oldLine.findInlineDiffTagIndices()
+                val newLineIndices = diffRow.newLine.findInlineDiffTagIndices()
                 Pair(oldLineIndices, newLineIndices)
             } else {
                 Pair(emptyList(), emptyList())
             }
         }
 
-        println("InlineDiffs: $inlineDiffs")
-
-        val strippedDiffRows = diffRows.map { diffRow ->
+        val strippedTagDiffRows = diffRows.map { diffRow ->
             diffRow.copy(
                 oldLine = diffRow.oldLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, ""),
                 newLine = diffRow.newLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, "")
             )
         }
 
-        println("strippedDiffs: $strippedDiffRows")
+        val originalDiffElements = getOriginalDiffElements(
+            strippedTagDiffRows = strippedTagDiffRows,
+            originalJsonTreeList = originalJsonTreeList,
+            inlineDiffsIndices = inlineDiffsIndices
+        )
 
-//        val originalDiffJson = strippedDiffRows.fold("") { acc, row -> acc + row.oldLine }
-//        val revisedDiffJson = strippedDiffRows.fold("") { acc, row -> acc + row.newLine }
+        val revisedDiffElements = getRevisedDiffElements(
+            strippedTagDiffRows = strippedTagDiffRows,
+            revisedJsonTreeList = revisedJsonTreeList,
+            inlineDiffsIndices = inlineDiffsIndices
+        )
 
-        println(originalJsonTreeList)
-        println(revisedJsonTreeList)
-        val originalUsedIds = mutableListOf<String>()
-        val originalDiffElements = strippedDiffRows.mapIndexed { index, diffRow ->
+        withContext(mainDispatcher) {
+            state.value = JsonTreeDiffer2State.Ready(
+                originalJsonDiffElements = originalDiffElements,
+                revisedJsonDiffElements = revisedDiffElements,
+            )
+        }
+    }
+
+    private fun getOriginalDiffElements(
+        strippedTagDiffRows: List<DiffRow>,
+        originalJsonTreeList: List<JsonTreeElement>,
+        inlineDiffsIndices: List<Pair<List<Pair<Int, Int>>, List<Pair<Int,Int>>>>
+    ): List<JsonDiffElement> {
+        val usedIds = mutableListOf<String>()
+
+        fun findJsonTreeElement(diffLine: String): JsonTreeElement {
+            return originalJsonTreeList.first { jsonTreeElement ->
+                diffLine == jsonTreeElement.toDiffString() && jsonTreeElement.id !in usedIds
+            }
+        }
+
+        return strippedTagDiffRows.mapIndexed { index, diffRow ->
             when(diffRow.tag) {
                 DiffRow.Tag.EQUAL -> {
-                    val jsonTreeElement = originalJsonTreeList.first { jsonTreeElement ->
-                        println("$diffRow -> ${jsonTreeElement.toDiffString()}")
-                        diffRow.oldLine.trim() == jsonTreeElement.toDiffString() && jsonTreeElement.id !in originalUsedIds
-                    }
-                    originalUsedIds.add(jsonTreeElement.id)
+                    val jsonTreeElement = findJsonTreeElement(diffRow.oldLine)
+                    usedIds.add(jsonTreeElement.id)
                     JsonDiffElement.Equal(jsonTreeElement)
                 }
                 DiffRow.Tag.CHANGE -> {
-                    val jsonTreeElement = originalJsonTreeList.first { jsonTreeElement ->
-                        println(diffRow)
-                        diffRow.oldLine.trim() == jsonTreeElement.toDiffString() && jsonTreeElement.id !in originalUsedIds
-                    }
-                    originalUsedIds.add(jsonTreeElement.id)
+                    val jsonTreeElement = findJsonTreeElement(diffRow.oldLine)
+                    usedIds.add(jsonTreeElement.id)
                     JsonDiffElement.Change(
                         jsonTreeElement = jsonTreeElement,
-                        inlineDiffIndices = inlineDiffs[index].first
+                        inlineDiffIndices = inlineDiffsIndices[index].first
                     )
                 }
                 DiffRow.Tag.INSERT -> {
                     JsonDiffElement.Insertion(null)
                 }
                 DiffRow.Tag.DELETE -> {
-                    val jsonTreeElement = originalJsonTreeList.first { jsonTreeElement ->
-                        println(diffRow)
-                        diffRow.oldLine.trim() == jsonTreeElement.toDiffString() && jsonTreeElement.id !in originalUsedIds
-                    }
-                    originalUsedIds.add(jsonTreeElement.id)
+                    val jsonTreeElement = findJsonTreeElement(diffRow.oldLine)
+                    usedIds.add(jsonTreeElement.id)
                     JsonDiffElement.Deletion(jsonTreeElement)
                 }
             }
         }
+    }
 
-        val revisedUsedIds = mutableListOf<String>()
-        val revisedDiffElements = strippedDiffRows.mapIndexed { index, diffRow ->
+    private fun getRevisedDiffElements(
+        strippedTagDiffRows: List<DiffRow>,
+        revisedJsonTreeList: List<JsonTreeElement>,
+        inlineDiffsIndices: List<Pair<List<Pair<Int, Int>>, List<Pair<Int,Int>>>>
+    ): List<JsonDiffElement> {
+        val usedIds = mutableListOf<String>()
+
+        fun findJsonTreeElement(diffLine: String): JsonTreeElement {
+            return revisedJsonTreeList.first { jsonTreeElement ->
+                diffLine == jsonTreeElement.toDiffString() && jsonTreeElement.id !in usedIds
+            }
+        }
+
+        return strippedTagDiffRows.mapIndexed { index, diffRow ->
             when(diffRow.tag) {
                 DiffRow.Tag.EQUAL -> {
-                    val jsonTreeElement = revisedJsonTreeList.first { jsonTreeElement ->
-                        diffRow.newLine.trim() == jsonTreeElement.toDiffString() && jsonTreeElement.id !in revisedUsedIds
-                    }
-                    revisedUsedIds.add(jsonTreeElement.id)
+                    val jsonTreeElement = findJsonTreeElement(diffRow.newLine)
+                    usedIds.add(jsonTreeElement.id)
                     JsonDiffElement.Equal(jsonTreeElement)
                 }
                 DiffRow.Tag.CHANGE -> {
-                    val jsonTreeElement = revisedJsonTreeList.first { jsonTreeElement ->
-                        diffRow.newLine.trim() == jsonTreeElement.toDiffString() && jsonTreeElement.id !in revisedUsedIds
-                    }
-                    revisedUsedIds.add(jsonTreeElement.id)
+                    val jsonTreeElement = findJsonTreeElement(diffRow.newLine)
+                    usedIds.add(jsonTreeElement.id)
                     JsonDiffElement.Change(
                         jsonTreeElement = jsonTreeElement,
-                        inlineDiffIndices = inlineDiffs[index].second
+                        inlineDiffIndices = inlineDiffsIndices[index].second
                     )
                 }
                 DiffRow.Tag.INSERT -> {
-                    val jsonTreeElement = revisedJsonTreeList.first { jsonTreeElement ->
-                        diffRow.newLine.trim() == jsonTreeElement.toDiffString() && jsonTreeElement.id !in revisedUsedIds
-                    }
-                    revisedUsedIds.add(jsonTreeElement.id)
+                    val jsonTreeElement = findJsonTreeElement(diffRow.newLine)
+                    usedIds.add(jsonTreeElement.id)
                     JsonDiffElement.Insertion(jsonTreeElement)
                 }
                 DiffRow.Tag.DELETE -> JsonDiffElement.Deletion(null)
             }
         }
-
-        println("OriginalDiffElements: $originalDiffElements")
-        println("RevisedDiffElements: $revisedDiffElements")
-
-        state.value = JsonTreeDiffer2State.Ready(
-            originalJsonDiffElements = originalDiffElements,
-            revisedJsonDiffElements = revisedDiffElements,
-        )
     }
 
-    private fun String.findBoldTagIndicesStripped(): List<Pair<Int, Int>> {
+    private suspend fun getJsonTreeList(json: String): JsonTreeParserState {
+        val originalParser = JsonTreeParser(
+            json = json,
+            defaultDispatcher = Dispatchers.Default,
+            mainDispatcher = Dispatchers.Main
+        ).also { it.init(TreeState.EXPANDED) }
+
+        return when(val state = originalParser.state.value) {
+            is JsonTreeParserState.Ready -> state
+            is JsonTreeParserState.Parsing.Error -> state
+            is JsonTreeParserState.Loading,
+            is JsonTreeParserState.Parsing.Parsed -> error("Impossible state $state!")
+        }
+    }
+
+    private fun String.findInlineDiffTagIndices(): List<Pair<Int, Int>> {
         val result = mutableListOf<Pair<Int, Int>>()
         var strippedIndex = 0
         var currentIndex = 0
@@ -203,13 +235,6 @@ internal class JsonTreeDiffer2 {
             val jsonTreeElement: JsonTreeElement,
         ): JsonDiffElement
     }
-
-    internal enum class ChangeType {
-        Change,
-        Insertion,
-        Deletion,
-        Equal
-    }
 }
 
 internal sealed interface JsonTreeDiffer2State {
@@ -218,6 +243,10 @@ internal sealed interface JsonTreeDiffer2State {
         val originalJsonDiffElements: List<JsonTreeDiffer2.JsonDiffElement>,
         val revisedJsonDiffElements: List<JsonTreeDiffer2.JsonDiffElement>
     ): JsonTreeDiffer2State
+    sealed interface Error: JsonTreeDiffer2State {
+        data class OriginalJsonError(val throwable: Throwable): Error
+        data class RevisedJsonError(val throwable: Throwable): Error
+    }
 }
 
 internal fun JsonTreeElement.toDiffString(): String {

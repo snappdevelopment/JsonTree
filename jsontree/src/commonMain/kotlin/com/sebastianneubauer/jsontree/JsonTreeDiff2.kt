@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,24 +18,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import be.digitalia.compose.htmlconverter.htmlToAnnotatedString
-import io.github.petertrr.diffutils.text.DiffLineNormalizer
-import io.github.petertrr.diffutils.text.DiffRow
-import io.github.petertrr.diffutils.text.DiffRowGenerator
-import io.github.petertrr.diffutils.text.DiffTagGenerator
 import jsontree.jsontree.generated.resources.Res
 import jsontree.jsontree.generated.resources.jsontree_arrow_right
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable.start
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.vectorResource
 
@@ -57,42 +46,7 @@ public fun JsonTreeDiff2(
     onError: (Throwable) -> Unit = {}
 ) {
 
-    val jsonTreeDiffer2 = remember { JsonTreeDiffer2() }
-    LaunchedEffect(originalJson, revisedJson) {
-        jsonTreeDiffer2.diff(originalJson, revisedJson)
-    }
 
-
-
-//    when (val state = revisedJsonParser.state.value) {
-//        is JsonTreeParserState.Ready -> {
-//            Box(modifier = modifier) {
-//                JsonTreeList(
-//                    state = state,
-//                    contentPadding = contentPadding,
-//                    colors = colors,
-//                    icon = icon,
-//                    iconSize = iconSize,
-//                    textStyle = textStyle,
-//                    showIndices = showIndices,
-//                    showItemCount = showItemCount,
-//                    searchResult = SearchState.SearchResult(
-//                        query = null,
-//                        occurrences = emptyMap(),
-//                        selectedOccurrence = null,
-//                        totalResults = 0,
-//                        selectedResultIndex = null
-//                    ),
-//                    lazyListState = lazyListState,
-//                    onClick = {} //noop
-//                )
-//
-//            }
-//        }
-//        is JsonTreeParserState.Loading -> onLoading()
-//        is JsonTreeParserState.Parsing.Error -> onError(state.throwable)
-//        is JsonTreeParserState.Parsing.Parsed -> error("Unexpected state $state")
-//    }
 }
 
 @Composable
@@ -158,27 +112,26 @@ public fun SideBySideDiff2() {
             }
         }
     """.trimIndent()
-// TODO: Leerzeilen wie im emptyJsonObject sind schwer zu verarbeiten. Es ist auch nicht garantiert, dass der User pretty Json reingibt.
-    // TODO: Evtl. die Strings als erstes durch den JsonParser jagen und dann toDiffString verwenden um die DiffRows zu erstellen?
-    // TODO: Dann hat man garantiert valides Json und kann die DiffRows perfekt mit den JsonTreeElements matchen
 
-    val originalListState = rememberLazyListState()
-    val revisedListState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
-
-    val jsonTreeDiffer2 = remember { JsonTreeDiffer2() }
+    val jsonTreeDiffer2 = remember {
+        JsonTreeDiffer2(
+            defaultDispatcher = Dispatchers.Default,
+            mainDispatcher = Dispatchers.Main
+        )
+    }
     val jsonTreeDiffer2State = jsonTreeDiffer2.state.collectAsState().value
-    LaunchedEffect(Unit) {
+    LaunchedEffect(original, revised) {
         jsonTreeDiffer2.diff(original, revised)
     }
 
-    SyncScrolling(
+    val originalListState = rememberLazyListState()
+    val revisedListState = rememberLazyListState()
+
+    SyncScrollingEffect(
         originalListState = originalListState,
         revisedListState = revisedListState,
-        coroutineScope = coroutineScope
     )
 
-    println("State: $jsonTreeDiffer2State")
     if(jsonTreeDiffer2State is JsonTreeDiffer2State.Ready) {
         Row(modifier = Modifier.fillMaxWidth()) {
             LazyColumn(
@@ -266,11 +219,11 @@ public fun SideBySideDiff2() {
 }
 
 @Composable
-private fun SyncScrolling(
+private fun SyncScrollingEffect(
     originalListState: LazyListState,
     revisedListState: LazyListState,
-    coroutineScope: CoroutineScope
 ) {
+    val coroutineScope = rememberCoroutineScope()
     fun syncScroll(leading: LazyListState, following: LazyListState) {
         coroutineScope.launch {
             val scrollPosition = leading.firstVisibleItemScrollOffset
