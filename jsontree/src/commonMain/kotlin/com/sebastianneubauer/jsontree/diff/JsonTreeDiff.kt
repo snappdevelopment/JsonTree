@@ -4,9 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
@@ -17,14 +18,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.sebastianneubauer.jsontree.CollapsableType
+import com.sebastianneubauer.jsontree.JsonTreeElement
 import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.defaultLightColors
 import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
-import com.sebastianneubauer.jsontree.util.toRenderString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -44,7 +46,9 @@ public fun JsonTreeDiff(
 }
 
 @Composable
-public fun SideBySideDiff2() {
+public fun SideBySideDiff2(
+    colors: TreeColors = defaultLightColors,
+) {
     val original = """
         {
             "topLevelObject": {
@@ -132,38 +136,35 @@ public fun SideBySideDiff2() {
                 modifier = Modifier.weight(1f),
                 state = originalListState
             ) {
-                items(jsonTreeDifferState.originalJsonDiffElements) { diffElement ->
-                    val text = when(diffElement) {
-                        is JsonDiffElement.Change -> diffElement.jsonTreeElement.toRenderString()
-                        is JsonDiffElement.Deletion -> diffElement.jsonTreeElement!!.toRenderString()
-                        is JsonDiffElement.Equal -> diffElement.jsonTreeElement.toRenderString()
-                        is JsonDiffElement.Insertion -> ""
-                    }
-                    val annotatedText = buildAnnotatedString {
-                        append(text)
-                        if(diffElement is JsonDiffElement.Change) {
-                            diffElement.inlineDiffIndices.forEach { (start, end) ->
-                                addStyle(
-                                    style = SpanStyle(background = Color.Blue),
-                                    start = start,
-                                    end = end
-                                )
-                            }
-                        }
+                itemsIndexed(jsonTreeDifferState.originalJsonDiffElements) { index, diffElement ->
+                    val jsonTreeElement = when(diffElement) {
+                        is JsonDiffElement.Change -> diffElement.jsonTreeElement
+                        is JsonDiffElement.Deletion -> diffElement.jsonTreeElement!!
+                        is JsonDiffElement.Equal -> diffElement.jsonTreeElement
+                        is JsonDiffElement.Insertion -> null
                     }
 
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = when(diffElement) {
-                                    is JsonDiffElement.Change -> Color.Red
-                                    is JsonDiffElement.Deletion -> Color.Red
-                                    is JsonDiffElement.Equal -> Color.Transparent
-                                    is JsonDiffElement.Insertion -> Color.Transparent
-                                }
-                            ),
-                        text = annotatedText
+                    val text = rememberText(
+                        jsonTreeElement = jsonTreeElement,
+                        diffIndices = if(diffElement is JsonDiffElement.Change) {
+                            diffElement.inlineDiffIndices
+                        } else null,
+                        colors = colors
+                    )
+
+                    DiffText(
+                        backgroundColor = when(diffElement) {
+                            is JsonDiffElement.Change -> Color.Red
+                            is JsonDiffElement.Deletion -> Color.Red
+                            is JsonDiffElement.Equal -> Color.Transparent
+                            is JsonDiffElement.Insertion -> Color.Transparent
+                        },
+                        indent = if(jsonTreeElement != null && index > 0) {
+                            20.dp * jsonTreeElement.level
+                        } else {
+                            0.dp
+                        },
+                        text = text,
                     )
                 }
             }
@@ -172,44 +173,94 @@ public fun SideBySideDiff2() {
                 modifier = Modifier.weight(1f),
                 state = revisedListState
             ) {
-                items(jsonTreeDifferState.revisedJsonDiffElements) { diffElement ->
-                    val text = when(diffElement) {
-                        is JsonDiffElement.Change -> diffElement.jsonTreeElement.toRenderString()
-                        is JsonDiffElement.Deletion -> ""
-                        is JsonDiffElement.Equal -> diffElement.jsonTreeElement.toRenderString()
-                        is JsonDiffElement.Insertion -> diffElement.jsonTreeElement!!.toRenderString()
+                itemsIndexed(jsonTreeDifferState.revisedJsonDiffElements) { index, diffElement ->
+                    val jsonTreeElement = when(diffElement) {
+                        is JsonDiffElement.Change -> diffElement.jsonTreeElement
+                        is JsonDiffElement.Deletion -> null
+                        is JsonDiffElement.Equal -> diffElement.jsonTreeElement
+                        is JsonDiffElement.Insertion -> diffElement.jsonTreeElement!!
                     }
-                    val annotatedText = buildAnnotatedString {
-                        append(text)
-                        if(diffElement is JsonDiffElement.Change) {
-                            diffElement.inlineDiffIndices.forEach { (start, end) ->
-                                addStyle(
-                                    style = SpanStyle(background = Color.Blue),
-                                    start = start,
-                                    end = end
-                                )
-                            }
-                        }
-                    }
+                    val text = rememberText(
+                        jsonTreeElement = jsonTreeElement,
+                        diffIndices = if(diffElement is JsonDiffElement.Change) {
+                            diffElement.inlineDiffIndices
+                        } else null,
+                        colors = colors
+                    )
 
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = when(diffElement) {
-                                    is JsonDiffElement.Change -> Color.Green
-                                    is JsonDiffElement.Deletion -> Color.Transparent
-                                    is JsonDiffElement.Equal -> Color.Transparent
-                                    is JsonDiffElement.Insertion -> Color.Green
-                                }
-                            ),
-                        text = annotatedText
+                    DiffText(
+                        backgroundColor = when(diffElement) {
+                            is JsonDiffElement.Change -> Color.Green
+                            is JsonDiffElement.Deletion -> Color.Transparent
+                            is JsonDiffElement.Equal -> Color.Transparent
+                            is JsonDiffElement.Insertion -> Color.Green
+                        },
+                        indent = if(jsonTreeElement != null && index > 0) {
+                            20.dp * jsonTreeElement.level
+                        } else {
+                            0.dp
+                        },
+                        text = text
                     )
                 }
             }
         }
     }
+}
 
+@Composable
+private fun DiffText(
+    backgroundColor: Color,
+    indent: Dp,
+    text: AnnotatedString,
+) {
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = backgroundColor)
+            .padding(start = indent),
+        text = text
+    )
+}
+
+@Composable
+private fun rememberText(
+    jsonTreeElement: JsonTreeElement?,
+    diffIndices: List<Pair<Int, Int>>?,
+    colors: TreeColors,
+): AnnotatedString {
+    return when(jsonTreeElement) {
+        is JsonTreeElement.Collapsable.Array -> rememberCollapsableDiffText(
+            type = CollapsableType.ARRAY,
+            key = jsonTreeElement.key,
+            isLastItem = jsonTreeElement.isLastItem,
+            parentType = jsonTreeElement.parentType,
+            colors = colors,
+            diffIndices = diffIndices,
+        )
+        is JsonTreeElement.Collapsable.Object -> rememberCollapsableDiffText(
+            type = CollapsableType.OBJECT,
+            key = jsonTreeElement.key,
+            isLastItem = jsonTreeElement.isLastItem,
+            parentType = jsonTreeElement.parentType,
+            colors = colors,
+            diffIndices = diffIndices,
+        )
+        is JsonTreeElement.Primitive -> rememberPrimitiveDiffText(
+            key = jsonTreeElement.key,
+            value = jsonTreeElement.value,
+            isLastItem = jsonTreeElement.isLastItem,
+            parentType = jsonTreeElement.parentType,
+            colors = colors,
+            diffIndices = diffIndices,
+        )
+        is JsonTreeElement.EndBracket -> rememberEndBracketDiffText(
+            type = jsonTreeElement.type,
+            isLastItem = jsonTreeElement.isLastItem,
+            colors = colors
+        )
+        null -> AnnotatedString("")
+    }
 }
 
 @Composable
