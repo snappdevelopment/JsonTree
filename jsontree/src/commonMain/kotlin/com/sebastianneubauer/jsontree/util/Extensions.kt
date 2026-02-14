@@ -5,6 +5,7 @@ import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
 import com.sebastianneubauer.jsontree.JsonTreeElement.EndBracket
 import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive
+import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.endBracket
 
@@ -178,4 +179,31 @@ internal fun JsonTreeElement.toList(): List<JsonTreeElement> {
 
     addToList(this)
     return list
+}
+
+/**
+ * Converts a JsonTreeElement to its string representation.
+ */
+internal fun JsonTreeElement.toRenderString(): String {
+    return when(this) {
+        is Object -> if(key != null && parentType != ParentType.ARRAY) {
+            "\"$key\": {"
+        } else {
+            "{"
+        }
+        is Array -> if(key != null && parentType != ParentType.ARRAY) {
+            "\"$key\": ["
+        } else {
+            "["
+        }
+        is Primitive -> if(key != null && parentType != ParentType.ARRAY) {
+            "\"$key\": $value" + if(isLastItem) "" else ","
+        } else {
+            "$value" + if(isLastItem) "" else ","
+        }
+        is EndBracket -> when(type) {
+            EndBracket.Type.ARRAY -> if (!isLastItem) "]," else "]"
+            EndBracket.Type.OBJECT -> if (!isLastItem) "}," else "}"
+        }
+    }
 }

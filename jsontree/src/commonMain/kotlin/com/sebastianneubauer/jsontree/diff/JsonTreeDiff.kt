@@ -1,4 +1,4 @@
-package com.sebastianneubauer.jsontree
+package com.sebastianneubauer.jsontree.diff
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,32 +17,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import jsontree.jsontree.generated.resources.Res
-import jsontree.jsontree.generated.resources.jsontree_arrow_right
+import com.sebastianneubauer.jsontree.TreeColors
+import com.sebastianneubauer.jsontree.defaultLightColors
+import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
+import com.sebastianneubauer.jsontree.util.toRenderString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.vectorResource
 
 @Composable
-public fun JsonTreeDiff2(
+public fun JsonTreeDiff(
     originalJson: String,
     revisedJson: String,
     onLoading: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     colors: TreeColors = defaultLightColors,
-    icon: ImageVector = vectorResource(Res.drawable.jsontree_arrow_right),
-    iconSize: Dp = 20.dp,
     textStyle: TextStyle = LocalTextStyle.current,
-    showIndices: Boolean = false,
-    showItemCount: Boolean = true,
-    lazyListState: LazyListState = rememberLazyListState(),
     onError: (Throwable) -> Unit = {}
 ) {
 
@@ -113,15 +107,15 @@ public fun SideBySideDiff2() {
         }
     """.trimIndent()
 
-    val jsonTreeDiffer2 = remember {
-        JsonTreeDiffer2(
+    val jsonTreeDiffer = remember {
+        JsonTreeDiffer(
             defaultDispatcher = Dispatchers.Default,
             mainDispatcher = Dispatchers.Main
         )
     }
-    val jsonTreeDiffer2State = jsonTreeDiffer2.state.collectAsState().value
+    val jsonTreeDifferState = jsonTreeDiffer.state.collectAsState().value
     LaunchedEffect(original, revised) {
-        jsonTreeDiffer2.diff(original, revised)
+        jsonTreeDiffer.diff(original, revised)
     }
 
     val originalListState = rememberLazyListState()
@@ -132,22 +126,22 @@ public fun SideBySideDiff2() {
         revisedListState = revisedListState,
     )
 
-    if(jsonTreeDiffer2State is JsonTreeDiffer2State.Ready) {
+    if(jsonTreeDifferState is JsonTreeDifferState.Ready) {
         Row(modifier = Modifier.fillMaxWidth()) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 state = originalListState
             ) {
-                items(jsonTreeDiffer2State.originalJsonDiffElements) { diffElement ->
+                items(jsonTreeDifferState.originalJsonDiffElements) { diffElement ->
                     val text = when(diffElement) {
-                        is JsonTreeDiffer2.JsonDiffElement.Change -> diffElement.jsonTreeElement.toDiffString()
-                        is JsonTreeDiffer2.JsonDiffElement.Deletion -> diffElement.jsonTreeElement!!.toDiffString()
-                        is JsonTreeDiffer2.JsonDiffElement.Equal -> diffElement.jsonTreeElement.toDiffString()
-                        is JsonTreeDiffer2.JsonDiffElement.Insertion -> ""
+                        is JsonDiffElement.Change -> diffElement.jsonTreeElement.toRenderString()
+                        is JsonDiffElement.Deletion -> diffElement.jsonTreeElement!!.toRenderString()
+                        is JsonDiffElement.Equal -> diffElement.jsonTreeElement.toRenderString()
+                        is JsonDiffElement.Insertion -> ""
                     }
                     val annotatedText = buildAnnotatedString {
                         append(text)
-                        if(diffElement is JsonTreeDiffer2.JsonDiffElement.Change) {
+                        if(diffElement is JsonDiffElement.Change) {
                             diffElement.inlineDiffIndices.forEach { (start, end) ->
                                 addStyle(
                                     style = SpanStyle(background = Color.Blue),
@@ -163,10 +157,10 @@ public fun SideBySideDiff2() {
                             .fillMaxWidth()
                             .background(
                                 color = when(diffElement) {
-                                    is JsonTreeDiffer2.JsonDiffElement.Change -> Color.Red
-                                    is JsonTreeDiffer2.JsonDiffElement.Deletion -> Color.Red
-                                    is JsonTreeDiffer2.JsonDiffElement.Equal -> Color.Transparent
-                                    is JsonTreeDiffer2.JsonDiffElement.Insertion -> Color.Transparent
+                                    is JsonDiffElement.Change -> Color.Red
+                                    is JsonDiffElement.Deletion -> Color.Red
+                                    is JsonDiffElement.Equal -> Color.Transparent
+                                    is JsonDiffElement.Insertion -> Color.Transparent
                                 }
                             ),
                         text = annotatedText
@@ -178,16 +172,16 @@ public fun SideBySideDiff2() {
                 modifier = Modifier.weight(1f),
                 state = revisedListState
             ) {
-                items(jsonTreeDiffer2State.revisedJsonDiffElements) { diffElement ->
+                items(jsonTreeDifferState.revisedJsonDiffElements) { diffElement ->
                     val text = when(diffElement) {
-                        is JsonTreeDiffer2.JsonDiffElement.Change -> diffElement.jsonTreeElement.toDiffString()
-                        is JsonTreeDiffer2.JsonDiffElement.Deletion -> ""
-                        is JsonTreeDiffer2.JsonDiffElement.Equal -> diffElement.jsonTreeElement.toDiffString()
-                        is JsonTreeDiffer2.JsonDiffElement.Insertion -> diffElement.jsonTreeElement!!.toDiffString()
+                        is JsonDiffElement.Change -> diffElement.jsonTreeElement.toRenderString()
+                        is JsonDiffElement.Deletion -> ""
+                        is JsonDiffElement.Equal -> diffElement.jsonTreeElement.toRenderString()
+                        is JsonDiffElement.Insertion -> diffElement.jsonTreeElement!!.toRenderString()
                     }
                     val annotatedText = buildAnnotatedString {
                         append(text)
-                        if(diffElement is JsonTreeDiffer2.JsonDiffElement.Change) {
+                        if(diffElement is JsonDiffElement.Change) {
                             diffElement.inlineDiffIndices.forEach { (start, end) ->
                                 addStyle(
                                     style = SpanStyle(background = Color.Blue),
@@ -203,10 +197,10 @@ public fun SideBySideDiff2() {
                             .fillMaxWidth()
                             .background(
                                 color = when(diffElement) {
-                                    is JsonTreeDiffer2.JsonDiffElement.Change -> Color.Green
-                                    is JsonTreeDiffer2.JsonDiffElement.Deletion -> Color.Transparent
-                                    is JsonTreeDiffer2.JsonDiffElement.Equal -> Color.Transparent
-                                    is JsonTreeDiffer2.JsonDiffElement.Insertion -> Color.Green
+                                    is JsonDiffElement.Change -> Color.Green
+                                    is JsonDiffElement.Deletion -> Color.Transparent
+                                    is JsonDiffElement.Equal -> Color.Transparent
+                                    is JsonDiffElement.Insertion -> Color.Green
                                 }
                             ),
                         text = annotatedText

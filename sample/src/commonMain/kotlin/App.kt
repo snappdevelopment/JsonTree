@@ -44,8 +44,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.JsonTree
-import com.sebastianneubauer.jsontree.SideBySideDiff
-import com.sebastianneubauer.jsontree.SideBySideDiff2
+import com.sebastianneubauer.jsontree.diff.SideBySideDiff2
 import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
@@ -56,7 +55,6 @@ import com.sebastianneubauer.jsontreesample.sample.generated.resources.arrow_dow
 import com.sebastianneubauer.jsontreesample.sample.generated.resources.arrow_up
 import com.sebastianneubauer.jsontreesample.ui.theme.JsonTreeTheme
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
