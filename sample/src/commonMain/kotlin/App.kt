@@ -44,11 +44,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.JsonTree
-import com.sebastianneubauer.jsontree.diff.SideBySideDiff2
 import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
+import com.sebastianneubauer.jsontree.diff.JsonTreeDiff
+import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError
+import com.sebastianneubauer.jsontree.diff.defaultDarkDiffColors
+import com.sebastianneubauer.jsontree.diff.defaultLightDiffColors
 import com.sebastianneubauer.jsontree.search.rememberSearchState
 import com.sebastianneubauer.jsontreesample.sample.generated.resources.Res
 import com.sebastianneubauer.jsontreesample.sample.generated.resources.arrow_down
@@ -96,6 +99,7 @@ private fun MainScreen() {
             var showIndices: Boolean by remember { mutableStateOf(true) }
             var showItemCount: Boolean by remember { mutableStateOf(true) }
             var expandSingleChildren: Boolean by remember { mutableStateOf(true) }
+            var showDiff: Boolean by remember { mutableStateOf(false) }
             val searchState = rememberSearchState()
             val searchQuery by remember(searchState.query) { mutableStateOf(searchState.query.orEmpty()) }
             val coroutineScope = rememberCoroutineScope()
@@ -172,6 +176,13 @@ private fun MainScreen() {
                 ) {
                     Text(text = if (expandSingleChildren) "Expand children" else "Don't expand children")
                 }
+
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = { showDiff = !showDiff }
+                ) {
+                    Text(text = if (showDiff) "Hide diff" else "Show diff")
+                }
             }
 
             Spacer(Modifier.height(8.dp))
@@ -243,7 +254,12 @@ private fun MainScreen() {
 
             Spacer(Modifier.height(8.dp))
 
-            SideBySideDiff2()
+            if(showDiff) {
+                JsonDiff(
+                    originalJson = json,
+                    colors = colors,
+                )
+            }
 
             Spacer(Modifier.height(8.dp))
 
@@ -329,6 +345,54 @@ private fun MainScreen() {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun JsonDiff(
+    originalJson: String,
+    colors: TreeColors
+) {
+    var error by remember { mutableStateOf<String?>(null) }
+    val errorMessage = error
+
+    if (errorMessage != null) {
+        Text(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = if (colors == defaultLightColors) Color.Unspecified else Color.Black
+                ),
+            text = errorMessage,
+            color = if (colors == defaultLightColors) Color.Black else Color.White,
+        )
+    } else {
+        JsonTreeDiff(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp),
+            originalJson = originalJson,
+            revisedJson = complexJsonRevised,
+            onLoading = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            if (colors == defaultLightColors) Color.Unspecified else Color.Black
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Loading...",
+                        color = if (colors == defaultLightColors) Color.Black else Color.White
+                    )
+                }
+            },
+            colors = if(colors == defaultLightColors) defaultLightDiffColors else defaultDarkDiffColors,
+            onError = {
+                error = it.throwable.message
+            }
+        )
     }
 }
 

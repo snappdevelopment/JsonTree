@@ -115,6 +115,7 @@ internal class JsonTreeDiffer(
         }
 
         return strippedTagDiffRows.mapIndexed { index, diffRow ->
+            println("Diff: Index: $index, $diffRow")
             when(diffRow.tag) {
                 DiffRow.Tag.EQUAL -> {
                     val jsonTreeElement = findJsonTreeElement(diffRow.oldLine)
@@ -221,7 +222,7 @@ internal class JsonTreeDiffer(
         return result
     }
 
-    private val inlineDiffTagOpen = "<$$$$>"
-    private val inlineDiffTagClosed = "</$$$$>"
+    private val inlineDiffTagOpen = "!!$$$$!!"
+    private val inlineDiffTagClosed = "!!/$$$$!!"
 }
 

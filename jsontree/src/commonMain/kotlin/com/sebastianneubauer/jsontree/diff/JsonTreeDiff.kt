@@ -1,8 +1,9 @@
 package com.sebastianneubauer.jsontree.diff
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,9 +25,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.CollapsableType
 import com.sebastianneubauer.jsontree.JsonTreeElement
-import com.sebastianneubauer.jsontree.TreeColors
-import com.sebastianneubauer.jsontree.defaultLightColors
 import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
+import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError.OriginalJsonError
+import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError.RevisedJsonError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -36,90 +37,82 @@ public fun JsonTreeDiff(
     revisedJson: String,
     onLoading: @Composable () -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
-    colors: TreeColors = defaultLightColors,
+    colors: JsonTreeDiffColors = defaultLightDiffColors,
     textStyle: TextStyle = LocalTextStyle.current,
-    onError: (Throwable) -> Unit = {}
+    onError: (JsonTreeDiffError) -> Unit = {}
 ) {
+//    val original = """
+//        {
+//            "topLevelObject": {
+//                "string": "stringValue",
+//                "nestedObject": {
+//                    "int": 42,
+//                    "nestedArray": [
+//                        "nestedArrayValue",
+//                        "nestedArrayValue"
+//                    ],
+//                    "arrayOfObjects": [
+//                        {
+//                            "anotherString": "anotherStringValue"
+//                        },
+//                        {
+//                            "anotherInt": 52
+//                        }
+//                    ]
+//                }
+//            },
+//            "topLevelArray": [
+//                "hello",
+//                "world"
+//            ],
+//            "emptyObject": {
+//
+//            }
+//        }
+//    """.trimIndent()
+//
+//    val revised = """
+//        {
+//            "topLevelObject": {
+//                "string": "stringValue",
+//                "nestedObject": {
+//                    "nestedArray": [
+//                        "nestedArrayValue",
+//                        "nestedArrayValue"
+//                    ],
+//                    "rrayOfa": [
+//                        {
+//                            "anotherString": "anotherStringValue"
+//                        },
+//                        {
+//                            "anotherInt": 52
+//                        },
+//                        {
+//                            "anotherFloat": 5.0
+//                        }
+//                    ]
+//                }
+//            },
+//            "topLevelArray": [
+//                "hello",
+//                "world"
+//            ],
+//            "emptyObject": {
+//
+//            }
+//        }
+//    """.trimIndent()
 
-
-}
-
-@Composable
-public fun SideBySideDiff2(
-    colors: JsonTreeDiffColors = defaultDarkDiffColors
-) {
-    val original = """
-        {
-            "topLevelObject": {
-                "string": "stringValue",
-                "nestedObject": {
-                    "int": 42,
-                    "nestedArray": [
-                        "nestedArrayValue",
-                        "nestedArrayValue"
-                    ],
-                    "arrayOfObjects": [
-                        {
-                            "anotherString": "anotherStringValue"
-                        },
-                        {
-                            "anotherInt": 52
-                        }
-                    ]
-                }
-            },
-            "topLevelArray": [
-                "hello",
-                "world"
-            ],
-            "emptyObject": {
-    
-            }
-        }
-    """.trimIndent()
-
-    val revised = """
-        {
-            "topLevelObject": {
-                "string": "stringValue",
-                "nestedObject": {
-                    "nestedArray": [
-                        "nestedArrayValue",
-                        "nestedArrayValue"
-                    ],
-                    "rrayOfa": [
-                        {
-                            "anotherString": "anotherStringValue"
-                        },
-                        {
-                            "anotherInt": 52
-                        },
-                        {
-                            "anotherFloat": 5.0
-                        }
-                    ]
-                }
-            },
-            "topLevelArray": [
-                "hello",
-                "world"
-            ],
-            "emptyObject": {
-    
-            }
-        }
-    """.trimIndent()
-
-    val jsonTreeDiffer = remember {
+    val jsonTreeDiffer = remember(originalJson, revisedJson) {
         JsonTreeDiffer(
             defaultDispatcher = Dispatchers.Default,
             mainDispatcher = Dispatchers.Main
         )
     }
-    val jsonTreeDifferState = jsonTreeDiffer.state.collectAsState().value
-    LaunchedEffect(original, revised) {
-        jsonTreeDiffer.diff(original, revised)
+    val state = jsonTreeDiffer.state.collectAsState().value
+
+    LaunchedEffect(Unit) {
+        jsonTreeDiffer.diff(originalJson, revisedJson)
     }
 
     val originalListState = rememberLazyListState()
@@ -130,81 +123,105 @@ public fun SideBySideDiff2(
         revisedListState = revisedListState,
     )
 
-    if(jsonTreeDifferState is JsonTreeDifferState.Ready) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                state = originalListState
-            ) {
-                itemsIndexed(jsonTreeDifferState.originalJsonDiffElements) { index, diffElement ->
-                    val jsonTreeElement = when(diffElement) {
-                        is JsonDiffElement.Change -> diffElement.jsonTreeElement
-                        is JsonDiffElement.Deletion -> diffElement.jsonTreeElement!!
-                        is JsonDiffElement.Equal -> diffElement.jsonTreeElement
-                        is JsonDiffElement.Insertion -> null
-                    }
+    when(state) {
+        is JsonTreeDifferState.Loading -> onLoading()
+        is JsonTreeDifferState.Ready -> Box(modifier = modifier) {
+            SideBySideDiff(
+                state = state,
+                originalListState = originalListState,
+                revisedListState = revisedListState,
+                colors = colors,
+                textStyle = textStyle,
+            )
+        }
+        is JsonTreeDifferState.Error.OriginalJsonError -> onError(OriginalJsonError(state.throwable))
+        is JsonTreeDifferState.Error.RevisedJsonError -> onError(RevisedJsonError(state.throwable))
+    }
+}
 
-                    val text = rememberText(
-                        jsonTreeElement = jsonTreeElement,
-                        diffIndices = if(diffElement is JsonDiffElement.Change) {
-                            diffElement.inlineDiffIndices
-                        } else null,
-                        colors = colors,
-                        highlightColor = colors.deletionHighlightColor,
-                    )
-
-                    DiffText(
-                        backgroundColor = when(diffElement) {
-                            is JsonDiffElement.Change -> colors.deletionBackgroundColor
-                            is JsonDiffElement.Deletion -> colors.deletionBackgroundColor
-                            is JsonDiffElement.Equal -> Color.Transparent
-                            is JsonDiffElement.Insertion -> Color.Transparent
-                        },
-                        indent = if(jsonTreeElement != null && index > 0) {
-                            20.dp * jsonTreeElement.level
-                        } else {
-                            0.dp
-                        },
-                        text = text,
-                    )
+@Composable
+private fun SideBySideDiff(
+    state: JsonTreeDifferState.Ready,
+    originalListState: LazyListState,
+    revisedListState: LazyListState,
+    colors: JsonTreeDiffColors,
+    textStyle: TextStyle,
+) {
+    Row(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            state = originalListState
+        ) {
+            itemsIndexed(state.originalJsonDiffElements) { index, diffElement ->
+                val jsonTreeElement = when(diffElement) {
+                    is JsonDiffElement.Change -> diffElement.jsonTreeElement
+                    is JsonDiffElement.Deletion -> diffElement.jsonTreeElement!!
+                    is JsonDiffElement.Equal -> diffElement.jsonTreeElement
+                    is JsonDiffElement.Insertion -> null
                 }
+
+                val text = rememberText(
+                    jsonTreeElement = jsonTreeElement,
+                    diffIndices = if(diffElement is JsonDiffElement.Change) {
+                        diffElement.inlineDiffIndices
+                    } else null,
+                    colors = colors,
+                    highlightColor = colors.deletionHighlightColor,
+                )
+
+                DiffText(
+                    backgroundColor = when(diffElement) {
+                        is JsonDiffElement.Change -> colors.deletionBackgroundColor
+                        is JsonDiffElement.Deletion -> colors.deletionBackgroundColor
+                        is JsonDiffElement.Equal -> Color.Transparent
+                        is JsonDiffElement.Insertion -> Color.Transparent
+                    },
+                    indent = if(jsonTreeElement != null && index > 0) {
+                        20.dp * jsonTreeElement.level
+                    } else {
+                        0.dp
+                    },
+                    textStyle = textStyle,
+                    text = text,
+                )
             }
+        }
 
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                state = revisedListState
-            ) {
-                itemsIndexed(jsonTreeDifferState.revisedJsonDiffElements) { index, diffElement ->
-                    val jsonTreeElement = when(diffElement) {
-                        is JsonDiffElement.Change -> diffElement.jsonTreeElement
-                        is JsonDiffElement.Deletion -> null
-                        is JsonDiffElement.Equal -> diffElement.jsonTreeElement
-                        is JsonDiffElement.Insertion -> diffElement.jsonTreeElement!!
-                    }
-                    val text = rememberText(
-                        jsonTreeElement = jsonTreeElement,
-                        diffIndices = if(diffElement is JsonDiffElement.Change) {
-                            diffElement.inlineDiffIndices
-                        } else null,
-                        colors = colors,
-                        highlightColor = colors.insertionHighlightColor
-                    )
-
-                    DiffText(
-                        backgroundColor = when(diffElement) {
-                            is JsonDiffElement.Change -> colors.insertionBackgroundColor
-                            is JsonDiffElement.Deletion -> Color.Transparent
-                            is JsonDiffElement.Equal -> Color.Transparent
-                            is JsonDiffElement.Insertion -> colors.insertionBackgroundColor
-                        },
-                        indent = if(jsonTreeElement != null && index > 0) {
-                            20.dp * jsonTreeElement.level
-                        } else {
-                            0.dp
-                        },
-                        text = text
-                    )
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            state = revisedListState
+        ) {
+            itemsIndexed(state.revisedJsonDiffElements) { index, diffElement ->
+                val jsonTreeElement = when(diffElement) {
+                    is JsonDiffElement.Change -> diffElement.jsonTreeElement
+                    is JsonDiffElement.Deletion -> null
+                    is JsonDiffElement.Equal -> diffElement.jsonTreeElement
+                    is JsonDiffElement.Insertion -> diffElement.jsonTreeElement!!
                 }
+                val text = rememberText(
+                    jsonTreeElement = jsonTreeElement,
+                    diffIndices = if(diffElement is JsonDiffElement.Change) {
+                        diffElement.inlineDiffIndices
+                    } else null,
+                    colors = colors,
+                    highlightColor = colors.insertionHighlightColor
+                )
+
+                DiffText(
+                    backgroundColor = when(diffElement) {
+                        is JsonDiffElement.Change -> colors.insertionBackgroundColor
+                        is JsonDiffElement.Deletion -> Color.Transparent
+                        is JsonDiffElement.Equal -> Color.Transparent
+                        is JsonDiffElement.Insertion -> colors.insertionBackgroundColor
+                    },
+                    indent = if(jsonTreeElement != null && index > 0) {
+                        20.dp * jsonTreeElement.level
+                    } else {
+                        0.dp
+                    },
+                    textStyle = textStyle,
+                    text = text
+                )
             }
         }
     }
@@ -214,6 +231,7 @@ public fun SideBySideDiff2(
 private fun DiffText(
     backgroundColor: Color,
     indent: Dp,
+    textStyle: TextStyle,
     text: AnnotatedString,
 ) {
     Text(
@@ -221,6 +239,7 @@ private fun DiffText(
             .fillMaxWidth()
             .background(color = backgroundColor)
             .padding(start = indent),
+        style = textStyle,
         text = text
     )
 }
