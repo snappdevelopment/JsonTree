@@ -22,7 +22,8 @@ import kotlinx.serialization.json.longOrNull
 internal fun rememberCollapsableDiffText(
     type: CollapsableType,
     key: String?,
-    colors: TreeColors,
+    colors: JsonTreeDiffColors,
+    highlightColor: Color,
     isLastItem: Boolean,
     parentType: ParentType,
     diffIndices: List<Pair<Int, Int>>?,
@@ -48,7 +49,7 @@ internal fun rememberCollapsableDiffText(
 
             diffIndices?.forEach { (start, end) ->
                 addStyle(
-                    style = SpanStyle(background = Color.Blue),
+                    style = SpanStyle(background = highlightColor),
                     start = start,
                     end = end
                 )
@@ -61,7 +62,8 @@ internal fun rememberCollapsableDiffText(
 internal fun rememberPrimitiveDiffText(
     key: String?,
     value: JsonPrimitive,
-    colors: TreeColors,
+    colors: JsonTreeDiffColors,
+    highlightColor: Color,
     isLastItem: Boolean,
     parentType: ParentType,
     diffIndices: List<Pair<Int, Int>>?,
@@ -104,7 +106,7 @@ internal fun rememberPrimitiveDiffText(
 
             diffIndices?.forEach { (start, end) ->
                 addStyle(
-                    style = SpanStyle(background = Color.Blue),
+                    style = SpanStyle(background = highlightColor),
                     start = start,
                     end = end
                 )
@@ -116,7 +118,7 @@ internal fun rememberPrimitiveDiffText(
 @Composable
 internal fun rememberEndBracketDiffText(
     type: JsonTreeElement.EndBracket.Type,
-    colors: TreeColors,
+    colors: JsonTreeDiffColors,
     isLastItem: Boolean,
 ): AnnotatedString {
     return remember(colors) {

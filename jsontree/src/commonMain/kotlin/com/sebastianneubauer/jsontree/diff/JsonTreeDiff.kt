@@ -47,7 +47,7 @@ public fun JsonTreeDiff(
 
 @Composable
 public fun SideBySideDiff2(
-    colors: TreeColors = defaultLightColors,
+    colors: JsonTreeDiffColors = defaultDarkDiffColors
 ) {
     val original = """
         {
@@ -149,13 +149,14 @@ public fun SideBySideDiff2(
                         diffIndices = if(diffElement is JsonDiffElement.Change) {
                             diffElement.inlineDiffIndices
                         } else null,
-                        colors = colors
+                        colors = colors,
+                        highlightColor = colors.deletionHighlightColor,
                     )
 
                     DiffText(
                         backgroundColor = when(diffElement) {
-                            is JsonDiffElement.Change -> Color.Red
-                            is JsonDiffElement.Deletion -> Color.Red
+                            is JsonDiffElement.Change -> colors.deletionBackgroundColor
+                            is JsonDiffElement.Deletion -> colors.deletionBackgroundColor
                             is JsonDiffElement.Equal -> Color.Transparent
                             is JsonDiffElement.Insertion -> Color.Transparent
                         },
@@ -185,15 +186,16 @@ public fun SideBySideDiff2(
                         diffIndices = if(diffElement is JsonDiffElement.Change) {
                             diffElement.inlineDiffIndices
                         } else null,
-                        colors = colors
+                        colors = colors,
+                        highlightColor = colors.insertionHighlightColor
                     )
 
                     DiffText(
                         backgroundColor = when(diffElement) {
-                            is JsonDiffElement.Change -> Color.Green
+                            is JsonDiffElement.Change -> colors.insertionBackgroundColor
                             is JsonDiffElement.Deletion -> Color.Transparent
                             is JsonDiffElement.Equal -> Color.Transparent
-                            is JsonDiffElement.Insertion -> Color.Green
+                            is JsonDiffElement.Insertion -> colors.insertionBackgroundColor
                         },
                         indent = if(jsonTreeElement != null && index > 0) {
                             20.dp * jsonTreeElement.level
@@ -227,7 +229,8 @@ private fun DiffText(
 private fun rememberText(
     jsonTreeElement: JsonTreeElement?,
     diffIndices: List<Pair<Int, Int>>?,
-    colors: TreeColors,
+    colors: JsonTreeDiffColors,
+    highlightColor: Color,
 ): AnnotatedString {
     return when(jsonTreeElement) {
         is JsonTreeElement.Collapsable.Array -> rememberCollapsableDiffText(
@@ -236,6 +239,7 @@ private fun rememberText(
             isLastItem = jsonTreeElement.isLastItem,
             parentType = jsonTreeElement.parentType,
             colors = colors,
+            highlightColor = highlightColor,
             diffIndices = diffIndices,
         )
         is JsonTreeElement.Collapsable.Object -> rememberCollapsableDiffText(
@@ -244,6 +248,7 @@ private fun rememberText(
             isLastItem = jsonTreeElement.isLastItem,
             parentType = jsonTreeElement.parentType,
             colors = colors,
+            highlightColor = highlightColor,
             diffIndices = diffIndices,
         )
         is JsonTreeElement.Primitive -> rememberPrimitiveDiffText(
@@ -252,6 +257,7 @@ private fun rememberText(
             isLastItem = jsonTreeElement.isLastItem,
             parentType = jsonTreeElement.parentType,
             colors = colors,
+            highlightColor = highlightColor,
             diffIndices = diffIndices,
         )
         is JsonTreeElement.EndBracket -> rememberEndBracketDiffText(
