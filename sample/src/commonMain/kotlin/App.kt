@@ -370,7 +370,10 @@ private fun JsonDiff(
         JsonTreeDiff(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(400.dp),
+                .height(400.dp)
+                .background(
+                    if (colors == defaultLightColors) Color.Unspecified else Color.Black
+                ),
             originalJson = originalJson,
             revisedJson = complexJsonRevised,
             onLoading = {

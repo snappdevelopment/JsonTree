@@ -2,6 +2,7 @@ package com.sebastianneubauer.jsontree.diff
 
 import androidx.compose.runtime.Immutable
 import com.sebastianneubauer.jsontree.JsonTreeElement
+import kotlinx.serialization.json.Json
 
 @Immutable
 internal sealed interface JsonTreeDifferState {
@@ -9,8 +10,7 @@ internal sealed interface JsonTreeDifferState {
     data object Loading: JsonTreeDifferState
 
     data class Ready(
-        val originalJsonDiffElements: List<JsonDiffElement>,
-        val revisedJsonDiffElements: List<JsonDiffElement>
+        val diffElements: List<Pair<JsonDiffElement, JsonDiffElement>>
     ): JsonTreeDifferState
 
     @Immutable
