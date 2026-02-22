@@ -57,22 +57,11 @@ public fun JsonTreeDiff(
         jsonTreeDiffer.diff(originalJson, revisedJson)
     }
 
-    val state = jsonTreeDiffer.state.collectAsState().value
-    val originalListState = rememberLazyListState()
-    val revisedListState = rememberLazyListState()
-
-    SyncScrollingEffect(
-        originalListState = originalListState,
-        revisedListState = revisedListState,
-    )
-
-    when(state) {
+    when(val state = jsonTreeDiffer.state.collectAsState().value) {
         is JsonTreeDifferState.Loading -> onLoading()
         is JsonTreeDifferState.Ready -> Box(modifier = modifier) {
             SideBySideDiff(
                 state = state,
-                originalListState = originalListState,
-                revisedListState = revisedListState,
                 colors = colors,
                 textStyle = textStyle,
             )
@@ -85,14 +74,11 @@ public fun JsonTreeDiff(
 @Composable
 private fun SideBySideDiff(
     state: JsonTreeDifferState.Ready,
-    originalListState: LazyListState,
-    revisedListState: LazyListState,
     colors: JsonTreeDiffColors,
     textStyle: TextStyle,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        state = originalListState
     ) {
         itemsIndexed(state.diffElements) { index, (originalDiffElement, revisedDiffElement) ->
             val originalJsonTreeElement = when(originalDiffElement) {
@@ -245,30 +231,5 @@ private fun rememberText(
             colors = colors
         )
         null -> AnnotatedString("")
-    }
-}
-
-@Composable
-private fun SyncScrollingEffect(
-    originalListState: LazyListState,
-    revisedListState: LazyListState,
-) {
-    val coroutineScope = rememberCoroutineScope()
-    fun syncScroll(leading: LazyListState, following: LazyListState) {
-        coroutineScope.launch {
-            val scrollPosition = leading.firstVisibleItemScrollOffset
-            following.scrollToItem(
-                index = leading.firstVisibleItemIndex,
-                scrollOffset = scrollPosition
-            )
-        }
-    }
-
-    LaunchedEffect(originalListState.firstVisibleItemIndex, originalListState.firstVisibleItemScrollOffset) {
-        syncScroll(originalListState, revisedListState)
-    }
-
-    LaunchedEffect(revisedListState.firstVisibleItemIndex, revisedListState.firstVisibleItemScrollOffset) {
-        syncScroll(revisedListState, originalListState)
     }
 }
