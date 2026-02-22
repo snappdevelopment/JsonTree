@@ -2,6 +2,7 @@ package com.sebastianneubauer.jsontree.diff
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -51,12 +52,12 @@ public fun JsonTreeDiff(
             mainDispatcher = Dispatchers.Main
         )
     }
-    val state = jsonTreeDiffer.state.collectAsState().value
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(jsonTreeDiffer) {
         jsonTreeDiffer.diff(originalJson, revisedJson)
     }
 
+    val state = jsonTreeDiffer.state.collectAsState().value
     val originalListState = rememberLazyListState()
     val revisedListState = rememberLazyListState()
 
@@ -139,6 +140,7 @@ private fun SideBySideDiff(
                         is JsonDiffElement.Equal -> Color.Transparent
                         is JsonDiffElement.Insertion -> colors.changeBackgroundColor
                     },
+                    backgroundFillColor = colors.changeBackgroundColor,
                     indent = if(originalJsonTreeElement != null && index > 0) {
                         20.dp * originalJsonTreeElement.level
                     } else {
@@ -158,6 +160,7 @@ private fun SideBySideDiff(
                         is JsonDiffElement.Equal -> Color.Transparent
                         is JsonDiffElement.Insertion -> colors.insertionBackgroundColor
                     },
+                    backgroundFillColor = colors.changeBackgroundColor,
                     indent = if(revisedJsonTreeElement != null && index > 0) {
                         20.dp * revisedJsonTreeElement.level
                     } else {
@@ -175,17 +178,30 @@ private fun SideBySideDiff(
 private fun DiffText(
     modifier: Modifier,
     backgroundColor: Color,
+    backgroundFillColor: Color,
     indent: Dp,
     textStyle: TextStyle,
     text: AnnotatedString,
 ) {
-    Text(
-        modifier = modifier
-            .background(color = backgroundColor)
-            .padding(start = indent),
-        style = textStyle,
-        text = text,
-    )
+    Column(modifier = modifier) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = backgroundColor)
+                .padding(start = indent),
+            style = textStyle,
+            text = text,
+        )
+
+        // If the change on the other side spans multiple lines,
+        // fill the rest of this side with a background color
+        Box(
+            modifier = Modifier
+                .weight(1F)
+                .fillMaxWidth()
+                .background(color = backgroundFillColor)
+        )
+    }
 }
 
 @Composable

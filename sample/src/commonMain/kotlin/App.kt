@@ -30,6 +30,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -83,9 +85,11 @@ private fun MainScreen() {
                         style = MaterialTheme.typography.headlineMedium,
                     )
                 },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
             )
         },
         contentWindowInsets = WindowInsets(top = 60.dp),
+        containerColor = Color.White
     ) { padding ->
         Column(
             modifier = Modifier
@@ -214,6 +218,15 @@ private fun MainScreen() {
 
             Spacer(Modifier.height(8.dp))
 
+            if(showDiff) {
+                JsonDiff(
+                    originalJson = json,
+                    colors = colors,
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+
             FlowRow(modifier = Modifier.padding(horizontal = 8.dp)) {
                 TextField(
                     value = searchQuery,
@@ -250,15 +263,6 @@ private fun MainScreen() {
 
                     Text("Found: ${searchState.selectedResultIndex?.let { it + 1 } ?: 0}/${searchState.totalResults}")
                 }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            if(showDiff) {
-                JsonDiff(
-                    originalJson = json,
-                    colors = colors,
-                )
             }
 
             Spacer(Modifier.height(8.dp))
@@ -353,7 +357,7 @@ private fun JsonDiff(
     originalJson: String,
     colors: TreeColors
 ) {
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember(originalJson) { mutableStateOf<String?>(null) }
     val errorMessage = error
 
     if (errorMessage != null) {
@@ -361,7 +365,7 @@ private fun JsonDiff(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    color = if (colors == defaultLightColors) Color.Unspecified else Color.Black
+                    color = if (colors == defaultLightColors) Color.White else Color.Black
                 ),
             text = errorMessage,
             color = if (colors == defaultLightColors) Color.Black else Color.White,
@@ -372,7 +376,7 @@ private fun JsonDiff(
                 .fillMaxWidth()
                 .height(400.dp)
                 .background(
-                    if (colors == defaultLightColors) Color.Unspecified else Color.Black
+                    if (colors == defaultLightColors) Color.White else Color.Black
                 ),
             originalJson = originalJson,
             revisedJson = complexJsonRevised,
@@ -381,7 +385,7 @@ private fun JsonDiff(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
-                            if (colors == defaultLightColors) Color.Unspecified else Color.Black
+                            if (colors == defaultLightColors) Color.White else Color.Black
                         ),
                     contentAlignment = Alignment.Center
                 ) {
