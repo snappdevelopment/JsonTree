@@ -10,7 +10,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-public class ExtensionsTest {
+public class JsonTreeElementExtensionsTest {
 
     @Test
     public fun expand_object_with_expansion_none_should_not_expand_children() {

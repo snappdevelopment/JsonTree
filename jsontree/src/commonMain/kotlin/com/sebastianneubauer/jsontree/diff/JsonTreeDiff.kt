@@ -42,19 +42,24 @@ public fun JsonTreeDiff(
     revisedJson: String,
     onLoading: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    showInlineDiffs: Boolean = true,
     colors: JsonTreeDiffColors = defaultLightDiffColors,
     textStyle: TextStyle = LocalTextStyle.current,
     onError: (JsonTreeDiffError) -> Unit = {}
 ) {
-    val jsonTreeDiffer = remember(originalJson, revisedJson) {
+    val jsonTreeDiffer = remember {
         JsonTreeDiffer(
             defaultDispatcher = Dispatchers.Default,
             mainDispatcher = Dispatchers.Main
         )
     }
 
-    LaunchedEffect(jsonTreeDiffer) {
-        jsonTreeDiffer.diff(originalJson, revisedJson)
+    LaunchedEffect(originalJson, revisedJson, showInlineDiffs) {
+        jsonTreeDiffer.diff(
+            original = originalJson,
+            revised = revisedJson,
+            showInlineDiffs = showInlineDiffs
+        )
     }
 
     when(val state = jsonTreeDiffer.state.collectAsState().value) {
@@ -123,7 +128,7 @@ private fun SideBySideDiff(
                     backgroundColor = when(originalDiffElement) {
                         is JsonDiffElement.Change -> colors.deletionBackgroundColor
                         is JsonDiffElement.Deletion -> colors.deletionBackgroundColor
-                        is JsonDiffElement.Equal -> Color.Transparent
+                        is JsonDiffElement.Equal -> colors.regularBackgroundColor
                         is JsonDiffElement.Insertion -> colors.changeBackgroundColor
                     },
                     backgroundFillColor = colors.changeBackgroundColor,
@@ -143,7 +148,7 @@ private fun SideBySideDiff(
                     backgroundColor = when(revisedDiffElement) {
                         is JsonDiffElement.Change -> colors.insertionBackgroundColor
                         is JsonDiffElement.Deletion -> colors.changeBackgroundColor
-                        is JsonDiffElement.Equal -> Color.Transparent
+                        is JsonDiffElement.Equal -> colors.regularBackgroundColor
                         is JsonDiffElement.Insertion -> colors.insertionBackgroundColor
                     },
                     backgroundFillColor = colors.changeBackgroundColor,

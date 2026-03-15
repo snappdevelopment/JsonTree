@@ -6,6 +6,7 @@ import com.sebastianneubauer.jsontree.JsonTreeParserState
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
 import com.sebastianneubauer.jsontree.util.toRenderString
+import io.github.petertrr.diffutils.text.DiffLineNormalizer
 import io.github.petertrr.diffutils.text.DiffRow
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import io.github.petertrr.diffutils.text.DiffTagGenerator
@@ -19,13 +20,19 @@ internal class JsonTreeDiffer(
     val defaultDispatcher: CoroutineDispatcher,
     val mainDispatcher: CoroutineDispatcher
 ) {
-
     val state = MutableStateFlow<JsonTreeDifferState>(JsonTreeDifferState.Loading)
 
     suspend fun diff(
         original: String,
         revised: String,
+        showInlineDiffs: Boolean,
     ) = withContext(defaultDispatcher) {
+        if(state.value !is JsonTreeDifferState.Loading) {
+            withContext(mainDispatcher) {
+                state.value = JsonTreeDifferState.Loading
+            }
+        }
+
         val originalJsonTreeListDeferred = async { getJsonTreeList(original) }
         val revisedJsonTreeListDeferred = async { getJsonTreeList(revised) }
 
@@ -50,16 +57,17 @@ internal class JsonTreeDiffer(
             }
         }
 
-        val diffRowGenerator =  object : DiffTagGenerator {
+        val diffTagGenerator =  object : DiffTagGenerator {
             override fun generateClose(tag: DiffRow.Tag): String = inlineDiffTagClosed
             override fun generateOpen(tag: DiffRow.Tag): String = inlineDiffTagOpen
         }
 
         val diffRows = DiffRowGenerator(
             columnWidth = 0, // Needs to be 0, otherwise HTML linebreaks will be inserted in diff lines.
-            showInlineDiffs = true,
-            newTag = diffRowGenerator,
-            oldTag = diffRowGenerator,
+            showInlineDiffs = showInlineDiffs,
+            lineNormalizer = DiffLineNormalizer { line -> line },
+            newTag = diffTagGenerator,
+            oldTag = diffTagGenerator,
         ).generateDiffRows(
             originalJsonTreeList.map { it.toRenderString() },
             revisedJsonTreeList.map { it.toRenderString() }
@@ -69,9 +77,7 @@ internal class JsonTreeDiffer(
         val usedRevisedIds = mutableListOf<String>()
 
         val diffElements = diffRows.map { diffRow ->
-            println("DiffRow: ${diffRow.tag}: ${diffRow.oldLine} -> ${diffRow.newLine}")
-
-            val inlineDiffsIndices = if(diffRow.tag == DiffRow.Tag.CHANGE) {
+            val (oldLineDiffIndices, newLineDiffIndices) = if(diffRow.tag == DiffRow.Tag.CHANGE) {
                 val oldLineIndices = diffRow.oldLine.findInlineDiffTagIndices()
                 val newLineIndices = diffRow.newLine.findInlineDiffTagIndices()
                 Pair(oldLineIndices, newLineIndices)
@@ -83,20 +89,19 @@ internal class JsonTreeDiffer(
                 oldLine = diffRow.oldLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, ""),
                 newLine = diffRow.newLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, "")
             )
-            println("Stripped: ${strippedTagDiffRow.tag}: ${strippedTagDiffRow.oldLine} -> ${strippedTagDiffRow.newLine}")
 
             val originalDiffElement = getOriginalDiffElement(
                 diffRow = strippedTagDiffRow,
                 usedIds = usedOriginalIds,
                 originalJsonTreeList = originalJsonTreeList,
-                inlineDiffsIndices = inlineDiffsIndices.first
+                inlineDiffsIndices = oldLineDiffIndices
             )
 
             val revisedDiffElement = getRevisedDiffElement(
                 diffRow = strippedTagDiffRow,
                 usedIds = usedRevisedIds,
                 revisedJsonTreeList = revisedJsonTreeList,
-                inlineDiffsIndices = inlineDiffsIndices.second
+                inlineDiffsIndices = newLineDiffIndices
             )
 
             Pair(originalDiffElement, revisedDiffElement)
@@ -184,8 +189,8 @@ internal class JsonTreeDiffer(
     private suspend fun getJsonTreeList(json: String): JsonTreeParserState {
         val originalParser = JsonTreeParser(
             json = json,
-            defaultDispatcher = Dispatchers.Default,
-            mainDispatcher = Dispatchers.Main
+            defaultDispatcher = defaultDispatcher,
+            mainDispatcher = mainDispatcher
         ).also { it.init(TreeState.EXPANDED) }
 
         return when(val state = originalParser.state.value) {

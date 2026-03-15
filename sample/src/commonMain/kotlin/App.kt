@@ -104,6 +104,7 @@ private fun MainScreen() {
             var showItemCount: Boolean by remember { mutableStateOf(true) }
             var expandSingleChildren: Boolean by remember { mutableStateOf(true) }
             var showDiff: Boolean by remember { mutableStateOf(false) }
+            var showInlineDiffs: Boolean by remember { mutableStateOf(true) }
             val searchState = rememberSearchState()
             val searchQuery by remember(searchState.query) { mutableStateOf(searchState.query.orEmpty()) }
             val coroutineScope = rememberCoroutineScope()
@@ -187,6 +188,13 @@ private fun MainScreen() {
                 ) {
                     Text(text = if (showDiff) "Hide diff" else "Show diff")
                 }
+
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = { showInlineDiffs = !showInlineDiffs }
+                ) {
+                    Text(text = if (showInlineDiffs) "Hide inline diffs" else "Show inline diffs")
+                }
             }
 
             Spacer(Modifier.height(8.dp))
@@ -221,6 +229,7 @@ private fun MainScreen() {
             if(showDiff) {
                 JsonDiff(
                     originalJson = json,
+                    showInlineDiffs = showInlineDiffs,
                     colors = colors,
                 )
             }
@@ -355,6 +364,7 @@ private fun MainScreen() {
 @Composable
 private fun JsonDiff(
     originalJson: String,
+    showInlineDiffs: Boolean,
     colors: TreeColors
 ) {
     var error by remember(originalJson) { mutableStateOf<String?>(null) }
@@ -380,6 +390,7 @@ private fun JsonDiff(
                 ),
             originalJson = originalJson,
             revisedJson = complexJsonRevised,
+            showInlineDiffs = showInlineDiffs,
             onLoading = {
                 Box(
                     modifier = Modifier

@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
  * @param insertionHighlightColor TThe color for highlighting insertions inside a line.
  * @param insertionBackgroundColor The background color for lines that contain insertion diffs.
  * @param changeBackgroundColor The background color for lines that have changes on the other side of the diff.
+ * @param regularBackgroundColor The background color for lines that are equal on both sides of the diff.
  */
 public data class JsonTreeDiffColors(
     val keyColor: Color,
@@ -28,7 +29,8 @@ public data class JsonTreeDiffColors(
     val deletionBackgroundColor: Color,
     val insertionHighlightColor: Color,
     val insertionBackgroundColor: Color,
-    val changeBackgroundColor: Color
+    val changeBackgroundColor: Color,
+    val regularBackgroundColor: Color,
 )
 
 /**
@@ -46,6 +48,7 @@ public val defaultLightDiffColors: JsonTreeDiffColors = JsonTreeDiffColors(
     insertionHighlightColor = Color(0xFFACEEBB),
     insertionBackgroundColor = Color(0xFFDBFBE1),
     changeBackgroundColor = Color(0xFFF7F8FA),
+    regularBackgroundColor = Color(0xFFFFFFFF)
 )
 
 /**
@@ -63,4 +66,5 @@ public val defaultDarkDiffColors: JsonTreeDiffColors = JsonTreeDiffColors(
     insertionHighlightColor = Color(0xFF345E3D),
     insertionBackgroundColor = Color(0xFF263834),
     changeBackgroundColor = Color(0xFF262C36),
+    regularBackgroundColor = Color(0xFF0C1117)
 )
