@@ -6,6 +6,7 @@ import com.sebastianneubauer.jsontree.util.Expansion
 import com.sebastianneubauer.jsontree.util.collapse
 import com.sebastianneubauer.jsontree.util.expand
 import com.sebastianneubauer.jsontree.util.toList
+import com.sebastianneubauer.jsontree.util.toRenderString
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -121,6 +122,308 @@ public class JsonTreeElementExtensionsTest {
                 CollapseTestData.array1.endBracket,
                 CollapseTestData.testObject.endBracket
             )
+        )
+    }
+
+    @Test
+    public fun toRenderString_object_with_key_and_object_parent_should_render_with_key() {
+        val element = Object(
+            id = "",
+            level = 0,
+            state = TreeState.COLLAPSED,
+            children = emptyMap(),
+            isLastItem = true,
+            key = "myKey",
+            parentType = JsonTreeElement.ParentType.OBJECT
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "\"myKey\": {"
+        )
+    }
+
+    @Test
+    public fun toRenderString_object_with_key_and_array_parent_should_render_without_key() {
+        val element = Object(
+            id = "",
+            level = 0,
+            state = TreeState.COLLAPSED,
+            children = emptyMap(),
+            isLastItem = true,
+            key = "0",
+            parentType = JsonTreeElement.ParentType.ARRAY
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "{"
+        )
+    }
+
+    @Test
+    public fun toRenderString_object_without_key_should_render_without_key() {
+        val element = Object(
+            id = "",
+            level = 0,
+            state = TreeState.COLLAPSED,
+            children = emptyMap(),
+            isLastItem = true,
+            key = null,
+            parentType = JsonTreeElement.ParentType.NONE
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "{"
+        )
+    }
+
+    @Test
+    public fun toRenderString_array_with_key_and_object_parent_should_render_with_key() {
+        val element = Array(
+            id = "",
+            level = 0,
+            state = TreeState.COLLAPSED,
+            children = emptyMap(),
+            isLastItem = true,
+            key = "myArray",
+            parentType = JsonTreeElement.ParentType.OBJECT
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "\"myArray\": ["
+        )
+    }
+
+    @Test
+    public fun toRenderString_array_with_key_and_array_parent_should_render_without_key() {
+        val element = Array(
+            id = "",
+            level = 0,
+            state = TreeState.COLLAPSED,
+            children = emptyMap(),
+            isLastItem = true,
+            key = "0",
+            parentType = JsonTreeElement.ParentType.ARRAY
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "["
+        )
+    }
+
+    @Test
+    public fun toRenderString_array_without_key_should_render_without_key() {
+        val element = Array(
+            id = "",
+            level = 0,
+            state = TreeState.COLLAPSED,
+            children = emptyMap(),
+            isLastItem = true,
+            key = null,
+            parentType = JsonTreeElement.ParentType.NONE
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "["
+        )
+    }
+
+    @Test
+    public fun toRenderString_primitive_with_key_and_object_parent_not_last_should_render_with_key_and_comma() {
+        val element = JsonTreeElement.Primitive(
+            id = "",
+            level = 0,
+            isLastItem = false,
+            key = "myProp",
+            value = JsonPrimitive("test"),
+            parentType = JsonTreeElement.ParentType.OBJECT
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "\"myProp\": \"test\","
+        )
+    }
+
+    @Test
+    public fun toRenderString_primitive_with_key_and_object_parent_last_should_render_with_key_and_without_comma() {
+        val element = JsonTreeElement.Primitive(
+            id = "",
+            level = 0,
+            isLastItem = true,
+            key = "myProp",
+            value = JsonPrimitive("test"),
+            parentType = JsonTreeElement.ParentType.OBJECT
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "\"myProp\": \"test\""
+        )
+    }
+
+    @Test
+    public fun toRenderString_primitive_with_key_and_array_parent_not_last_should_render_without_key_and_with_comma() {
+        val element = JsonTreeElement.Primitive(
+            id = "",
+            level = 0,
+            isLastItem = false,
+            key = "0",
+            value = JsonPrimitive(42),
+            parentType = JsonTreeElement.ParentType.ARRAY
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "42,"
+        )
+    }
+
+    @Test
+    public fun toRenderString_primitive_with_key_and_array_parent_last_should_render_without_key_and_without_comma() {
+        val element = JsonTreeElement.Primitive(
+            id = "",
+            level = 0,
+            isLastItem = true,
+            key = "0",
+            value = JsonPrimitive(42),
+            parentType = JsonTreeElement.ParentType.ARRAY
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "42"
+        )
+    }
+
+    @Test
+    public fun toRenderString_primitive_without_key_not_last_should_render_without_key_and_with_comma() {
+        val element = JsonTreeElement.Primitive(
+            id = "",
+            level = 0,
+            isLastItem = false,
+            key = null,
+            value = JsonPrimitive(true),
+            parentType = JsonTreeElement.ParentType.NONE
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "true,"
+        )
+    }
+
+    @Test
+    public fun toRenderString_primitive_without_key_last_should_render_without_key_and_without_comma() {
+        val element = JsonTreeElement.Primitive(
+            id = "",
+            level = 0,
+            isLastItem = true,
+            key = null,
+            value = JsonPrimitive(false),
+            parentType = JsonTreeElement.ParentType.NONE
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "false"
+        )
+    }
+
+    @Test
+    public fun toRenderString_end_bracket_array_not_last_should_render_with_comma() {
+        val element = JsonTreeElement.EndBracket(
+            id = "",
+            level = 0,
+            isLastItem = false,
+            type = JsonTreeElement.EndBracket.Type.ARRAY
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "],"
+        )
+    }
+
+    @Test
+    public fun toRenderString_end_bracket_array_last_should_render_without_comma() {
+        val element = JsonTreeElement.EndBracket(
+            id = "",
+            level = 0,
+            isLastItem = true,
+            type = JsonTreeElement.EndBracket.Type.ARRAY
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "]"
+        )
+    }
+
+    @Test
+    public fun toRenderString_end_bracket_object_not_last_should_render_with_comma() {
+        val element = JsonTreeElement.EndBracket(
+            id = "",
+            level = 0,
+            isLastItem = false,
+            type = JsonTreeElement.EndBracket.Type.OBJECT
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "},"
+        )
+    }
+
+    @Test
+    public fun toRenderString_end_bracket_object_last_should_render_without_comma() {
+        val element = JsonTreeElement.EndBracket(
+            id = "",
+            level = 0,
+            isLastItem = true,
+            type = JsonTreeElement.EndBracket.Type.OBJECT
+        )
+
+        val result = element.toRenderString()
+
+        assertEquals(
+            actual = result,
+            expected = "}"
         )
     }
 
