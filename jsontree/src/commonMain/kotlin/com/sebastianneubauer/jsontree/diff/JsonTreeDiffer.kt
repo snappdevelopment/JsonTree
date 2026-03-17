@@ -1,5 +1,7 @@
 package com.sebastianneubauer.jsontree.diff
 
+import androidx.compose.ui.util.fastFirst
+import androidx.compose.ui.util.fastMap
 import com.sebastianneubauer.jsontree.JsonTreeElement
 import com.sebastianneubauer.jsontree.JsonTreeParser
 import com.sebastianneubauer.jsontree.JsonTreeParserState
@@ -19,6 +21,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlin.collections.orEmpty
 import kotlin.coroutines.resume
+import kotlin.time.Clock
 
 internal class JsonTreeDiffer(
     val defaultDispatcher: CoroutineDispatcher,
@@ -76,8 +79,8 @@ internal class JsonTreeDiffer(
             newTag = diffTagGenerator,
             oldTag = diffTagGenerator,
         ).generateDiffRows(
-            originalJsonTreeList.map { it.toRenderString() },
-            revisedJsonTreeList.map { it.toRenderString() }
+            originalJsonTreeList.fastMap { it.toRenderString() },
+            revisedJsonTreeList.fastMap { it.toRenderString() }
         )
 
         val originalJsonTreeMap = originalJsonTreeMapDeferred.await()
@@ -86,7 +89,7 @@ internal class JsonTreeDiffer(
         val usedOriginalIds = mutableMapOf<String, MutableList<String>>()
         val usedRevisedIds = mutableMapOf<String, MutableList<String>>()
 
-        val diffElements = diffRows.map { diffRow ->
+        val diffElements = diffRows.fastMap { diffRow ->
             val (oldLineDiffIndices, newLineDiffIndices) = if(diffRow.tag == DiffRow.Tag.CHANGE) {
                 val oldLineIndices = diffRow.oldLine.findInlineDiffTagIndices()
                 val newLineIndices = diffRow.newLine.findInlineDiffTagIndices()
@@ -136,7 +139,7 @@ internal class JsonTreeDiffer(
     ): JsonDiffElement {
         fun findJsonTreeElement(): JsonTreeElement {
             val jsonTreeElements = originalJsonTreeMap.getValue(diffRow.oldLine)
-            return jsonTreeElements.first { it.id !in usedIds[diffRow.oldLine].orEmpty() }
+            return jsonTreeElements.fastFirst { it.id !in usedIds[diffRow.oldLine].orEmpty() }
         }
 
         fun addToUsedIds(id: String) {
@@ -177,7 +180,7 @@ internal class JsonTreeDiffer(
     ): JsonDiffElement {
         fun findJsonTreeElement(): JsonTreeElement {
             val jsonTreeElements = revisedJsonTreeMap.getValue(diffRow.newLine)
-            return jsonTreeElements.first { it.id !in usedIds[diffRow.newLine].orEmpty() }
+            return jsonTreeElements.fastFirst { it.id !in usedIds[diffRow.newLine].orEmpty() }
         }
 
         fun addToUsedIds(id: String) {
