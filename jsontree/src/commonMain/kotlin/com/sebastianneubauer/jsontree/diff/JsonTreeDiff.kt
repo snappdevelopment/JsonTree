@@ -85,7 +85,10 @@ private fun SideBySideDiff(
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
     ) {
-        itemsIndexed(state.diffElements) { index, (originalDiffElement, revisedDiffElement) ->
+        itemsIndexed(
+            items = state.diffElements,
+            key = { index, _ -> index }
+        ) { index, (originalDiffElement, revisedDiffElement) ->
             val originalJsonTreeElement = when(originalDiffElement) {
                 is JsonDiffElement.Change -> originalDiffElement.jsonTreeElement
                 is JsonDiffElement.Deletion -> originalDiffElement.jsonTreeElement!!

@@ -3,25 +3,23 @@ package com.sebastianneubauer.jsontree.diff
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastMap
 import com.sebastianneubauer.jsontree.JsonTreeElement
-import com.sebastianneubauer.jsontree.JsonTreeParser
-import com.sebastianneubauer.jsontree.JsonTreeParserState
+import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
+import com.sebastianneubauer.jsontree.util.IdGenerator
+import com.sebastianneubauer.jsontree.util.toJsonTreeElement
+import com.sebastianneubauer.jsontree.util.toList
 import com.sebastianneubauer.jsontree.util.toRenderString
 import io.github.petertrr.diffutils.text.DiffLineNormalizer
 import io.github.petertrr.diffutils.text.DiffRow
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import io.github.petertrr.diffutils.text.DiffTagGenerator
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import kotlin.collections.orEmpty
-import kotlin.coroutines.resume
-import kotlin.time.Clock
 
 internal class JsonTreeDiffer(
     val defaultDispatcher: CoroutineDispatcher,
@@ -47,25 +45,25 @@ internal class JsonTreeDiffer(
         val revisedJsonTreeListResult = revisedJsonTreeListDeferred.await()
 
         val (originalJsonTreeList, revisedJsonTreeList) = when {
-            originalJsonTreeListResult is JsonTreeParserState.Parsing.Error -> {
+            originalJsonTreeListResult is ParsingResult.Failure -> {
                 withContext(mainDispatcher) {
                     state.value = JsonTreeDifferState.Error.OriginalJsonError(originalJsonTreeListResult.throwable)
                 }
                 return@withContext
             }
-            revisedJsonTreeListResult is JsonTreeParserState.Parsing.Error -> {
+            revisedJsonTreeListResult is ParsingResult.Failure -> {
                 withContext(mainDispatcher) {
                     state.value = JsonTreeDifferState.Error.RevisedJsonError(revisedJsonTreeListResult.throwable)
                 }
                 return@withContext
             }
             else -> {
-                (originalJsonTreeListResult as JsonTreeParserState.Ready).list to (revisedJsonTreeListResult as JsonTreeParserState.Ready).list
+                (originalJsonTreeListResult as ParsingResult.Success).list to (revisedJsonTreeListResult as ParsingResult.Success).list
             }
         }
 
-        val originalJsonTreeMapDeferred = runAsync { originalJsonTreeList.groupBy { it.toRenderString() } }
-        val revisedJsonTreeMapDeferred = runAsync { revisedJsonTreeList.groupBy { it.toRenderString() } }
+        val originalJsonTreeMapDeferred = async { originalJsonTreeList.groupBy { it.toRenderString() } }
+        val revisedJsonTreeMapDeferred = async { revisedJsonTreeList.groupBy { it.toRenderString() } }
 
         val diffTagGenerator =  object : DiffTagGenerator {
             override fun generateClose(tag: DiffRow.Tag): String = inlineDiffTagClosed
@@ -103,7 +101,7 @@ internal class JsonTreeDiffer(
                 newLine = diffRow.newLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, "")
             )
 
-            val originalDiffElementDeferred = runAsync {
+            val originalDiffElementDeferred = async {
                 getOriginalDiffElement(
                     diffRow = strippedTagDiffRow,
                     usedIds = usedOriginalIds,
@@ -112,7 +110,7 @@ internal class JsonTreeDiffer(
                 )
             }
 
-            val revisedDiffElementDeferred = runAsync {
+            val revisedDiffElementDeferred = async {
                 getRevisedDiffElement(
                     diffRow = strippedTagDiffRow,
                     usedIds = usedRevisedIds,
@@ -211,18 +209,23 @@ internal class JsonTreeDiffer(
         }
     }
 
-    private suspend fun getJsonTreeList(json: String): JsonTreeParserState {
-        val originalParser = JsonTreeParser(
-            json = json,
-            defaultDispatcher = defaultDispatcher,
-            mainDispatcher = mainDispatcher
-        ).also { it.init(TreeState.EXPANDED) }
-
-        return when(val state = originalParser.state.value) {
-            is JsonTreeParserState.Ready -> state
-            is JsonTreeParserState.Parsing.Error -> state
-            is JsonTreeParserState.Loading,
-            is JsonTreeParserState.Parsing.Parsed -> error("Impossible state $state!")
+    private fun getJsonTreeList(json: String): ParsingResult {
+        return runCatching {
+            ParsingResult.Success(
+                Json
+                    .parseToJsonElement(json)
+                    .toJsonTreeElement(
+                        idGenerator = IdGenerator(),
+                        state = TreeState.EXPANDED,
+                        level = 0,
+                        key = null,
+                        isLastItem = true,
+                        parentType = ParentType.NONE
+                    )
+                    .toList()
+            )
+        }.getOrElse {
+            ParsingResult.Failure(throwable = it)
         }
     }
 
@@ -253,11 +256,9 @@ internal class JsonTreeDiffer(
         return result
     }
 
-    private fun <T> CoroutineScope.runAsync(block: () -> T): Deferred<T> = async {
-        suspendCancellableCoroutine { continuation ->
-            val result = block()
-            continuation.resume(result)
-        }
+    private sealed interface ParsingResult {
+        data class Success(val list: List<JsonTreeElement>): ParsingResult
+        data class Failure(val throwable: Throwable): ParsingResult
     }
 
     private val inlineDiffTagOpen = "JSON_TREE_DIFF_START_TAG"

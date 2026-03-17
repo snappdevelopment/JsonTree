@@ -11,20 +11,15 @@ import com.sebastianneubauer.jsontree.JsonTreeParserState.Loading
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Error
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Parsed
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Ready
+import com.sebastianneubauer.jsontree.util.IdGenerator
 import com.sebastianneubauer.jsontree.util.Expansion
 import com.sebastianneubauer.jsontree.util.collapse
 import com.sebastianneubauer.jsontree.util.expand
+import com.sebastianneubauer.jsontree.util.toJsonTreeElement
 import com.sebastianneubauer.jsontree.util.toList
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 
 internal class JsonTreeParser(
     private val json: String,
@@ -46,7 +41,7 @@ internal class JsonTreeParser(
                 Ready(
                     list = parsingState.jsonElement
                         .toJsonTreeElement(
-                            idGenerator = AtomicLongWrapper(),
+                            idGenerator = IdGenerator(),
                             state = initialState,
                             level = 0,
                             key = null,
@@ -132,85 +127,5 @@ internal class JsonTreeParser(
             removeAt(itemIndex)
             addAll(itemIndex, newItems)
         }
-    }
-
-    private fun JsonElement.toJsonTreeElement(
-        idGenerator: AtomicLongWrapper,
-        state: TreeState,
-        level: Int,
-        key: String?,
-        isLastItem: Boolean,
-        parentType: ParentType,
-    ): JsonTreeElement {
-        return when (this) {
-            is JsonPrimitive -> {
-                Primitive(
-                    id = idGenerator.incrementAndGet().toString(),
-                    level = level,
-                    key = key,
-                    value = this,
-                    isLastItem = isLastItem,
-                    parentType = parentType,
-                )
-            }
-            is JsonArray -> {
-                val childElements = jsonArray.mapIndexed { index, item ->
-                    Pair(
-                        index.toString(),
-                        item.toJsonTreeElement(
-                            idGenerator = idGenerator,
-                            state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
-                            level = level + 1,
-                            key = index.toString(),
-                            isLastItem = index == (jsonArray.size - 1),
-                            parentType = ParentType.ARRAY,
-                        )
-                    )
-                }
-                    .toMap()
-
-                Array(
-                    id = idGenerator.incrementAndGet().toString(),
-                    level = level,
-                    state = state,
-                    key = key,
-                    children = childElements,
-                    isLastItem = isLastItem,
-                    parentType = parentType,
-                )
-            }
-            is JsonObject -> {
-                val childElements = jsonObject.entries.associate {
-                    Pair(
-                        it.key,
-                        it.value.toJsonTreeElement(
-                            idGenerator = idGenerator,
-                            state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
-                            level = level + 1,
-                            key = it.key,
-                            isLastItem = it == jsonObject.entries.last(),
-                            parentType = ParentType.OBJECT
-                        )
-                    )
-                }
-
-                Object(
-                    id = idGenerator.incrementAndGet().toString(),
-                    level = level,
-                    state = state,
-                    key = key,
-                    children = childElements,
-                    isLastItem = isLastItem,
-                    parentType = parentType,
-                )
-            }
-        }
-    }
-}
-
-internal class AtomicLongWrapper {
-    private val atomicLong = atomic(0L)
-    fun incrementAndGet(): Long {
-        return atomicLong.incrementAndGet()
     }
 }
