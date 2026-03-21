@@ -81,6 +81,23 @@ internal class JsonTreeDiffer(
             revisedJsonTreeList.fastMap { it.toRenderString() }
         )
 
+        val diffInfoDeferred = async {
+            // A change is both a deletion in the original json and a insertion in the revised json
+            val insertions = diffRows.count { it.tag == DiffRow.Tag.INSERT || it.tag == DiffRow.Tag.CHANGE }
+            val deletions = diffRows.count { it.tag == DiffRow.Tag.DELETE || it.tag == DiffRow.Tag.CHANGE }
+
+            JsonTreeDiffInfo(
+                changeInfo = if(insertions == 0 && deletions == 0) {
+                    ChangeInfo.Identical
+                } else {
+                    ChangeInfo.Changed(
+                        insertions = insertions,
+                        deletions = deletions
+                    )
+                }
+            )
+        }
+
         val originalJsonTreeMap = originalJsonTreeMapDeferred.await()
         val revisedJsonTreeMap = revisedJsonTreeMapDeferred.await()
 
@@ -122,9 +139,12 @@ internal class JsonTreeDiffer(
             Pair(originalDiffElementDeferred.await(), revisedDiffElementDeferred.await())
         }
 
+        val diffInfo = diffInfoDeferred.await()
+
         withContext(mainDispatcher) {
             state.value = JsonTreeDifferState.Ready(
-                diffElements = diffElements
+                diffElements = diffElements,
+                diffInfo = diffInfo
             )
         }
     }

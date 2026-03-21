@@ -10,7 +10,8 @@ internal sealed interface JsonTreeDifferState {
     data object Loading: JsonTreeDifferState
 
     data class Ready(
-        val diffElements: List<Pair<JsonDiffElement, JsonDiffElement>>
+        val diffElements: List<Pair<JsonDiffElement, JsonDiffElement>>,
+        val diffInfo: JsonTreeDiffInfo
     ): JsonTreeDifferState
 
     @Immutable

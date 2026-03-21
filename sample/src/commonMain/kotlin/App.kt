@@ -50,8 +50,10 @@ import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
+import com.sebastianneubauer.jsontree.diff.ChangeInfo
 import com.sebastianneubauer.jsontree.diff.JsonTreeDiff
 import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError
+import com.sebastianneubauer.jsontree.diff.JsonTreeDiffState
 import com.sebastianneubauer.jsontree.diff.defaultDarkDiffColors
 import com.sebastianneubauer.jsontree.diff.defaultLightDiffColors
 import com.sebastianneubauer.jsontree.search.rememberSearchState
@@ -367,50 +369,81 @@ private fun JsonDiff(
     showInlineDiffs: Boolean,
     colors: TreeColors
 ) {
-    var error by remember(originalJson) { mutableStateOf<String?>(null) }
-    val errorMessage = error
+    var state by remember(originalJson) { mutableStateOf<JsonTreeDiffState?>(null) }
+    val currentState = state
 
-    if (errorMessage != null) {
-        Text(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    color = if (colors == defaultLightColors) Color.White else Color.Black
-                ),
-            text = errorMessage,
-            color = if (colors == defaultLightColors) Color.Black else Color.White,
-        )
-    } else {
-        JsonTreeDiff(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(400.dp)
-                .background(
-                    if (colors == defaultLightColors) Color.White else Color.Black
-                ),
-            originalJson = originalJson,
-            revisedJson = complexJsonRevised,
-            showInlineDiffs = showInlineDiffs,
-            onLoading = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            if (colors == defaultLightColors) Color.White else Color.Black
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
+    Column {
+        val lineChanges = if(currentState is JsonTreeDiffState.Success) {
+            when(val changeInfo = currentState.info.changeInfo) {
+                is ChangeInfo.Identical -> "Identical"
+                is ChangeInfo.Changed -> "+${changeInfo.insertions} -${changeInfo.deletions}"
+            }
+        } else null
+
+        Row {
+            Text(
+                modifier = Modifier.weight(1F),
+                text = "Original:",
+                color = if (colors == defaultLightColors) Color.Black else Color.White
+            )
+
+            Row(modifier = Modifier.weight(1F)) {
+                Text(
+                    modifier = Modifier.weight(1F),
+                    text = "Revised:",
+                    color = if (colors == defaultLightColors) Color.Black else Color.White
+                )
+
+                if(lineChanges != null) {
                     Text(
-                        text = "Loading...",
+                        text = lineChanges,
                         color = if (colors == defaultLightColors) Color.Black else Color.White
                     )
                 }
-            },
-            colors = if(colors == defaultLightColors) defaultLightDiffColors else defaultDarkDiffColors,
-            onError = {
-                error = it.throwable.message
             }
+        }
+
+        JsonTreeDiff(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp),
+            originalJson = originalJson,
+            revisedJson = complexJsonRevised,
+            showInlineDiffs = showInlineDiffs,
+            colors = if(colors == defaultLightColors) defaultLightDiffColors else defaultDarkDiffColors,
+            onStateChanged = { state = it },
         )
+    }
+
+    when(currentState) {
+        is JsonTreeDiffState.Loading -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        if (colors == defaultLightColors) Color.White else Color.Black
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Loading...",
+                    color = if (colors == defaultLightColors) Color.Black else Color.White
+                )
+            }
+        }
+        is JsonTreeDiffState.Error -> {
+            Text(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        color = if (colors == defaultLightColors) Color.White else Color.Black
+                    ),
+                text = currentState.error.throwable.message ?: "Unknown error",
+                color = if (colors == defaultLightColors) Color.Black else Color.White,
+            )
+        }
+        is JsonTreeDiffState.Success,
+        null -> Unit
     }
 }
 

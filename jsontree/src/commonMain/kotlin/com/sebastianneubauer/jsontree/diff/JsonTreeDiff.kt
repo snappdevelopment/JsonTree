@@ -4,28 +4,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.CollapsableType
@@ -34,18 +30,17 @@ import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
 import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError.OriginalJsonError
 import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError.RevisedJsonError
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Composable
 public fun JsonTreeDiff(
     originalJson: String,
     revisedJson: String,
-    onLoading: @Composable () -> Unit,
+    onStateChanged: (JsonTreeDiffState) -> Unit,
     modifier: Modifier = Modifier,
     showInlineDiffs: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     colors: JsonTreeDiffColors = defaultLightDiffColors,
-    textStyle: TextStyle = LocalTextStyle.current,
-    onError: (JsonTreeDiffError) -> Unit = {}
+    textStyle: TextStyle = LocalTextStyle.current
 ) {
     val jsonTreeDiffer = remember {
         JsonTreeDiffer(
@@ -63,16 +58,19 @@ public fun JsonTreeDiff(
     }
 
     when(val state = jsonTreeDiffer.state.collectAsState().value) {
-        is JsonTreeDifferState.Loading -> onLoading()
+        is JsonTreeDifferState.Loading -> onStateChanged(JsonTreeDiffState.Loading)
         is JsonTreeDifferState.Ready -> Box(modifier = modifier) {
+            onStateChanged(JsonTreeDiffState.Success(state.diffInfo))
+
             SideBySideDiff(
                 state = state,
                 colors = colors,
                 textStyle = textStyle,
+                contentPadding = contentPadding
             )
         }
-        is JsonTreeDifferState.Error.OriginalJsonError -> onError(OriginalJsonError(state.throwable))
-        is JsonTreeDifferState.Error.RevisedJsonError -> onError(RevisedJsonError(state.throwable))
+        is JsonTreeDifferState.Error.OriginalJsonError -> onStateChanged(JsonTreeDiffState.Error(OriginalJsonError(state.throwable)))
+        is JsonTreeDifferState.Error.RevisedJsonError -> onStateChanged(JsonTreeDiffState.Error(RevisedJsonError(state.throwable)))
     }
 }
 
@@ -81,9 +79,11 @@ private fun SideBySideDiff(
     state: JsonTreeDifferState.Ready,
     colors: JsonTreeDiffColors,
     textStyle: TextStyle,
+    contentPadding: PaddingValues,
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.background(color = colors.regularBackgroundColor),
+        contentPadding = contentPadding
     ) {
         itemsIndexed(
             items = state.diffElements,
