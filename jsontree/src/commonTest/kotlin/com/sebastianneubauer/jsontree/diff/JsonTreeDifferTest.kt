@@ -190,7 +190,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.state.value
+            actual = differ.differState.value
         )
     }
 
@@ -291,7 +291,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.state.value
+            actual = differ.differState.value
         )
     }
 
@@ -392,7 +392,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.state.value
+            actual = differ.differState.value
         )
     }
 
@@ -483,7 +483,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.state.value
+            actual = differ.differState.value
         )
     }
 
@@ -497,7 +497,7 @@ public class JsonTreeDifferTest {
             showInlineDiffs = false
         )
 
-        val state = differ.state.value
+        val state = differ.differState.value
         assertTrue(state is JsonTreeDifferState.Error.OriginalJsonError)
     }
 
@@ -511,7 +511,7 @@ public class JsonTreeDifferTest {
             showInlineDiffs = false
         )
 
-        val state = differ.state.value
+        val state = differ.differState.value
         assertTrue(state is JsonTreeDifferState.Error.RevisedJsonError)
     }
 
@@ -608,7 +608,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.state.value
+            actual = differ.differState.value
         )
     }
 
@@ -741,7 +741,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.state.value
+            actual = differ.differState.value
         )
     }
 
@@ -870,7 +870,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.state.value
+            actual = differ.differState.value
         )
     }
 
@@ -1013,7 +1013,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.state.value
+            actual = differ.differState.value
         )
     }
 
@@ -1156,7 +1156,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.state.value
+            actual = differ.differState.value
         )
     }
 }

@@ -1,24 +1,9 @@
 package com.sebastianneubauer.jsontree.diff
 
 /**
- * Describes the current state of the diff calculation.
+ * The diff calculation succeeded. See [info] for more details on the diff.
  */
-public sealed interface JsonTreeDiffState {
-    /**
-     * The diff is currently being calculated.
-     */
-    public data object Loading: JsonTreeDiffState
-
-    /**
-     * The diff calculation succeeded. See [info] for more details on the diff.
-     */
-    public data class Success(val info: JsonTreeDiffInfo): JsonTreeDiffState
-
-    /**
-     * The diff calculation failed with an error. See [error] for details.
-     */
-    public data class Error(val error: JsonTreeDiffError): JsonTreeDiffState
-}
+public data class Success(val info: JsonTreeDiffInfo)
 
 /**
  * Infos about the calculated diff.
@@ -27,26 +12,21 @@ public data class JsonTreeDiffInfo(
     val changeInfo: ChangeInfo
 )
 
-public sealed interface ChangeInfo {
+public data class ChangeInfo(
     /**
-     * The given Json strings are identical.
+     * The amount of inserted lines in the revised Json.
      */
-    public data object Identical: ChangeInfo
+    val insertions: Int,
+    /**
+     * The amount of deleted lines in the original Json.
+     */
+    val deletions: Int,
+)
 
-    /**
-     * The given Json strings have differences.
-     */
-    public data class Changed(
-        /**
-         * The amount of inserted lines in the revised Json.
-         */
-        val insertions: Int,
-        /**
-         * The amount of deleted lines in the original Json.
-         */
-        val deletions: Int,
-    ): ChangeInfo
-}
+/**
+ * The diff calculation failed with an error. See [error] for details.
+ */
+public data class Error(val error: JsonTreeDiffError)
 
 public interface JsonTreeDiffError {
     public val throwable: Throwable

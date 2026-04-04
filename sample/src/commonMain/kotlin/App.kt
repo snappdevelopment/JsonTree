@@ -30,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,10 +49,8 @@ import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
-import com.sebastianneubauer.jsontree.diff.ChangeInfo
 import com.sebastianneubauer.jsontree.diff.JsonTreeDiff
-import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError
-import com.sebastianneubauer.jsontree.diff.JsonTreeDiffState
+import com.sebastianneubauer.jsontree.diff.JsonTreeDiffInfo
 import com.sebastianneubauer.jsontree.diff.defaultDarkDiffColors
 import com.sebastianneubauer.jsontree.diff.defaultLightDiffColors
 import com.sebastianneubauer.jsontree.search.rememberSearchState
@@ -369,14 +366,16 @@ private fun JsonDiff(
     showInlineDiffs: Boolean,
     colors: TreeColors
 ) {
-    var state by remember(originalJson) { mutableStateOf<JsonTreeDiffState?>(null) }
-    val currentState = state
+    var diffInfo by remember(originalJson, showInlineDiffs) { mutableStateOf<JsonTreeDiffInfo?>(null) }
+    val currentDiffInfo = diffInfo
 
     Column {
-        val lineChanges = if(currentState is JsonTreeDiffState.Success) {
-            when(val changeInfo = currentState.info.changeInfo) {
-                is ChangeInfo.Identical -> "Identical"
-                is ChangeInfo.Changed -> "+${changeInfo.insertions} -${changeInfo.deletions}"
+        val lineChanges = if(currentDiffInfo != null) {
+            val changeInfo = currentDiffInfo.changeInfo
+            if(changeInfo.insertions == 0 && changeInfo.deletions == 0) {
+                "Identical"
+            } else {
+                "+${changeInfo.insertions} -${changeInfo.deletions}"
             }
         } else null
 
@@ -384,20 +383,20 @@ private fun JsonDiff(
             Text(
                 modifier = Modifier.weight(1F),
                 text = "Original:",
-                color = if (colors == defaultLightColors) Color.Black else Color.White
+                color = Color.Black
             )
 
             Row(modifier = Modifier.weight(1F)) {
                 Text(
                     modifier = Modifier.weight(1F),
                     text = "Revised:",
-                    color = if (colors == defaultLightColors) Color.Black else Color.White
+                    color = Color.Black
                 )
 
                 if(lineChanges != null) {
                     Text(
                         text = lineChanges,
-                        color = if (colors == defaultLightColors) Color.Black else Color.White
+                        color = Color.Black
                     )
                 }
             }
@@ -411,39 +410,34 @@ private fun JsonDiff(
             revisedJson = complexJsonRevised,
             showInlineDiffs = showInlineDiffs,
             colors = if(colors == defaultLightColors) defaultLightDiffColors else defaultDarkDiffColors,
-            onStateChanged = { state = it },
-        )
-    }
-
-    when(currentState) {
-        is JsonTreeDiffState.Loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        if (colors == defaultLightColors) Color.White else Color.Black
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
+            onSuccess = { diffInfo = it.info },
+            onLoading = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            if (colors == defaultLightColors) Color.White else Color.Black
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Loading...",
+                        color = if (colors == defaultLightColors) Color.Black else Color.White
+                    )
+                }
+            },
+            onError = { errorState ->
                 Text(
-                    text = "Loading...",
-                    color = if (colors == defaultLightColors) Color.Black else Color.White
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            color = if (colors == defaultLightColors) Color.White else Color.Black
+                        ),
+                    text = errorState.error.throwable.message ?: "Unknown error",
+                    color = if (colors == defaultLightColors) Color.Black else Color.White,
                 )
             }
-        }
-        is JsonTreeDiffState.Error -> {
-            Text(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        color = if (colors == defaultLightColors) Color.White else Color.Black
-                    ),
-                text = currentState.error.throwable.message ?: "Unknown error",
-                color = if (colors == defaultLightColors) Color.Black else Color.White,
-            )
-        }
-        is JsonTreeDiffState.Success,
-        null -> Unit
+        )
     }
 }
 

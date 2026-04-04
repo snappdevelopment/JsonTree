@@ -1,11 +1,16 @@
 package com.sebastianneubauer.jsontree.diff
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastMap
 import com.sebastianneubauer.jsontree.JsonTreeElement
 import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
+import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.Loading
+import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.Ready
+import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.Error
 import com.sebastianneubauer.jsontree.util.IdGenerator
 import com.sebastianneubauer.jsontree.util.toJsonTreeElement
 import com.sebastianneubauer.jsontree.util.toList
@@ -16,7 +21,6 @@ import io.github.petertrr.diffutils.text.DiffRowGenerator
 import io.github.petertrr.diffutils.text.DiffTagGenerator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlin.collections.orEmpty
@@ -25,19 +29,14 @@ internal class JsonTreeDiffer(
     val defaultDispatcher: CoroutineDispatcher,
     val mainDispatcher: CoroutineDispatcher
 ) {
-    val state = MutableStateFlow<JsonTreeDifferState>(JsonTreeDifferState.Loading)
+    private val differState = mutableStateOf<JsonTreeDifferState>(Loading)
+    val state: State<JsonTreeDifferState> = differState
 
     suspend fun diff(
         original: String,
         revised: String,
         showInlineDiffs: Boolean,
     ) = withContext(defaultDispatcher) {
-        if(state.value !is JsonTreeDifferState.Loading) {
-            withContext(mainDispatcher) {
-                state.value = JsonTreeDifferState.Loading
-            }
-        }
-
         val originalJsonTreeListDeferred = async { getJsonTreeList(original) }
         val revisedJsonTreeListDeferred = async { getJsonTreeList(revised) }
 
@@ -47,13 +46,13 @@ internal class JsonTreeDiffer(
         val (originalJsonTreeList, revisedJsonTreeList) = when {
             originalJsonTreeListResult is ParsingResult.Failure -> {
                 withContext(mainDispatcher) {
-                    state.value = JsonTreeDifferState.Error.OriginalJsonError(originalJsonTreeListResult.throwable)
+                    differState.value = Error.OriginalJsonError(originalJsonTreeListResult.throwable)
                 }
                 return@withContext
             }
             revisedJsonTreeListResult is ParsingResult.Failure -> {
                 withContext(mainDispatcher) {
-                    state.value = JsonTreeDifferState.Error.RevisedJsonError(revisedJsonTreeListResult.throwable)
+                    differState.value = Error.RevisedJsonError(revisedJsonTreeListResult.throwable)
                 }
                 return@withContext
             }
@@ -87,14 +86,10 @@ internal class JsonTreeDiffer(
             val deletions = diffRows.count { it.tag == DiffRow.Tag.DELETE || it.tag == DiffRow.Tag.CHANGE }
 
             JsonTreeDiffInfo(
-                changeInfo = if(insertions == 0 && deletions == 0) {
-                    ChangeInfo.Identical
-                } else {
-                    ChangeInfo.Changed(
-                        insertions = insertions,
-                        deletions = deletions
-                    )
-                }
+                changeInfo = ChangeInfo(
+                    insertions = insertions,
+                    deletions = deletions
+                )
             )
         }
 
@@ -105,7 +100,7 @@ internal class JsonTreeDiffer(
         val usedRevisedIds = mutableMapOf<String, MutableList<String>>()
 
         val diffElements = diffRows.fastMap { diffRow ->
-            val (oldLineDiffIndices, newLineDiffIndices) = if(diffRow.tag == DiffRow.Tag.CHANGE) {
+            val (oldLineDiffIndices, newLineDiffIndices) = if(diffRow.tag == DiffRow.Tag.CHANGE && showInlineDiffs) {
                 val oldLineIndices = diffRow.oldLine.findInlineDiffTagIndices()
                 val newLineIndices = diffRow.newLine.findInlineDiffTagIndices()
                 Pair(oldLineIndices, newLineIndices)
@@ -142,7 +137,7 @@ internal class JsonTreeDiffer(
         val diffInfo = diffInfoDeferred.await()
 
         withContext(mainDispatcher) {
-            state.value = JsonTreeDifferState.Ready(
+            differState.value = Ready(
                 diffElements = diffElements,
                 diffInfo = diffInfo
             )
