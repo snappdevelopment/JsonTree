@@ -2,7 +2,6 @@ package com.sebastianneubauer.jsontree.diff
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastMap
 import com.sebastianneubauer.jsontree.JsonTreeElement
 import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
@@ -20,12 +19,9 @@ import io.github.petertrr.diffutils.text.DiffRow
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import io.github.petertrr.diffutils.text.DiffTagGenerator
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import kotlin.collections.orEmpty
-import kotlin.time.Clock
 
 internal class JsonTreeDiffer(
     val defaultDispatcher: CoroutineDispatcher,
@@ -66,8 +62,16 @@ internal class JsonTreeDiffer(
         val originalDiffRowInput = async { originalJsonTreeList.fastMap { it.toRenderString() } }
         val revisedDiffRowInput = async { revisedJsonTreeList.fastMap { it.toRenderString() } }
 
-        val originalJsonTreeMapDeferred = async { originalJsonTreeList.groupBy { it.toRenderString() } }
-        val revisedJsonTreeMapDeferred = async { revisedJsonTreeList.groupBy { it.toRenderString() } }
+        val originalJsonTreeMapDeferred = async {
+            originalJsonTreeList
+                .groupBy { it.toRenderString() }
+                .mapValues { it.value.toMutableList() }
+        }
+        val revisedJsonTreeMapDeferred = async {
+            revisedJsonTreeList
+                .groupBy { it.toRenderString() }
+                .mapValues { it.value.toMutableList() }
+        }
 
         val diffTagGenerator =  object : DiffTagGenerator {
             override fun generateClose(tag: DiffRow.Tag): String = inlineDiffTagClosed
@@ -101,9 +105,6 @@ internal class JsonTreeDiffer(
         val originalJsonTreeMap = originalJsonTreeMapDeferred.await()
         val revisedJsonTreeMap = revisedJsonTreeMapDeferred.await()
 
-        val usedOriginalIds = mutableMapOf<String, MutableSet<String>>()
-        val usedRevisedIds = mutableMapOf<String, MutableSet<String>>()
-
         val diffElements = diffRows.fastMap { diffRow ->
             val (oldLineDiffIndices, newLineDiffIndices) = if(diffRow.tag == DiffRow.Tag.CHANGE && showInlineDiffs) {
                 val oldLineIndices = diffRow.oldLine.findInlineDiffTagIndices()
@@ -121,7 +122,6 @@ internal class JsonTreeDiffer(
             val originalDiffElementDeferred = async {
                 getOriginalDiffElement(
                     diffRow = strippedTagDiffRow,
-                    usedIds = usedOriginalIds,
                     originalJsonTreeMap = originalJsonTreeMap,
                     inlineDiffsIndices = oldLineDiffIndices
                 )
@@ -130,7 +130,6 @@ internal class JsonTreeDiffer(
             val revisedDiffElementDeferred = async {
                 getRevisedDiffElement(
                     diffRow = strippedTagDiffRow,
-                    usedIds = usedRevisedIds,
                     revisedJsonTreeMap = revisedJsonTreeMap,
                     inlineDiffsIndices = newLineDiffIndices
                 )
@@ -151,31 +150,21 @@ internal class JsonTreeDiffer(
 
     private fun getOriginalDiffElement(
         diffRow: DiffRow,
-        usedIds: MutableMap<String, MutableSet<String>>,
-        originalJsonTreeMap: Map<String, List<JsonTreeElement>>,
+        originalJsonTreeMap: Map<String, MutableList<JsonTreeElement>>,
         inlineDiffsIndices: List<Pair<Int, Int>>
     ): JsonDiffElement {
-        fun findJsonTreeElement(): JsonTreeElement {
+        fun findAndRemoveJsonTreeElement(): JsonTreeElement {
             val jsonTreeElements = originalJsonTreeMap.getValue(diffRow.oldLine)
-            val usedIdsList = usedIds[diffRow.oldLine].orEmpty()
-            return jsonTreeElements.fastFirst { it.id !in usedIdsList }
-        }
-
-        fun addToUsedIds(id: String) {
-            usedIds.getOrPut(diffRow.oldLine) { mutableSetOf() }.add(id)
+            return jsonTreeElements.removeAt(0)
         }
 
         return when(diffRow.tag) {
             DiffRow.Tag.EQUAL -> {
-                val jsonTreeElement = findJsonTreeElement()
-                addToUsedIds(id = jsonTreeElement.id)
-                JsonDiffElement.Equal(jsonTreeElement)
+                JsonDiffElement.Equal(findAndRemoveJsonTreeElement())
             }
             DiffRow.Tag.CHANGE -> {
-                val jsonTreeElement = findJsonTreeElement()
-                addToUsedIds(id = jsonTreeElement.id)
                 JsonDiffElement.Change(
-                    jsonTreeElement = jsonTreeElement,
+                    jsonTreeElement = findAndRemoveJsonTreeElement(),
                     inlineDiffIndices = inlineDiffsIndices
                 )
             }
@@ -183,47 +172,33 @@ internal class JsonTreeDiffer(
                 JsonDiffElement.Insertion(null)
             }
             DiffRow.Tag.DELETE -> {
-                val jsonTreeElement = findJsonTreeElement()
-                addToUsedIds(id = jsonTreeElement.id)
-                JsonDiffElement.Deletion(jsonTreeElement)
+                JsonDiffElement.Deletion(findAndRemoveJsonTreeElement())
             }
         }
     }
 
     private fun getRevisedDiffElement(
         diffRow: DiffRow,
-        usedIds: MutableMap<String, MutableSet<String>>,
-        revisedJsonTreeMap: Map<String, List<JsonTreeElement>>,
+        revisedJsonTreeMap: Map<String, MutableList<JsonTreeElement>>,
         inlineDiffsIndices: List<Pair<Int,Int>>
     ): JsonDiffElement {
-        fun findJsonTreeElement(): JsonTreeElement {
+        fun findAndRemoveJsonTreeElement(): JsonTreeElement {
             val jsonTreeElements = revisedJsonTreeMap.getValue(diffRow.newLine)
-            val usedIdsList = usedIds[diffRow.newLine].orEmpty()
-            return jsonTreeElements.fastFirst { it.id !in usedIdsList }
-        }
-
-        fun addToUsedIds(id: String) {
-            usedIds.getOrPut(diffRow.newLine) { mutableSetOf() }.add(id)
+            return jsonTreeElements.removeAt(0)
         }
 
         return when(diffRow.tag) {
             DiffRow.Tag.EQUAL -> {
-                val jsonTreeElement = findJsonTreeElement()
-                addToUsedIds(id = jsonTreeElement.id)
-                JsonDiffElement.Equal(jsonTreeElement)
+                JsonDiffElement.Equal(findAndRemoveJsonTreeElement())
             }
             DiffRow.Tag.CHANGE -> {
-                val jsonTreeElement = findJsonTreeElement()
-                addToUsedIds(id = jsonTreeElement.id)
                 JsonDiffElement.Change(
-                    jsonTreeElement = jsonTreeElement,
+                    jsonTreeElement = findAndRemoveJsonTreeElement(),
                     inlineDiffIndices = inlineDiffsIndices
                 )
             }
             DiffRow.Tag.INSERT -> {
-                val jsonTreeElement = findJsonTreeElement()
-                addToUsedIds(id = jsonTreeElement.id)
-                JsonDiffElement.Insertion(jsonTreeElement)
+                JsonDiffElement.Insertion(findAndRemoveJsonTreeElement())
             }
             DiffRow.Tag.DELETE -> JsonDiffElement.Deletion(null)
         }
