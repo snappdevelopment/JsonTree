@@ -20,10 +20,12 @@ import io.github.petertrr.diffutils.text.DiffRow
 import io.github.petertrr.diffutils.text.DiffRowGenerator
 import io.github.petertrr.diffutils.text.DiffTagGenerator
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlin.collections.orEmpty
+import kotlin.time.Clock
 
 internal class JsonTreeDiffer(
     val defaultDispatcher: CoroutineDispatcher,
@@ -61,6 +63,9 @@ internal class JsonTreeDiffer(
             }
         }
 
+        val originalDiffRowInput = async { originalJsonTreeList.fastMap { it.toRenderString() } }
+        val revisedDiffRowInput = async { revisedJsonTreeList.fastMap { it.toRenderString() } }
+
         val originalJsonTreeMapDeferred = async { originalJsonTreeList.groupBy { it.toRenderString() } }
         val revisedJsonTreeMapDeferred = async { revisedJsonTreeList.groupBy { it.toRenderString() } }
 
@@ -76,8 +81,8 @@ internal class JsonTreeDiffer(
             newTag = diffTagGenerator,
             oldTag = diffTagGenerator,
         ).generateDiffRows(
-            originalJsonTreeList.fastMap { it.toRenderString() },
-            revisedJsonTreeList.fastMap { it.toRenderString() }
+            originalDiffRowInput.await(),
+            revisedDiffRowInput.await()
         )
 
         val diffInfoDeferred = async {
@@ -96,8 +101,8 @@ internal class JsonTreeDiffer(
         val originalJsonTreeMap = originalJsonTreeMapDeferred.await()
         val revisedJsonTreeMap = revisedJsonTreeMapDeferred.await()
 
-        val usedOriginalIds = mutableMapOf<String, MutableList<String>>()
-        val usedRevisedIds = mutableMapOf<String, MutableList<String>>()
+        val usedOriginalIds = mutableMapOf<String, MutableSet<String>>()
+        val usedRevisedIds = mutableMapOf<String, MutableSet<String>>()
 
         val diffElements = diffRows.fastMap { diffRow ->
             val (oldLineDiffIndices, newLineDiffIndices) = if(diffRow.tag == DiffRow.Tag.CHANGE && showInlineDiffs) {
@@ -146,18 +151,18 @@ internal class JsonTreeDiffer(
 
     private fun getOriginalDiffElement(
         diffRow: DiffRow,
-        usedIds: MutableMap<String, MutableList<String>>,
+        usedIds: MutableMap<String, MutableSet<String>>,
         originalJsonTreeMap: Map<String, List<JsonTreeElement>>,
         inlineDiffsIndices: List<Pair<Int, Int>>
     ): JsonDiffElement {
         fun findJsonTreeElement(): JsonTreeElement {
             val jsonTreeElements = originalJsonTreeMap.getValue(diffRow.oldLine)
-            return jsonTreeElements.fastFirst { it.id !in usedIds[diffRow.oldLine].orEmpty() }
+            val usedIdsList = usedIds[diffRow.oldLine].orEmpty()
+            return jsonTreeElements.fastFirst { it.id !in usedIdsList }
         }
 
         fun addToUsedIds(id: String) {
-            val currentIds = usedIds[diffRow.oldLine] ?: mutableListOf()
-            usedIds[diffRow.oldLine] = currentIds.apply { add(id) }
+            usedIds.getOrPut(diffRow.oldLine) { mutableSetOf() }.add(id)
         }
 
         return when(diffRow.tag) {
@@ -187,18 +192,18 @@ internal class JsonTreeDiffer(
 
     private fun getRevisedDiffElement(
         diffRow: DiffRow,
-        usedIds: MutableMap<String, MutableList<String>>,
+        usedIds: MutableMap<String, MutableSet<String>>,
         revisedJsonTreeMap: Map<String, List<JsonTreeElement>>,
         inlineDiffsIndices: List<Pair<Int,Int>>
     ): JsonDiffElement {
         fun findJsonTreeElement(): JsonTreeElement {
             val jsonTreeElements = revisedJsonTreeMap.getValue(diffRow.newLine)
-            return jsonTreeElements.fastFirst { it.id !in usedIds[diffRow.newLine].orEmpty() }
+            val usedIdsList = usedIds[diffRow.newLine].orEmpty()
+            return jsonTreeElements.fastFirst { it.id !in usedIdsList }
         }
 
         fun addToUsedIds(id: String) {
-            val currentIds = usedIds[diffRow.newLine] ?: mutableListOf()
-            usedIds[diffRow.newLine] = currentIds.apply { add(id) }
+            usedIds.getOrPut(diffRow.newLine) { mutableSetOf() }.add(id)
         }
 
         return when(diffRow.tag) {
