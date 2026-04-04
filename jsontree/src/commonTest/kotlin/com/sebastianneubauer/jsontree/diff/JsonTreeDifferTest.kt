@@ -50,6 +50,12 @@ public class JsonTreeDifferTest {
 
         assertEquals(
             expected = JsonTreeDifferState.Ready(
+                diffInfo = JsonTreeDiffInfo(
+                    changeInfo = ChangeInfo(
+                        insertions = 0,
+                        deletions = 0
+                    )
+                ),
                 diffElements = listOf(
                     Pair(
                         JsonDiffElement.Equal(
@@ -135,6 +141,12 @@ public class JsonTreeDifferTest {
 
         assertEquals(
             expected =  JsonTreeDifferState.Ready(
+                diffInfo = JsonTreeDiffInfo(
+                    changeInfo = ChangeInfo(
+                        insertions = 1,
+                        deletions = 1
+                    )
+                ),
                 diffElements = listOf(
                     Pair(
                         JsonDiffElement.Equal(
@@ -190,7 +202,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.differState.value
+            actual = differ.state.value
         )
     }
 
@@ -235,6 +247,12 @@ public class JsonTreeDifferTest {
 
         assertEquals(
             expected = JsonTreeDifferState.Ready(
+                diffInfo = JsonTreeDiffInfo(
+                    changeInfo = ChangeInfo(
+                        insertions = 1,
+                        deletions = 0
+                    )
+                ),
                 diffElements = listOf(
                     Pair(
                         JsonDiffElement.Equal(
@@ -291,7 +309,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.differState.value
+            actual = differ.state.value
         )
     }
 
@@ -336,6 +354,12 @@ public class JsonTreeDifferTest {
 
         assertEquals(
             expected = JsonTreeDifferState.Ready(
+                diffInfo = JsonTreeDiffInfo(
+                    changeInfo = ChangeInfo(
+                        insertions = 0,
+                        deletions = 1
+                    )
+                ),
                 diffElements = listOf(
                     Pair(
                         JsonDiffElement.Equal(
@@ -392,7 +416,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.differState.value
+            actual = differ.state.value
         )
     }
 
@@ -428,6 +452,12 @@ public class JsonTreeDifferTest {
 
         assertEquals(
             expected = JsonTreeDifferState.Ready(
+                diffInfo = JsonTreeDiffInfo(
+                    changeInfo = ChangeInfo(
+                        insertions = 1,
+                        deletions = 1
+                    )
+                ),
                 diffElements = listOf(
                     Pair(
                         JsonDiffElement.Equal(
@@ -483,7 +513,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.differState.value
+            actual = differ.state.value
         )
     }
 
@@ -497,7 +527,7 @@ public class JsonTreeDifferTest {
             showInlineDiffs = false
         )
 
-        val state = differ.differState.value
+        val state = differ.state.value
         assertTrue(state is JsonTreeDifferState.Error.OriginalJsonError)
     }
 
@@ -511,7 +541,7 @@ public class JsonTreeDifferTest {
             showInlineDiffs = false
         )
 
-        val state = differ.differState.value
+        val state = differ.state.value
         assertTrue(state is JsonTreeDifferState.Error.RevisedJsonError)
     }
 
@@ -557,6 +587,12 @@ public class JsonTreeDifferTest {
 
         assertEquals(
             expected = JsonTreeDifferState.Ready(
+                diffInfo = JsonTreeDiffInfo(
+                    changeInfo = ChangeInfo(
+                        insertions = 0,
+                        deletions = 0
+                    )
+                ),
                 diffElements = listOf(
                     Pair(
                         JsonDiffElement.Equal(jsonTreeElement = rootObject),
@@ -608,7 +644,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.differState.value
+            actual = differ.state.value
         )
     }
 
@@ -684,6 +720,12 @@ public class JsonTreeDifferTest {
 
         assertEquals(
             expected = JsonTreeDifferState.Ready(
+                diffInfo = JsonTreeDiffInfo(
+                    changeInfo = ChangeInfo(
+                        insertions = 1,
+                        deletions = 1
+                    )
+                ),
                 diffElements = listOf(
                     Pair(
                         JsonDiffElement.Equal(jsonTreeElement = originalRootObject),
@@ -741,7 +783,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.differState.value
+            actual = differ.state.value
         )
     }
 
@@ -797,6 +839,12 @@ public class JsonTreeDifferTest {
 
         assertEquals(
             expected = JsonTreeDifferState.Ready(
+                diffInfo = JsonTreeDiffInfo(
+                    changeInfo = ChangeInfo(
+                        insertions = 0,
+                        deletions = 0
+                    )
+                ),
                 diffElements = listOf(
                     Pair(
                         JsonDiffElement.Equal(jsonTreeElement = rootObject),
@@ -870,7 +918,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.differState.value
+            actual = differ.state.value
         )
     }
 
@@ -958,6 +1006,12 @@ public class JsonTreeDifferTest {
 
         assertEquals(
             expected = JsonTreeDifferState.Ready(
+                diffInfo = JsonTreeDiffInfo(
+                    changeInfo = ChangeInfo(
+                        insertions = 1,
+                        deletions = 0
+                    )
+                ),
                 diffElements = listOf(
                     Pair(
                         JsonDiffElement.Equal(jsonTreeElement = originalRootObject),
@@ -1013,7 +1067,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.differState.value
+            actual = differ.state.value
         )
     }
 
@@ -1101,6 +1155,12 @@ public class JsonTreeDifferTest {
 
         assertEquals(
             expected = JsonTreeDifferState.Ready(
+                diffInfo = JsonTreeDiffInfo(
+                    changeInfo = ChangeInfo(
+                        insertions = 0,
+                        deletions = 1
+                    )
+                ),
                 diffElements = listOf(
                     Pair(
                         JsonDiffElement.Equal(jsonTreeElement = originalRootObject),
@@ -1156,7 +1216,7 @@ public class JsonTreeDifferTest {
                     )
                 )
             ),
-            actual = differ.differState.value
+            actual = differ.state.value
         )
     }
 }
