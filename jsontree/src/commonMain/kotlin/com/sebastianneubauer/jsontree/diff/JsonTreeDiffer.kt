@@ -114,10 +114,12 @@ internal class JsonTreeDiffer(
                 Pair(emptyList(), emptyList())
             }
 
-            val strippedTagDiffRow = diffRow.copy(
-                oldLine = diffRow.oldLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, ""),
-                newLine = diffRow.newLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, "")
-            )
+            val strippedTagDiffRow = if(diffRow.tag != DiffRow.Tag.EQUAL && showInlineDiffs) {
+                diffRow.copy(
+                    oldLine = diffRow.oldLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, ""),
+                    newLine = diffRow.newLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, "")
+                )
+            } else diffRow
 
             val originalDiffElementDeferred = async {
                 getOriginalDiffElement(
@@ -233,7 +235,6 @@ internal class JsonTreeDiffer(
             val openTagIndex = indexOf(inlineDiffTagOpen, currentIndex)
             if (openTagIndex == -1) break
 
-            // Add non-bold text length to stripped index
             strippedIndex += (openTagIndex - currentIndex)
 
             val contentStart = openTagIndex + inlineDiffTagOpen.length

@@ -410,6 +410,7 @@ private fun JsonDiff(
             revisedJson = complexJsonRevised,
             showInlineDiffs = showInlineDiffs,
             colors = if(colors == defaultLightColors) defaultLightDiffColors else defaultDarkDiffColors,
+            contentPadding = PaddingValues(8.dp),
             onSuccess = { diffInfo = it.info },
             onLoading = {
                 Box(

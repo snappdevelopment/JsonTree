@@ -30,6 +30,20 @@ import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError.OriginalJsonError
 import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError.RevisedJsonError
 import kotlinx.coroutines.Dispatchers
 
+/**
+ * Renders a side-by-side diff of two JSON strings with syntax highlighting.
+ *
+ * @param originalJson The original JSON data as a string.
+ * @param revisedJson The revised JSON data as a string which is compared with [originalJson].
+ * @param onLoading A Composable which is show while the diff is being calculated.
+ * @param onError A Composable which is shown if an error occurs. Receives an [Error] object with more information.
+ * @param onSuccess A callback which is called when the diff calculation succeeded. Receives an [Success] object with more information.
+ * @param modifier The Modifier which is applied on the side-by-side diff. Not applied on the [onLoading] and [onError] slots.
+ * @param showInlineDiffs If true, the diff shows partial changes within the text of a line.
+ * @param contentPadding The content padding which is applied on the LazyColumn of the side-by-side diff.
+ * @param colors The color palette the diff uses. [defaultLightDiffColors], [defaultDarkDiffColors] or a custom instance of [JsonTreeDiffColors].
+ * @param textStyle The style which is used for all texts in the diff.
+ */
 @Composable
 public fun JsonTreeDiff(
     originalJson: String,
@@ -38,7 +52,7 @@ public fun JsonTreeDiff(
     onError: @Composable (Error) -> Unit,
     onSuccess: (Success) -> Unit= {},
     modifier: Modifier = Modifier,
-    showInlineDiffs: Boolean = true,
+    showInlineDiffs: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     colors: JsonTreeDiffColors = defaultLightDiffColors,
     textStyle: TextStyle = LocalTextStyle.current
