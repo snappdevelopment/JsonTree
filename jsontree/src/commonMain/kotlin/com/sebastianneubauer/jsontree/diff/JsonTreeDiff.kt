@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.CollapsableType
 import com.sebastianneubauer.jsontree.JsonTreeElement
 import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
-import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError.OriginalJsonError
-import com.sebastianneubauer.jsontree.diff.JsonTreeDiffError.RevisedJsonError
+import com.sebastianneubauer.jsontree.diff.DiffError.OriginalJsonError
+import com.sebastianneubauer.jsontree.diff.DiffError.RevisedJsonError
 import kotlinx.coroutines.Dispatchers
 
 /**
@@ -36,8 +36,8 @@ import kotlinx.coroutines.Dispatchers
  * @param originalJson The original JSON data as a string.
  * @param revisedJson The revised JSON data as a string which is compared with [originalJson].
  * @param onLoading A Composable which is show while the diff is being calculated.
- * @param onError A Composable which is shown if an error occurs. Receives an [Error] object with more information.
- * @param onSuccess A callback which is called when the diff calculation succeeded. Receives an [Success] object with more information.
+ * @param onError A Composable which is shown if an error occurs. Receives an [JsonTreeDiffError] object with more information.
+ * @param onSuccess A callback which is called when the diff calculation succeeded. Receives an [JsonTreeDiffSuccess] object with more information.
  * @param modifier The Modifier which is applied on the side-by-side diff. Not applied on the [onLoading] and [onError] slots.
  * @param showInlineDiffs If true, the diff shows partial changes within the text of a line.
  * @param contentPadding The content padding which is applied on the LazyColumn of the side-by-side diff.
@@ -49,8 +49,8 @@ public fun JsonTreeDiff(
     originalJson: String,
     revisedJson: String,
     onLoading: @Composable () -> Unit,
-    onError: @Composable (Error) -> Unit,
-    onSuccess: (Success) -> Unit= {},
+    onError: @Composable (JsonTreeDiffError) -> Unit,
+    onSuccess: (JsonTreeDiffSuccess) -> Unit= {},
     modifier: Modifier = Modifier,
     showInlineDiffs: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -76,7 +76,7 @@ public fun JsonTreeDiff(
     when(val state = jsonTreeDiffer.state.value) {
         is JsonTreeDifferState.Loading -> onLoading()
         is JsonTreeDifferState.Ready -> {
-            onSuccess(Success(state.diffInfo))
+            onSuccess(JsonTreeDiffSuccess(state.diffInfo))
 
             Box(modifier = modifier) {
                 SideBySideDiff(
@@ -87,8 +87,8 @@ public fun JsonTreeDiff(
                 )
             }
         }
-        is JsonTreeDifferState.Error.OriginalJsonError -> onError(Error(OriginalJsonError(state.throwable)))
-        is JsonTreeDifferState.Error.RevisedJsonError -> onError(Error(RevisedJsonError(state.throwable)))
+        is JsonTreeDifferState.Error.OriginalJsonError -> onError(JsonTreeDiffError(OriginalJsonError(state.throwable)))
+        is JsonTreeDifferState.Error.RevisedJsonError -> onError(JsonTreeDiffError(RevisedJsonError(state.throwable)))
     }
 }
 
