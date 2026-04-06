@@ -26,5 +26,9 @@ style:
     active: false
   UnusedPrivateMember:
     ignoreAnnotated: ['Preview']
+  LoopWithTooManyJumpStatements:
+    active: true
+  MaxLineLength:
+    active: false
 
 
