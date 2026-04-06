@@ -63,6 +63,9 @@ captures/
 .idea/runConfigurations.xml
 .idea/AndroidProjectSystem.xml
 .idea/deviceManager.xml
+.idea/appInsightsSettings.xml
+.idea/ktlint-plugin.xml
+.idea/markdown.xml
 
 .kotlin
 

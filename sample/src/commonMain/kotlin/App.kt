@@ -30,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,13 +49,16 @@ import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.defaultDarkColors
 import com.sebastianneubauer.jsontree.defaultLightColors
+import com.sebastianneubauer.jsontree.diff.JsonTreeDiff
+import com.sebastianneubauer.jsontree.diff.JsonTreeDiffInfo
+import com.sebastianneubauer.jsontree.diff.defaultDarkDiffColors
+import com.sebastianneubauer.jsontree.diff.defaultLightDiffColors
 import com.sebastianneubauer.jsontree.search.rememberSearchState
 import com.sebastianneubauer.jsontreesample.sample.generated.resources.Res
 import com.sebastianneubauer.jsontreesample.sample.generated.resources.arrow_down
 import com.sebastianneubauer.jsontreesample.sample.generated.resources.arrow_up
 import com.sebastianneubauer.jsontreesample.ui.theme.JsonTreeTheme
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -80,9 +84,11 @@ private fun MainScreen() {
                         style = MaterialTheme.typography.headlineMedium,
                     )
                 },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
             )
         },
         contentWindowInsets = WindowInsets(top = 60.dp),
+        containerColor = Color.White
     ) { padding ->
         Column(
             modifier = Modifier
@@ -96,6 +102,8 @@ private fun MainScreen() {
             var showIndices: Boolean by remember { mutableStateOf(true) }
             var showItemCount: Boolean by remember { mutableStateOf(true) }
             var expandSingleChildren: Boolean by remember { mutableStateOf(true) }
+            var showDiff: Boolean by remember { mutableStateOf(false) }
+            var showInlineDiffs: Boolean by remember { mutableStateOf(true) }
             val searchState = rememberSearchState()
             val searchQuery by remember(searchState.query) { mutableStateOf(searchState.query.orEmpty()) }
             val coroutineScope = rememberCoroutineScope()
@@ -172,6 +180,20 @@ private fun MainScreen() {
                 ) {
                     Text(text = if (expandSingleChildren) "Expand children" else "Don't expand children")
                 }
+
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = { showDiff = !showDiff }
+                ) {
+                    Text(text = if (showDiff) "Hide diff" else "Show diff")
+                }
+
+                Button(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    onClick = { showInlineDiffs = !showInlineDiffs }
+                ) {
+                    Text(text = if (showInlineDiffs) "Hide inline diffs" else "Show inline diffs")
+                }
             }
 
             Spacer(Modifier.height(8.dp))
@@ -199,6 +221,16 @@ private fun MainScreen() {
                 ) {
                     Text(text = "To Bottom")
                 }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            if(showDiff) {
+                JsonDiff(
+                    originalJson = json,
+                    showInlineDiffs = showInlineDiffs,
+                    colors = colors,
+                )
             }
 
             Spacer(Modifier.height(8.dp))
@@ -325,6 +357,88 @@ private fun MainScreen() {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun JsonDiff(
+    originalJson: String,
+    showInlineDiffs: Boolean,
+    colors: TreeColors
+) {
+    var diffInfo by remember(originalJson, showInlineDiffs) { mutableStateOf<JsonTreeDiffInfo?>(null) }
+    val currentDiffInfo = diffInfo
+
+    Column {
+        val lineChanges = if(currentDiffInfo != null) {
+            val changeInfo = currentDiffInfo.changeInfo
+            if(changeInfo.insertions == 0 && changeInfo.deletions == 0) {
+                "Identical"
+            } else {
+                "+${changeInfo.insertions} -${changeInfo.deletions}"
+            }
+        } else null
+
+        Row {
+            Text(
+                modifier = Modifier.weight(1F),
+                text = "Original:",
+                color = Color.Black
+            )
+
+            Row(modifier = Modifier.weight(1F)) {
+                Text(
+                    modifier = Modifier.weight(1F),
+                    text = "Revised:",
+                    color = Color.Black
+                )
+
+                if(lineChanges != null) {
+                    Text(
+                        text = lineChanges,
+                        color = Color.Black
+                    )
+                }
+            }
+        }
+
+        JsonTreeDiff(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp),
+            originalJson = originalJson,
+            revisedJson = complexJsonRevised,
+            showInlineDiffs = showInlineDiffs,
+            colors = if(colors == defaultLightColors) defaultLightDiffColors else defaultDarkDiffColors,
+            contentPadding = PaddingValues(8.dp),
+            onSuccess = { diffInfo = it.info },
+            onLoading = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            if (colors == defaultLightColors) Color.White else Color.Black
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Loading...",
+                        color = if (colors == defaultLightColors) Color.Black else Color.White
+                    )
+                }
+            },
+            onError = { errorState ->
+                Text(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            color = if (colors == defaultLightColors) Color.White else Color.Black
+                        ),
+                    text = errorState.error.throwable.message ?: "Unknown error",
+                    color = if (colors == defaultLightColors) Color.Black else Color.White,
+                )
+            }
+        )
     }
 }
 

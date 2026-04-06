@@ -81,7 +81,8 @@ jobs:
           ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.JsonTreeParserTest --stacktrace
           ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.JsonTreeSearchTest --stacktrace
           ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.SearchStateTest --stacktrace
-          ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.ExtensionsTest --stacktrace
+          ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.JsonTreeElementExtensionsTest --stacktrace
+          ./gradlew :jsontree:jvmTest --tests com.sebastianneubauer.jsontree.diff.JsonTreeDifferTest --stacktrace
 
   apiCheck:
     runs-on: macos-latest

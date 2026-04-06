@@ -52,6 +52,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             // needs to be added as a workaround not get atomicfus code stripped
             implementation(libs.atomicfu)
+            implementation(libs.kotlindiff)
         }
 
         commonTest.dependencies {

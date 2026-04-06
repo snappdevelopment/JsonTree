@@ -4,9 +4,16 @@ import com.sebastianneubauer.jsontree.JsonTreeElement
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
 import com.sebastianneubauer.jsontree.JsonTreeElement.EndBracket
+import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
 import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.endBracket
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 
 internal enum class Expansion {
     /**
@@ -178,4 +185,107 @@ internal fun JsonTreeElement.toList(): List<JsonTreeElement> {
 
     addToList(this)
     return list
+}
+
+/**
+ * Converts a [JsonElement] to a [JsonTreeElement].
+ */
+internal fun JsonElement.toJsonTreeElement(
+    idGenerator: IdGenerator,
+    state: TreeState,
+    level: Int,
+    key: String?,
+    isLastItem: Boolean,
+    parentType: ParentType,
+): JsonTreeElement {
+    return when (this) {
+        is JsonPrimitive -> {
+            Primitive(
+                id = idGenerator.incrementAndGet().toString(),
+                level = level,
+                key = key,
+                value = this,
+                isLastItem = isLastItem,
+                parentType = parentType,
+            )
+        }
+        is JsonArray -> {
+            val childElements = jsonArray.mapIndexed { index, item ->
+                Pair(
+                    index.toString(),
+                    item.toJsonTreeElement(
+                        idGenerator = idGenerator,
+                        state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
+                        level = level + 1,
+                        key = index.toString(),
+                        isLastItem = index == (jsonArray.size - 1),
+                        parentType = ParentType.ARRAY,
+                    )
+                )
+            }
+                .toMap()
+
+            Array(
+                id = idGenerator.incrementAndGet().toString(),
+                level = level,
+                state = state,
+                key = key,
+                children = childElements,
+                isLastItem = isLastItem,
+                parentType = parentType,
+            )
+        }
+        is JsonObject -> {
+            val childElements = jsonObject.entries.associate {
+                Pair(
+                    it.key,
+                    it.value.toJsonTreeElement(
+                        idGenerator = idGenerator,
+                        state = if (state == TreeState.FIRST_ITEM_EXPANDED) TreeState.COLLAPSED else state,
+                        level = level + 1,
+                        key = it.key,
+                        isLastItem = it == jsonObject.entries.last(),
+                        parentType = ParentType.OBJECT
+                    )
+                )
+            }
+
+            Object(
+                id = idGenerator.incrementAndGet().toString(),
+                level = level,
+                state = state,
+                key = key,
+                children = childElements,
+                isLastItem = isLastItem,
+                parentType = parentType,
+            )
+        }
+    }
+}
+
+/**
+ * Converts a JsonTreeElement to its string representation.
+ */
+internal fun JsonTreeElement.toRenderString(): String {
+    return when (this) {
+        is Object -> if (key != null && parentType != ParentType.ARRAY) {
+            "\"$key\": {"
+        } else {
+            "{"
+        }
+        is Array -> if (key != null && parentType != ParentType.ARRAY) {
+            "\"$key\": ["
+        } else {
+            "["
+        }
+        is Primitive -> if (key != null && parentType != ParentType.ARRAY) {
+            "\"$key\": $value" + if (isLastItem) "" else ","
+        } else {
+            "$value" + if (isLastItem) "" else ","
+        }
+        is EndBracket -> when (type) {
+            EndBracket.Type.ARRAY -> if (!isLastItem) "]," else "]"
+            EndBracket.Type.OBJECT -> if (!isLastItem) "}," else "}"
+        }
+    }
 }
