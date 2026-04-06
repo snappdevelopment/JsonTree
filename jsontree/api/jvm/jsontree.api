@@ -46,6 +46,115 @@ public final class com/sebastianneubauer/jsontree/TreeState : java/lang/Enum {
 	public static fun values ()[Lcom/sebastianneubauer/jsontree/TreeState;
 }
 
+public final class com/sebastianneubauer/jsontree/diff/ChangeInfo {
+	public static final field $stable I
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Lcom/sebastianneubauer/jsontree/diff/ChangeInfo;
+	public static synthetic fun copy$default (Lcom/sebastianneubauer/jsontree/diff/ChangeInfo;IIILjava/lang/Object;)Lcom/sebastianneubauer/jsontree/diff/ChangeInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeletions ()I
+	public final fun getInsertions ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/sebastianneubauer/jsontree/diff/DiffError {
+	public abstract fun getThrowable ()Ljava/lang/Throwable;
+}
+
+public final class com/sebastianneubauer/jsontree/diff/DiffError$OriginalJsonError : com/sebastianneubauer/jsontree/diff/DiffError {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Throwable;)V
+	public fun getThrowable ()Ljava/lang/Throwable;
+}
+
+public final class com/sebastianneubauer/jsontree/diff/DiffError$RevisedJsonError : com/sebastianneubauer/jsontree/diff/DiffError {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Throwable;)V
+	public fun getThrowable ()Ljava/lang/Throwable;
+}
+
+public final class com/sebastianneubauer/jsontree/diff/JsonTreeDiffColors {
+	public static final field $stable I
+	public synthetic fun <init> (JJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-0d7_KjU ()J
+	public final fun component10-0d7_KjU ()J
+	public final fun component11-0d7_KjU ()J
+	public final fun component12-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun component5-0d7_KjU ()J
+	public final fun component6-0d7_KjU ()J
+	public final fun component7-0d7_KjU ()J
+	public final fun component8-0d7_KjU ()J
+	public final fun component9-0d7_KjU ()J
+	public final fun copy-2qZNXz8 (JJJJJJJJJJJJ)Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffColors;
+	public static synthetic fun copy-2qZNXz8$default (Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffColors;JJJJJJJJJJJJILjava/lang/Object;)Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffColors;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBooleanValueColor-0d7_KjU ()J
+	public final fun getChangeBackgroundColor-0d7_KjU ()J
+	public final fun getDeletionBackgroundColor-0d7_KjU ()J
+	public final fun getDeletionHighlightColor-0d7_KjU ()J
+	public final fun getInsertionBackgroundColor-0d7_KjU ()J
+	public final fun getInsertionHighlightColor-0d7_KjU ()J
+	public final fun getKeyColor-0d7_KjU ()J
+	public final fun getNullValueColor-0d7_KjU ()J
+	public final fun getNumberValueColor-0d7_KjU ()J
+	public final fun getRegularBackgroundColor-0d7_KjU ()J
+	public final fun getStringValueColor-0d7_KjU ()J
+	public final fun getSymbolColor-0d7_KjU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/sebastianneubauer/jsontree/diff/JsonTreeDiffColorsKt {
+	public static final fun getDefaultDarkDiffColors ()Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffColors;
+	public static final fun getDefaultLightDiffColors ()Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffColors;
+}
+
+public final class com/sebastianneubauer/jsontree/diff/JsonTreeDiffError {
+	public static final field $stable I
+	public fun <init> (Lcom/sebastianneubauer/jsontree/diff/DiffError;)V
+	public final fun component1 ()Lcom/sebastianneubauer/jsontree/diff/DiffError;
+	public final fun copy (Lcom/sebastianneubauer/jsontree/diff/DiffError;)Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffError;
+	public static synthetic fun copy$default (Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffError;Lcom/sebastianneubauer/jsontree/diff/DiffError;ILjava/lang/Object;)Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Lcom/sebastianneubauer/jsontree/diff/DiffError;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/sebastianneubauer/jsontree/diff/JsonTreeDiffInfo {
+	public static final field $stable I
+	public fun <init> (Lcom/sebastianneubauer/jsontree/diff/ChangeInfo;)V
+	public final fun component1 ()Lcom/sebastianneubauer/jsontree/diff/ChangeInfo;
+	public final fun copy (Lcom/sebastianneubauer/jsontree/diff/ChangeInfo;)Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffInfo;
+	public static synthetic fun copy$default (Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffInfo;Lcom/sebastianneubauer/jsontree/diff/ChangeInfo;ILjava/lang/Object;)Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChangeInfo ()Lcom/sebastianneubauer/jsontree/diff/ChangeInfo;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/sebastianneubauer/jsontree/diff/JsonTreeDiffKt {
+	public static final fun JsonTreeDiff (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;ZLandroidx/compose/foundation/layout/PaddingValues;Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffColors;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/sebastianneubauer/jsontree/diff/JsonTreeDiffSuccess {
+	public static final field $stable I
+	public fun <init> (Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffInfo;)V
+	public final fun component1 ()Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffInfo;
+	public final fun copy (Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffInfo;)Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffSuccess;
+	public static synthetic fun copy$default (Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffSuccess;Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffInfo;ILjava/lang/Object;)Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffSuccess;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInfo ()Lcom/sebastianneubauer/jsontree/diff/JsonTreeDiffInfo;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/sebastianneubauer/jsontree/search/SearchState {
 	public static final field $stable I
 	public final fun getQuery ()Ljava/lang/String;
