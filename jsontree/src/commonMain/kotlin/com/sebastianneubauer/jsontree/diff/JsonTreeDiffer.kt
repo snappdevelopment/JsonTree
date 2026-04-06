@@ -56,7 +56,7 @@ internal class JsonTreeDiffer(
             }
             else -> {
                 (originalJsonTreeListResult as ParsingResult.Success).list to
-                        (revisedJsonTreeListResult as ParsingResult.Success).list
+                    (revisedJsonTreeListResult as ParsingResult.Success).list
             }
         }
 
