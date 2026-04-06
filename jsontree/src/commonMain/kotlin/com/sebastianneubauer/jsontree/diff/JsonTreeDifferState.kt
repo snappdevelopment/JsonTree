@@ -2,41 +2,40 @@ package com.sebastianneubauer.jsontree.diff
 
 import androidx.compose.runtime.Immutable
 import com.sebastianneubauer.jsontree.JsonTreeElement
-import kotlinx.serialization.json.Json
 
 @Immutable
 internal sealed interface JsonTreeDifferState {
 
-    data object Loading: JsonTreeDifferState
+    data object Loading : JsonTreeDifferState
 
     data class Ready(
         val diffElements: List<Pair<JsonDiffElement, JsonDiffElement>>,
         val diffInfo: JsonTreeDiffInfo
-    ): JsonTreeDifferState
+    ) : JsonTreeDifferState
 
     @Immutable
-    sealed interface Error: JsonTreeDifferState {
-        data class OriginalJsonError(val throwable: Throwable): Error
-        data class RevisedJsonError(val throwable: Throwable): Error
+    sealed interface Error : JsonTreeDifferState {
+        data class OriginalJsonError(val throwable: Throwable) : Error
+        data class RevisedJsonError(val throwable: Throwable) : Error
     }
 
     @Immutable
-    sealed interface JsonDiffElement{
+    sealed interface JsonDiffElement {
         data class Change(
             val jsonTreeElement: JsonTreeElement,
             val inlineDiffIndices: List<Pair<Int, Int>>
-        ): JsonDiffElement
+        ) : JsonDiffElement
 
         data class Insertion(
             val jsonTreeElement: JsonTreeElement?,
-        ): JsonDiffElement
+        ) : JsonDiffElement
 
         data class Deletion(
             val jsonTreeElement: JsonTreeElement?,
-        ): JsonDiffElement
+        ) : JsonDiffElement
 
         data class Equal(
             val jsonTreeElement: JsonTreeElement,
-        ): JsonDiffElement
+        ) : JsonDiffElement
     }
 }

@@ -30,13 +30,14 @@ public data class JsonTreeDiffError(val error: DiffError)
 
 public sealed interface DiffError {
     public val throwable: Throwable
+
     /**
      * Describes an error during parsing of the original Json.
      */
-    public class OriginalJsonError(override val throwable: Throwable): DiffError
+    public class OriginalJsonError(override val throwable: Throwable) : DiffError
 
     /**
      * Describes an error during parsing of the revised Json.
      */
-    public class RevisedJsonError(override val throwable: Throwable): DiffError
+    public class RevisedJsonError(override val throwable: Throwable) : DiffError
 }

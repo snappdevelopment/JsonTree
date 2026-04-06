@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sebastianneubauer.jsontree.CollapsableType
 import com.sebastianneubauer.jsontree.JsonTreeElement
-import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
 import com.sebastianneubauer.jsontree.diff.DiffError.OriginalJsonError
 import com.sebastianneubauer.jsontree.diff.DiffError.RevisedJsonError
+import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
 import kotlinx.coroutines.Dispatchers
 
 /**
@@ -50,7 +50,7 @@ public fun JsonTreeDiff(
     revisedJson: String,
     onLoading: @Composable () -> Unit,
     onError: @Composable (JsonTreeDiffError) -> Unit,
-    onSuccess: (JsonTreeDiffSuccess) -> Unit= {},
+    onSuccess: (JsonTreeDiffSuccess) -> Unit = {},
     modifier: Modifier = Modifier,
     showInlineDiffs: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -73,7 +73,7 @@ public fun JsonTreeDiff(
         )
     }
 
-    when(val state = jsonTreeDiffer.state.value) {
+    when (val state = jsonTreeDiffer.state.value) {
         is JsonTreeDifferState.Loading -> onLoading()
         is JsonTreeDifferState.Ready -> {
             onSuccess(JsonTreeDiffSuccess(state.diffInfo))
@@ -107,7 +107,7 @@ private fun SideBySideDiff(
             items = state.diffElements,
             key = { index, _ -> index }
         ) { index, (originalDiffElement, revisedDiffElement) ->
-            val originalJsonTreeElement = when(originalDiffElement) {
+            val originalJsonTreeElement = when (originalDiffElement) {
                 is JsonDiffElement.Change -> originalDiffElement.jsonTreeElement
                 is JsonDiffElement.Deletion -> originalDiffElement.jsonTreeElement!!
                 is JsonDiffElement.Equal -> originalDiffElement.jsonTreeElement
@@ -115,14 +115,16 @@ private fun SideBySideDiff(
             }
             val originalText = rememberText(
                 jsonTreeElement = originalJsonTreeElement,
-                diffIndices = if(originalDiffElement is JsonDiffElement.Change) {
+                diffIndices = if (originalDiffElement is JsonDiffElement.Change) {
                     originalDiffElement.inlineDiffIndices
-                } else null,
+                } else {
+                    null
+                },
                 colors = colors,
                 highlightColor = colors.deletionHighlightColor,
             )
 
-            val revisedJsonTreeElement = when(revisedDiffElement) {
+            val revisedJsonTreeElement = when (revisedDiffElement) {
                 is JsonDiffElement.Change -> revisedDiffElement.jsonTreeElement
                 is JsonDiffElement.Deletion -> null
                 is JsonDiffElement.Equal -> revisedDiffElement.jsonTreeElement
@@ -130,9 +132,11 @@ private fun SideBySideDiff(
             }
             val revisedText = rememberText(
                 jsonTreeElement = revisedJsonTreeElement,
-                diffIndices = if(revisedDiffElement is JsonDiffElement.Change) {
+                diffIndices = if (revisedDiffElement is JsonDiffElement.Change) {
                     revisedDiffElement.inlineDiffIndices
-                } else null,
+                } else {
+                    null
+                },
                 colors = colors,
                 highlightColor = colors.insertionHighlightColor
             )
@@ -146,14 +150,14 @@ private fun SideBySideDiff(
                     modifier = Modifier
                         .weight(1F)
                         .fillMaxHeight(),
-                    backgroundColor = when(originalDiffElement) {
+                    backgroundColor = when (originalDiffElement) {
                         is JsonDiffElement.Change -> colors.deletionBackgroundColor
                         is JsonDiffElement.Deletion -> colors.deletionBackgroundColor
                         is JsonDiffElement.Equal -> colors.regularBackgroundColor
                         is JsonDiffElement.Insertion -> colors.changeBackgroundColor
                     },
                     backgroundFillColor = colors.changeBackgroundColor,
-                    indent = if(originalJsonTreeElement != null && index > 0) {
+                    indent = if (originalJsonTreeElement != null && index > 0) {
                         20.dp * originalJsonTreeElement.level
                     } else {
                         0.dp
@@ -166,14 +170,14 @@ private fun SideBySideDiff(
                     modifier = Modifier
                         .weight(1F)
                         .fillMaxHeight(),
-                    backgroundColor = when(revisedDiffElement) {
+                    backgroundColor = when (revisedDiffElement) {
                         is JsonDiffElement.Change -> colors.insertionBackgroundColor
                         is JsonDiffElement.Deletion -> colors.changeBackgroundColor
                         is JsonDiffElement.Equal -> colors.regularBackgroundColor
                         is JsonDiffElement.Insertion -> colors.insertionBackgroundColor
                     },
                     backgroundFillColor = colors.changeBackgroundColor,
-                    indent = if(revisedJsonTreeElement != null && index > 0) {
+                    indent = if (revisedJsonTreeElement != null && index > 0) {
                         20.dp * revisedJsonTreeElement.level
                     } else {
                         0.dp
@@ -223,7 +227,7 @@ private fun rememberText(
     colors: JsonTreeDiffColors,
     highlightColor: Color,
 ): AnnotatedString {
-    return when(jsonTreeElement) {
+    return when (jsonTreeElement) {
         is JsonTreeElement.Collapsable.Array -> rememberCollapsableDiffText(
             type = CollapsableType.ARRAY,
             key = jsonTreeElement.key,

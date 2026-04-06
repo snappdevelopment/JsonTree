@@ -10,7 +10,6 @@ import androidx.compose.ui.text.withStyle
 import com.sebastianneubauer.jsontree.CollapsableType
 import com.sebastianneubauer.jsontree.JsonTreeElement
 import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
-import com.sebastianneubauer.jsontree.TreeColors
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.doubleOrNull

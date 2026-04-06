@@ -11,8 +11,8 @@ import com.sebastianneubauer.jsontree.JsonTreeParserState.Loading
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Error
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Parsed
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Ready
-import com.sebastianneubauer.jsontree.util.IdGenerator
 import com.sebastianneubauer.jsontree.util.Expansion
+import com.sebastianneubauer.jsontree.util.IdGenerator
 import com.sebastianneubauer.jsontree.util.collapse
 import com.sebastianneubauer.jsontree.util.expand
 import com.sebastianneubauer.jsontree.util.toJsonTreeElement

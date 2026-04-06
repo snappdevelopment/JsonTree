@@ -6,10 +6,10 @@ import androidx.compose.ui.util.fastMap
 import com.sebastianneubauer.jsontree.JsonTreeElement
 import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
 import com.sebastianneubauer.jsontree.TreeState
+import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.Error
 import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
 import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.Loading
 import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.Ready
-import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.Error
 import com.sebastianneubauer.jsontree.util.IdGenerator
 import com.sebastianneubauer.jsontree.util.toJsonTreeElement
 import com.sebastianneubauer.jsontree.util.toList
@@ -73,7 +73,7 @@ internal class JsonTreeDiffer(
                 .mapValues { it.value.toMutableList() }
         }
 
-        val diffTagGenerator =  object : DiffTagGenerator {
+        val diffTagGenerator = object : DiffTagGenerator {
             override fun generateClose(tag: DiffRow.Tag): String = inlineDiffTagClosed
             override fun generateOpen(tag: DiffRow.Tag): String = inlineDiffTagOpen
         }
@@ -106,7 +106,7 @@ internal class JsonTreeDiffer(
         val revisedJsonTreeMap = revisedJsonTreeMapDeferred.await()
 
         val diffElements = diffRows.fastMap { diffRow ->
-            val (oldLineDiffIndices, newLineDiffIndices) = if(diffRow.tag == DiffRow.Tag.CHANGE && showInlineDiffs) {
+            val (oldLineDiffIndices, newLineDiffIndices) = if (diffRow.tag == DiffRow.Tag.CHANGE && showInlineDiffs) {
                 val oldLineIndices = diffRow.oldLine.findInlineDiffTagIndices()
                 val newLineIndices = diffRow.newLine.findInlineDiffTagIndices()
                 Pair(oldLineIndices, newLineIndices)
@@ -114,12 +114,14 @@ internal class JsonTreeDiffer(
                 Pair(emptyList(), emptyList())
             }
 
-            val strippedTagDiffRow = if(diffRow.tag != DiffRow.Tag.EQUAL && showInlineDiffs) {
+            val strippedTagDiffRow = if (diffRow.tag != DiffRow.Tag.EQUAL && showInlineDiffs) {
                 diffRow.copy(
                     oldLine = diffRow.oldLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, ""),
                     newLine = diffRow.newLine.replace(inlineDiffTagOpen, "").replace(inlineDiffTagClosed, "")
                 )
-            } else diffRow
+            } else {
+                diffRow
+            }
 
             val originalDiffElementDeferred = async {
                 getOriginalDiffElement(
@@ -160,7 +162,7 @@ internal class JsonTreeDiffer(
             return jsonTreeElements.removeAt(0)
         }
 
-        return when(diffRow.tag) {
+        return when (diffRow.tag) {
             DiffRow.Tag.EQUAL -> {
                 JsonDiffElement.Equal(findAndRemoveJsonTreeElement())
             }
@@ -182,14 +184,14 @@ internal class JsonTreeDiffer(
     private fun getRevisedDiffElement(
         diffRow: DiffRow,
         revisedJsonTreeMap: Map<String, MutableList<JsonTreeElement>>,
-        inlineDiffsIndices: List<Pair<Int,Int>>
+        inlineDiffsIndices: List<Pair<Int, Int>>
     ): JsonDiffElement {
         fun findAndRemoveJsonTreeElement(): JsonTreeElement {
             val jsonTreeElements = revisedJsonTreeMap.getValue(diffRow.newLine)
             return jsonTreeElements.removeAt(0)
         }
 
-        return when(diffRow.tag) {
+        return when (diffRow.tag) {
             DiffRow.Tag.EQUAL -> {
                 JsonDiffElement.Equal(findAndRemoveJsonTreeElement())
             }
@@ -253,11 +255,10 @@ internal class JsonTreeDiffer(
     }
 
     private sealed interface ParsingResult {
-        data class Success(val list: List<JsonTreeElement>): ParsingResult
-        data class Failure(val throwable: Throwable): ParsingResult
+        data class Success(val list: List<JsonTreeElement>) : ParsingResult
+        data class Failure(val throwable: Throwable) : ParsingResult
     }
 
     private val inlineDiffTagOpen = "JSON_TREE_DIFF_START_TAG"
     private val inlineDiffTagClosed = "JSON_TREE_DIFF_END_TAG"
 }
-
