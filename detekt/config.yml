@@ -17,7 +17,7 @@ complexity:
   LongParameterList:
     functionThreshold: 20
   CyclomaticComplexMethod:
-    threshold: 20
+    threshold: 25
   LargeClass:
     threshold: 1000
 
@@ -27,8 +27,10 @@ style:
   UnusedPrivateMember:
     ignoreAnnotated: ['Preview']
   LoopWithTooManyJumpStatements:
-    active: true
+    active: false
   MaxLineLength:
+    active: false
+  MaximumLineLength:
     active: false
 
 

@@ -231,7 +231,6 @@ private fun rememberText(
         is JsonTreeElement.Collapsable.Array -> rememberCollapsableDiffText(
             type = CollapsableType.ARRAY,
             key = jsonTreeElement.key,
-            isLastItem = jsonTreeElement.isLastItem,
             parentType = jsonTreeElement.parentType,
             colors = colors,
             highlightColor = highlightColor,
@@ -240,7 +239,6 @@ private fun rememberText(
         is JsonTreeElement.Collapsable.Object -> rememberCollapsableDiffText(
             type = CollapsableType.OBJECT,
             key = jsonTreeElement.key,
-            isLastItem = jsonTreeElement.isLastItem,
             parentType = jsonTreeElement.parentType,
             colors = colors,
             highlightColor = highlightColor,

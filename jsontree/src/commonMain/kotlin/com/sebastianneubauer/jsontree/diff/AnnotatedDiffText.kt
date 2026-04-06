@@ -23,7 +23,6 @@ internal fun rememberCollapsableDiffText(
     key: String?,
     colors: JsonTreeDiffColors,
     highlightColor: Color,
-    isLastItem: Boolean,
     parentType: ParentType,
     diffIndices: List<Pair<Int, Int>>?,
 ): AnnotatedString {
