@@ -30,7 +30,5 @@ style:
     active: false
   MaxLineLength:
     active: false
-  MaximumLineLength:
-    active: false
 
 
