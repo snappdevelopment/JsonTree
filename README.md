@@ -20,7 +20,7 @@ JsonTree offers several customizations for visual appearance like syntax highlig
 
 ## Download
 
-See `maven-central` tag at the top for the latest version.
+See `maven` tag at the top for the latest version.
 
 ```kotlin
 dependencies {
@@ -31,7 +31,7 @@ dependencies {
 
 ### Snapshots
 
-Add the sonatype snapshot repository to your gradle setup and add the dependency from above. See `snapshot` tag at the top for the latest version.
+Add the sonatype snapshot repository to your gradle setup and add the dependency from above. See `maven` tag at the top for the latest snapshot version.
 
 ```kotlin
 maven { url = uri("https://central.sonatype.com/repository/maven-snapshots/") }
