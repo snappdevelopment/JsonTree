@@ -1,6 +1,6 @@
 # 🌳 JsonTree
 
-![](https://img.shields.io/maven-central/v/com.sebastianneubauer.jsontree/jsontree) ![](https://img.shields.io/nexus/s/com.sebastianneubauer.jsontree/jsontree?server=https%3A%2F%2Fs01.oss.sonatype.org&label=snapshot&color=blue)
+![](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Frepo1.maven.org%2Fmaven2%2Fcom%2Fsebastianneubauer%2Fjsontree%2Fjsontree%2Fmaven-metadata.xml) ![](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Fcom%2Fsebastianneubauer%2Fjsontree%2Fjsontree%2Fmaven-metadata.xml)
 ![](https://img.shields.io/badge/Platform-Android|iOS|Desktop|Web-orange) ![](https://img.shields.io/badge/Android_Weekly-Issue_584-yellow)
 <br /><br />
 JsonTree is a Compose Multiplatform library to display JSON data in Compose with syntax highlighting and more.
@@ -34,7 +34,7 @@ dependencies {
 Add the sonatype snapshot repository to your gradle setup and add the dependency from above. See `snapshot` tag at the top for the latest version.
 
 ```kotlin
-maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/") }
+maven { url = uri("https://central.sonatype.com/repository/maven-snapshots/") }
 ```
 
 ## How to use
@@ -112,7 +112,7 @@ JsonTree can be searched for keys and values by using the `searchState` paramete
 ## Minimum Requirements
 
 - Android minSdk 21
-- Android compileSdk 34
+- Android compileSdk 36
 - JDK 17
 
 ## Tech Stack
@@ -132,7 +132,7 @@ This repository is open for contributions. However, PRs might get rejected if th
 
 ```
 JsonTree
-Copyright © 2024 SNAD
+Copyright © 2026 SNAD
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

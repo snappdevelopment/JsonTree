@@ -15,6 +15,6 @@
 ## Releasing to the Maven Snapshot repository
 
 1. Update version in `gradle.properties` with `-SNAPSHOT`
-2. `./gradlew publishAllPublicationsToMavenCentralRepository`
-3. Add the `maven { url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/") }` repository and the library to the consumer project
+2. `./gradlew publishToMavenCentral`
+3. Add the `maven { url = uri("https://central.sonatype.com/repository/maven-snapshots/") }` repository and the library to the consumer project
 
