@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.kotlinx.atomicfu)
     alias(libs.plugins.publish)
 }
 
@@ -50,8 +49,6 @@ kotlin {
             implementation(libs.jb.compose.components.resources)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
-            // needs to be added as a workaround not get atomicfus code stripped
-            implementation(libs.atomicfu)
             implementation(libs.kotlindiff)
         }
 

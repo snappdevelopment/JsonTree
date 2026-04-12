@@ -10,7 +10,6 @@ agp = "8.13.2"
 kotlin = "2.3.0"
 publish = "0.36.0"
 api-validator = "0.18.1"
-atomicfu = "0.31.0"
 androidx-activity-compose = "1.12.2"
 androidx-compose-ui-test = "1.10.1"
 kotlinx-serialization-json = "1.10.0"
@@ -39,7 +38,6 @@ androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-mani
 kotlindiff = { module = "io.github.petertrr:kotlin-multiplatform-diff", version.ref = "kotlindiff" }
 
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 
 [plugins]
 android-library = { id = "com.android.library", version.ref = "agp" }
@@ -50,4 +48,3 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
 api-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "api-validator" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-kotlinx-atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "atomicfu" }
