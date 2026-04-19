@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.publish)
@@ -12,11 +12,19 @@ plugins {
 
 kotlin {
     jvm()
-    androidTarget {
-        publishLibraryVariants("release")
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
+    android {
+        namespace = "com.sebastianneubauer.jsontree"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        aarMetadata {
+            minCompileSdk = libs.versions.android.minSdk.get().toInt()
+        }
     }
+//    androidTarget {
+//        publishLibraryVariants("release")
+//        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+//        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
+//    }
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -75,30 +83,30 @@ kotlin {
         }
     }
 }
+// TODO: move UI tests and dependencies to androidApp module?
+//dependencies {
+//    implementation(libs.kotlinx.coroutines.test)
+//    androidTestImplementation(libs.androidx.compose.ui.test.android)
+//    debugImplementation(libs.androidx.compose.ui.test.manifest)
+//}
 
-dependencies {
-    implementation(libs.kotlinx.coroutines.test)
-    androidTestImplementation(libs.androidx.compose.ui.test.android)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-}
-
-android {
-    namespace = "com.sebastianneubauer.jsontree"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    buildFeatures {
-        buildConfig = false
-        compose = true
-    }
-    defaultConfig {
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        aarMetadata {
-            minCompileSdk = libs.versions.android.minSdk.get().toInt()
-        }
-    }
-
-    // fixes lint error in release builds for compose 1.9.3
-    lint {
-        disable.add("NullSafeMutableLiveData")
-    }
-}
+//android {
+//    namespace = "com.sebastianneubauer.jsontree"
+//    compileSdk = libs.versions.android.compileSdk.get().toInt()
+//    buildFeatures {
+//        buildConfig = false
+//        compose = true
+//    }
+//    defaultConfig {
+//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//        minSdk = libs.versions.android.minSdk.get().toInt()
+//        aarMetadata {
+//            minCompileSdk = libs.versions.android.minSdk.get().toInt()
+//        }
+//    }
+//
+//    // fixes lint error in release builds for compose 1.9.3
+//    lint {
+//        disable.add("NullSafeMutableLiveData")
+//    }
+//}
