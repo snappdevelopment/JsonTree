@@ -444,6 +444,7 @@ private fun JsonDiff(
 
 @Preview
 @Composable
-private fun PreviewMainScreen() = JsonTreeTheme {
-    MainScreen()
-}
+private fun PreviewMainScreen() =
+    JsonTreeTheme {
+        MainScreen()
+    }

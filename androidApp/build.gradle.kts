@@ -1,13 +1,15 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
 }
 
 android {
-    namespace = "com.sebastianneubauer.jsontreesample.androidapp"
+    namespace = "com.sebastianneubauer.jsontreesample"
     compileSdk = 36
 
     defaultConfig {
+        applicationId = "com.sebastianneubauer.jsontreesample"
         minSdk = 23
         targetSdk = 36
 
@@ -38,4 +40,5 @@ android {
 dependencies {
     implementation(project(":sample"))
     implementation(libs.androidx.activity.compose)
+    implementation(libs.jb.compose.components.resources)
 }

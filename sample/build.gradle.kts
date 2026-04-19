@@ -13,9 +13,11 @@ version = "1.0"
 
 kotlin {
     android {
-        namespace = "com.sebastianneubauer.jsontreesample"
+        namespace = "com.sebastianneubauer.jsontreesample.shared"
         compileSdk = 36
         minSdk = 23
+
+        androidResources.enable = true
     }
 
     jvm()
@@ -65,11 +67,6 @@ kotlin {
             implementation(kotlin("test"))
         }
 
-        androidMain.dependencies {
-            implementation(libs.jb.compose.ui.tooling)
-            implementation(libs.androidx.activity.compose)
-        }
-
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
         }
@@ -117,9 +114,10 @@ kotlin {
 //    }
 //}
 
+
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "com.sebastianneubauer.jsontreesample.MainKt"
         buildTypes.release {
             proguard {
                 configurationFiles.from("compose-desktop.pro")

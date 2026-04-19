@@ -19,6 +19,8 @@ kotlin {
         aarMetadata {
             minCompileSdk = libs.versions.android.minSdk.get().toInt()
         }
+
+        androidResources.enable = true
     }
 //    androidTarget {
 //        publishLibraryVariants("release")
@@ -83,7 +85,7 @@ kotlin {
         }
     }
 }
-// TODO: move UI tests and dependencies to androidApp module?
+
 //dependencies {
 //    implementation(libs.kotlinx.coroutines.test)
 //    androidTestImplementation(libs.androidx.compose.ui.test.android)
