@@ -11,7 +11,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
     android {
         namespace = "com.sebastianneubauer.jsontree"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -22,11 +21,9 @@ kotlin {
 
         androidResources.enable = true
     }
-//    androidTarget {
-//        publishLibraryVariants("release")
-//        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-//        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
-//    }
+
+    jvm()
+
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -85,30 +82,3 @@ kotlin {
         }
     }
 }
-
-//dependencies {
-//    implementation(libs.kotlinx.coroutines.test)
-//    androidTestImplementation(libs.androidx.compose.ui.test.android)
-//    debugImplementation(libs.androidx.compose.ui.test.manifest)
-//}
-
-//android {
-//    namespace = "com.sebastianneubauer.jsontree"
-//    compileSdk = libs.versions.android.compileSdk.get().toInt()
-//    buildFeatures {
-//        buildConfig = false
-//        compose = true
-//    }
-//    defaultConfig {
-//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-//        minSdk = libs.versions.android.minSdk.get().toInt()
-//        aarMetadata {
-//            minCompileSdk = libs.versions.android.minSdk.get().toInt()
-//        }
-//    }
-//
-//    // fixes lint error in release builds for compose 1.9.3
-//    lint {
-//        disable.add("NullSafeMutableLiveData")
-//    }
-//}
