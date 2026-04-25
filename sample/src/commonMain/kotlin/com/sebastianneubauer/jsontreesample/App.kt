@@ -62,7 +62,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-internal fun App() = JsonTreeTheme(darkTheme = false) {
+fun App() = JsonTreeTheme(darkTheme = false) {
     MainScreen()
 }
 
@@ -444,6 +444,7 @@ private fun JsonDiff(
 
 @Preview
 @Composable
-private fun PreviewMainScreen() = JsonTreeTheme {
-    MainScreen()
-}
+private fun PreviewMainScreen() =
+    JsonTreeTheme {
+        MainScreen()
+    }

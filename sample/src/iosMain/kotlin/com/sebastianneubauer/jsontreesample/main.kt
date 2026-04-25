@@ -1,3 +1,5 @@
+package com.sebastianneubauer.jsontreesample
+
 import androidx.compose.ui.window.ComposeUIViewController
 import com.sebastianneubauer.jsontreesample.App
 import platform.UIKit.UIViewController

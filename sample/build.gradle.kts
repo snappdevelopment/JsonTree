@@ -2,8 +2,8 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    alias(libs.plugins.android.application)
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
 }
@@ -12,7 +12,13 @@ group = "com.sebastianneubauer.jsontreesample"
 version = "1.0"
 
 kotlin {
-    androidTarget()
+    android {
+        namespace = "com.sebastianneubauer.jsontreesample.shared"
+        compileSdk = 36
+        minSdk = 23
+
+        androidResources.enable = true
+    }
 
     jvm()
 
@@ -61,11 +67,6 @@ kotlin {
             implementation(kotlin("test"))
         }
 
-        androidMain.dependencies {
-            implementation(libs.jb.compose.ui.tooling)
-            implementation(libs.androidx.activity.compose)
-        }
-
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
         }
@@ -79,43 +80,9 @@ kotlin {
     jvmToolchain(17)
 }
 
-android {
-    namespace = "com.sebastianneubauer.jsontreesample"
-    compileSdk = 36
-
-    defaultConfig {
-        minSdk = 23
-        targetSdk = 36
-    }
-    sourceSets["main"].apply {
-        manifest.srcFile("src/androidMain/AndroidManifest.xml")
-        res.srcDirs("src/androidMain/res")
-    }
-    buildTypes {
-        getByName("release")  {
-            isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            //for testing only, don't do this in your app
-            signingConfig = signingConfigs.getByName("debug")
-        }
-        getByName("debug") {
-            applicationIdSuffix = ".debug"
-            signingConfig = signingConfigs.getByName("debug")
-        }
-    }
-    buildFeatures {
-        compose = true
-    }
-
-    // fixes lint error in release builds for compose 1.9.3
-    lint {
-        disable.add("NullSafeMutableLiveData")
-    }
-}
-
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "com.sebastianneubauer.jsontreesample.MainKt"
         buildTypes.release {
             proguard {
                 configurationFiles.from("compose-desktop.pro")

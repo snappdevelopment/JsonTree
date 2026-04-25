@@ -1,6 +1,7 @@
+package com.sebastianneubauer.jsontreesample
+
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
-import com.sebastianneubauer.jsontreesample.App
 import kotlinx.browser.document
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.configureWebResources

@@ -6,7 +6,7 @@ java-toolchain = "17"
 
 compose = "1.10.3"
 compose-material3 = "1.9.0"
-agp = "8.13.2"
+agp = "9.1.1"
 kotlin = "2.3.20"
 publish = "0.36.0"
 api-validator = "0.18.1"
@@ -40,9 +40,9 @@ kotlindiff = { module = "io.github.petertrr:kotlin-multiplatform-diff", version.
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 
 [plugins]
-android-library = { id = "com.android.library", version.ref = "agp" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 publish = { id = "com.vanniktech.maven.publish", version.ref = "publish" }
