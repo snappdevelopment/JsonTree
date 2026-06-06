@@ -11,30 +11,21 @@ version = "1.0"
 
 kotlin {
     js {
-        outputModuleName = "webApp"
         browser()
         binaries.executable()
-        useEsModules()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        outputModuleName = "webApp"
         browser()
         binaries.executable()
     }
 
     sourceSets {
-        all {
-            languageSettings {
-                optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
-            }
-        }
         commonMain.dependencies {
             implementation(project(":shared"))
             implementation(libs.jb.compose.runtime)
             implementation(libs.jb.compose.foundation)
-            implementation(libs.jb.compose.components.resources)
         }
     }
 }
