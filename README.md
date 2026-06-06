@@ -95,7 +95,7 @@ JsonTree(
 
 ## Search
 
-JsonTree can be searched for keys and values by using the `searchState` parameter. The SearchState provides the following data about the current results. For an example on how to implement a search UI see the sample [here](sample/src/commonMain/kotlin/App.kt).
+JsonTree can be searched for keys and values by using the `searchState` parameter. The SearchState provides the following data about the current results. For an example on how to implement a search UI see the sample [here](shared/src/commonMain/kotlin/com/sebastianneubauer/jsontreesample/App.kt).
 
 - `query` - The string which should be searched in the JsonTree
 - `totalResults` - The total count of results for the query

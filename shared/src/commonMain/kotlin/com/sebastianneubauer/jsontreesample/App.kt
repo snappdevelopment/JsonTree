@@ -54,22 +54,23 @@ import com.sebastianneubauer.jsontree.diff.JsonTreeDiffInfo
 import com.sebastianneubauer.jsontree.diff.defaultDarkDiffColors
 import com.sebastianneubauer.jsontree.diff.defaultLightDiffColors
 import com.sebastianneubauer.jsontree.search.rememberSearchState
-import com.sebastianneubauer.jsontreesample.sample.generated.resources.Res
-import com.sebastianneubauer.jsontreesample.sample.generated.resources.arrow_down
-import com.sebastianneubauer.jsontreesample.sample.generated.resources.arrow_up
+import com.sebastianneubauer.jsontreesample.shared.generated.resources.Res
+import com.sebastianneubauer.jsontreesample.shared.generated.resources.arrow_down
+import com.sebastianneubauer.jsontreesample.shared.generated.resources.arrow_up
 import com.sebastianneubauer.jsontreesample.ui.theme.JsonTreeTheme
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun App() = JsonTreeTheme(darkTheme = false) {
-    MainScreen()
-}
+fun App() =
+    JsonTreeTheme(darkTheme = false) {
+        MainScreen()
+    }
 
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,
-    ExperimentalLayoutApi::class
+    ExperimentalLayoutApi::class,
 )
 @Composable
 private fun MainScreen() {
@@ -88,12 +89,13 @@ private fun MainScreen() {
             )
         },
         contentWindowInsets = WindowInsets(top = 60.dp),
-        containerColor = Color.White
+        containerColor = Color.White,
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding),
         ) {
             var errorMessage: String? by remember { mutableStateOf(null) }
             var json: String by remember { mutableStateOf(simpleJson) }
@@ -117,50 +119,53 @@ private fun MainScreen() {
                     modifier = Modifier.padding(horizontal = 8.dp),
                     onClick = {
                         errorMessage = null
-                        json = when (json) {
-                            emptyJson -> simpleJson
-                            simpleJson -> complexJson
-                            complexJson -> invalidJson
-                            invalidJson -> emptyJson
-                            else -> throw IllegalStateException("No JSON selected!")
-                        }
-                    }
+                        json =
+                            when (json) {
+                                emptyJson -> simpleJson
+                                simpleJson -> complexJson
+                                complexJson -> invalidJson
+                                invalidJson -> emptyJson
+                                else -> throw IllegalStateException("No JSON selected!")
+                            }
+                    },
                 ) {
                     Text(
-                        text = when (json) {
-                            simpleJson -> "Simple Json"
-                            emptyJson -> "Empty Json"
-                            complexJson -> "Complex Json"
-                            invalidJson -> "Invalid Json"
-                            else -> throw IllegalStateException("No JSON selected!")
-                        }
+                        text =
+                            when (json) {
+                                simpleJson -> "Simple Json"
+                                emptyJson -> "Empty Json"
+                                complexJson -> "Complex Json"
+                                invalidJson -> "Invalid Json"
+                                else -> throw IllegalStateException("No JSON selected!")
+                            },
                     )
                 }
 
                 Button(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     onClick = {
-                        val newState = when (initialState) {
-                            TreeState.EXPANDED -> TreeState.COLLAPSED
-                            TreeState.COLLAPSED -> TreeState.FIRST_ITEM_EXPANDED
-                            TreeState.FIRST_ITEM_EXPANDED -> TreeState.EXPANDED
-                        }
+                        val newState =
+                            when (initialState) {
+                                TreeState.EXPANDED -> TreeState.COLLAPSED
+                                TreeState.COLLAPSED -> TreeState.FIRST_ITEM_EXPANDED
+                                TreeState.FIRST_ITEM_EXPANDED -> TreeState.EXPANDED
+                            }
                         initialState = newState
-                    }
+                    },
                 ) {
                     Text(text = initialState.name)
                 }
 
                 Button(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    onClick = { showIndices = !showIndices }
+                    onClick = { showIndices = !showIndices },
                 ) {
                     Text(text = if (showIndices) "Hide indices" else "Show indices")
                 }
 
                 Button(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    onClick = { showItemCount = !showItemCount }
+                    onClick = { showItemCount = !showItemCount },
                 ) {
                     Text(text = if (showItemCount) "Hide item count" else "Show item count")
                 }
@@ -169,28 +174,28 @@ private fun MainScreen() {
                     modifier = Modifier.padding(horizontal = 8.dp),
                     onClick = {
                         colors = if (colors == defaultLightColors) defaultDarkColors else defaultLightColors
-                    }
+                    },
                 ) {
                     Text(text = if (colors == defaultLightColors) "Light" else "Dark")
                 }
 
                 Button(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    onClick = { expandSingleChildren = !expandSingleChildren }
+                    onClick = { expandSingleChildren = !expandSingleChildren },
                 ) {
                     Text(text = if (expandSingleChildren) "Expand children" else "Don't expand children")
                 }
 
                 Button(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    onClick = { showDiff = !showDiff }
+                    onClick = { showDiff = !showDiff },
                 ) {
                     Text(text = if (showDiff) "Hide diff" else "Show diff")
                 }
 
                 Button(
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    onClick = { showInlineDiffs = !showInlineDiffs }
+                    onClick = { showInlineDiffs = !showInlineDiffs },
                 ) {
                     Text(text = if (showInlineDiffs) "Hide inline diffs" else "Show inline diffs")
                 }
@@ -205,7 +210,7 @@ private fun MainScreen() {
                         coroutineScope.launch {
                             listState.animateScrollToItem(0)
                         }
-                    }
+                    },
                 ) {
                     Text(text = "To Top")
                 }
@@ -217,7 +222,7 @@ private fun MainScreen() {
                             val lastIndex = listState.layoutInfo.totalItemsCount - 1
                             listState.animateScrollToItem(lastIndex.coerceAtLeast(0))
                         }
-                    }
+                    },
                 ) {
                     Text(text = "To Bottom")
                 }
@@ -225,7 +230,7 @@ private fun MainScreen() {
 
             Spacer(Modifier.height(8.dp))
 
-            if(showDiff) {
+            if (showDiff) {
                 JsonDiff(
                     originalJson = json,
                     showInlineDiffs = showInlineDiffs,
@@ -240,32 +245,32 @@ private fun MainScreen() {
                     value = searchQuery,
                     onValueChange = { searchState.query = it },
                     singleLine = true,
-                    label = { Text("Search Key/Value") }
+                    label = { Text("Search Key/Value") },
                 )
 
                 Row(
                     modifier = Modifier.padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     IconButton(
                         onClick = {
                             coroutineScope.launch { searchState.selectNext() }
-                        }
+                        },
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.arrow_down),
-                            contentDescription = "next"
+                            contentDescription = "next",
                         )
                     }
 
                     IconButton(
                         onClick = {
                             coroutineScope.launch { searchState.selectPrevious() }
-                        }
+                        },
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.arrow_up),
-                            contentDescription = "prev"
+                            contentDescription = "prev",
                         )
                     }
 
@@ -277,48 +282,51 @@ private fun MainScreen() {
 
             val pagerState = rememberPagerState(initialPage = 0, pageCount = { 3 })
 
-            //Pager to test leaving composition
+            // Pager to test leaving composition
             HorizontalPager(
                 modifier = Modifier.fillMaxWidth().weight(1F),
                 state = pagerState,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.Top,
             ) { pageIndex ->
                 when (pageIndex) {
                     0 -> {
                         val error = errorMessage
                         if (error != null) {
                             Text(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(
-                                        color = if (colors == defaultLightColors) Color.Unspecified else Color.Black
-                                    ),
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            color = if (colors == defaultLightColors) Color.Unspecified else Color.Black,
+                                        ),
                                 text = error,
                                 color = if (colors == defaultLightColors) Color.Black else Color.White,
                             )
                         } else {
                             SelectionContainer {
                                 JsonTree(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .horizontalScroll(rememberScrollState())
-                                        .background(
-                                            if (colors == defaultLightColors) Color.Unspecified else Color.Black
-                                        ),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .horizontalScroll(rememberScrollState())
+                                            .background(
+                                                if (colors == defaultLightColors) Color.Unspecified else Color.Black,
+                                            ),
                                     contentPadding = PaddingValues(vertical = jsonTreePadding),
                                     json = json,
                                     onLoading = {
                                         Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(
-                                                    if (colors == defaultLightColors) Color.Unspecified else Color.Black
-                                                ),
-                                            contentAlignment = Alignment.Center
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxSize()
+                                                    .background(
+                                                        if (colors == defaultLightColors) Color.Unspecified else Color.Black,
+                                                    ),
+                                            contentAlignment = Alignment.Center,
                                         ) {
                                             Text(
                                                 text = "Loading...",
-                                                color = if (colors == defaultLightColors) Color.Black else Color.White
+                                                color = if (colors == defaultLightColors) Color.Black else Color.White,
                                             )
                                         }
                                     },
@@ -339,7 +347,7 @@ private fun MainScreen() {
 
                                 val resultIndex = searchState.selectedResultListIndex
                                 LaunchedEffect(resultIndex) {
-                                    if(resultIndex != null && !listState.isScrollInProgress) {
+                                    if (resultIndex != null && !listState.isScrollInProgress) {
                                         listState.animateScrollToItem(resultIndex, jsonTreePaddingPx)
                                     }
                                 }
@@ -364,80 +372,86 @@ private fun MainScreen() {
 private fun JsonDiff(
     originalJson: String,
     showInlineDiffs: Boolean,
-    colors: TreeColors
+    colors: TreeColors,
 ) {
     var diffInfo by remember(originalJson, showInlineDiffs) { mutableStateOf<JsonTreeDiffInfo?>(null) }
     val currentDiffInfo = diffInfo
 
     Column {
-        val lineChanges = if(currentDiffInfo != null) {
-            val changeInfo = currentDiffInfo.changeInfo
-            if(changeInfo.insertions == 0 && changeInfo.deletions == 0) {
-                "Identical"
+        val lineChanges =
+            if (currentDiffInfo != null) {
+                val changeInfo = currentDiffInfo.changeInfo
+                if (changeInfo.insertions == 0 && changeInfo.deletions == 0) {
+                    "Identical"
+                } else {
+                    "+${changeInfo.insertions} -${changeInfo.deletions}"
+                }
             } else {
-                "+${changeInfo.insertions} -${changeInfo.deletions}"
+                null
             }
-        } else null
 
         Row {
             Text(
                 modifier = Modifier.weight(1F),
                 text = "Original:",
-                color = Color.Black
+                color = Color.Black,
             )
 
             Row(modifier = Modifier.weight(1F)) {
                 Text(
                     modifier = Modifier.weight(1F),
                     text = "Revised:",
-                    color = Color.Black
+                    color = Color.Black,
                 )
 
-                if(lineChanges != null) {
+                if (lineChanges != null) {
                     Text(
                         text = lineChanges,
-                        color = Color.Black
+                        color = Color.Black,
                     )
                 }
             }
         }
 
         JsonTreeDiff(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(400.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(400.dp),
             originalJson = originalJson,
             revisedJson = complexJsonRevised,
             showInlineDiffs = showInlineDiffs,
-            colors = if(colors == defaultLightColors) defaultLightDiffColors else defaultDarkDiffColors,
+            colors = if (colors == defaultLightColors) defaultLightDiffColors else defaultDarkDiffColors,
             contentPadding = PaddingValues(8.dp),
             onSuccess = { diffInfo = it.info },
             onLoading = {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            if (colors == defaultLightColors) Color.White else Color.Black
-                        ),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(
+                                if (colors == defaultLightColors) Color.White else Color.Black,
+                            ),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = "Loading...",
-                        color = if (colors == defaultLightColors) Color.Black else Color.White
+                        color = if (colors == defaultLightColors) Color.Black else Color.White,
                     )
                 }
             },
             onError = { errorState ->
                 Text(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            color = if (colors == defaultLightColors) Color.White else Color.Black
-                        ),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(
+                                color = if (colors == defaultLightColors) Color.White else Color.Black,
+                            ),
                     text = errorState.error.throwable.message ?: "Unknown error",
                     color = if (colors == defaultLightColors) Color.Black else Color.White,
                 )
-            }
+            },
         )
     }
 }

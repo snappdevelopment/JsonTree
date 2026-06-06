@@ -13,5 +13,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "JsonTree"
 include(":jsontree")
-include(":sample")
+include(":shared")
 include(":androidApp")
+include(":desktopApp")
+include(":webApp")
