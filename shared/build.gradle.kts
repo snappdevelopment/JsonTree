@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
@@ -25,26 +24,22 @@ kotlin {
     listOf(
         iosX64(),
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach {
         it.binaries.framework {
-            baseName = "Sample"
+            baseName = "Shared"
             isStatic = true
         }
     }
 
     js {
-        outputModuleName = "jsontree"
         browser()
-        binaries.executable()
         useEsModules()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        outputModuleName = "jsontree"
         browser()
-        binaries.executable()
     }
 
     sourceSets {
@@ -66,32 +61,18 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
-
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-        }
     }
 
-    //https://kotlinlang.org/docs/native-objc-interop.html#export-of-kdoc-comments-to-generated-objective-c-headers
+    // https://kotlinlang.org/docs/native-objc-interop.html#export-of-kdoc-comments-to-generated-objective-c-headers
     targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
-        compilations["main"].compilerOptions.options.freeCompilerArgs.add("-Xexport-kdoc")
+        compilations["main"]
+            .compilerOptions.options.freeCompilerArgs
+            .add("-Xexport-kdoc")
     }
 
     jvmToolchain(17)
 }
 
-compose.desktop {
-    application {
-        mainClass = "com.sebastianneubauer.jsontreesample.MainKt"
-        buildTypes.release {
-            proguard {
-                configurationFiles.from("compose-desktop.pro")
-            }
-        }
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.sebastianneubauer.jsontreesample"
-            packageVersion = "1.0.0"
-        }
-    }
+compose.resources {
+    packageOfResClass = "com.sebastianneubauer.jsontreesample.shared.generated.resources"
 }

@@ -22,7 +22,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             // for testing only, don't do this in your app
             signingConfig = signingConfigs.getByName("debug")
@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":sample"))
+    implementation(project(":shared"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.jb.compose.components.resources)
 }

@@ -10,7 +10,7 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value=":sample:hotRunJvm" />
+          <option value=":desktopApp:hotRunJvm" />
           <option value="--autoReload" />
           <option value="--mainClass" />
           <option value="MainKt" />
