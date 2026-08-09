@@ -293,10 +293,15 @@ internal fun JsonTreeElement.toRenderString(): String {
         } else {
             "["
         }
-        is Primitive -> if (key != null && parentType != ParentType.ARRAY) {
-            "\"$key\": $value" + if (isLastItem) "" else ","
-        } else {
-            value + if (isLastItem) "" else ","
+        is Primitive -> {
+            val isString = type == Type.STRING
+            val quotedValue = if(isString) "\"$value\"" else value
+
+            if (key != null && parentType != ParentType.ARRAY) {
+                "\"$key\": $quotedValue" + if (isLastItem) "" else ","
+            } else {
+                quotedValue + if (isLastItem) "" else ","
+            }
         }
         is EndBracket -> when (type) {
             EndBracket.Type.ARRAY -> if (!isLastItem) "]," else "]"

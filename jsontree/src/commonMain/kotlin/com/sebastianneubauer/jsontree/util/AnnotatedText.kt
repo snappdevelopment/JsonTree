@@ -175,7 +175,11 @@ internal fun rememberPrimitiveText(
             }
 
             withStyle(SpanStyle(color = valueColor)) {
-                append(value)
+                if(type == Type.STRING) {
+                    append("\"$value\"")
+                } else {
+                    append(value)
+                }
             }
 
             searchOccurrence

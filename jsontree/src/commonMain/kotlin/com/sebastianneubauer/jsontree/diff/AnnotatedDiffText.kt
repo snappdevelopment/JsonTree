@@ -84,7 +84,11 @@ internal fun rememberPrimitiveDiffText(
             }
 
             withStyle(SpanStyle(color = valueColor)) {
-                append(value)
+                if(type == Type.STRING) {
+                    append("\"$value\"")
+                } else {
+                    append(value)
+                }
             }
 
             if (!isLastItem) {

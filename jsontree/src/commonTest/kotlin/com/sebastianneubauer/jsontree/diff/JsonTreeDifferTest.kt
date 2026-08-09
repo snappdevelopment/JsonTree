@@ -1,6 +1,7 @@
 package com.sebastianneubauer.jsontree.diff
 
 import com.sebastianneubauer.jsontree.JsonTreeElement
+import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive.Type
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.diff.JsonTreeDifferState.JsonDiffElement
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,7 +45,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("value"),
+            value = "value",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -126,7 +128,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("oldValue"),
+            value = "oldValue",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -135,7 +138,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("newValue"),
+            value = "newValue",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -223,7 +227,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("value"),
+            value = "value",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -232,7 +237,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = false,
             key = "age",
-            value = JsonPrimitive(42),
+            value = "42",
+            type = Type.NUMBER,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -241,7 +247,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("value"),
+            value = "value",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -330,7 +337,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = false,
             key = "age",
-            value = JsonPrimitive(42),
+            value = "42",
+            type = Type.NUMBER,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -339,7 +347,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("value"),
+            value = "value",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -348,7 +357,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("value"),
+            value = "value",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -437,7 +447,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("oldValue"),
+            value = "oldValue",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -446,7 +457,8 @@ public class JsonTreeDifferTest {
             level = 1,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("newValue"),
+            value = "newValue",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -561,7 +573,8 @@ public class JsonTreeDifferTest {
             level = 2,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("John"),
+            value = "John",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -665,7 +678,8 @@ public class JsonTreeDifferTest {
             level = 2,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("John"),
+            value = "John",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -674,7 +688,8 @@ public class JsonTreeDifferTest {
             level = 2,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("Jane"),
+            value = "Jane",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -803,7 +818,8 @@ public class JsonTreeDifferTest {
             level = 3,
             isLastItem = true,
             key = "c",
-            value = JsonPrimitive("value"),
+            value = "value",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -939,7 +955,8 @@ public class JsonTreeDifferTest {
             level = 2,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("John"),
+            value = "John",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -948,7 +965,8 @@ public class JsonTreeDifferTest {
             level = 2,
             isLastItem = false,
             key = "age",
-            value = JsonPrimitive(30),
+            value = "30",
+            type = Type.NUMBER,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -957,7 +975,8 @@ public class JsonTreeDifferTest {
             level = 2,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("John"),
+            value = "John",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -1088,7 +1107,8 @@ public class JsonTreeDifferTest {
             level = 2,
             isLastItem = false,
             key = "age",
-            value = JsonPrimitive(30),
+            value = "30",
+            type = Type.NUMBER,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -1097,7 +1117,8 @@ public class JsonTreeDifferTest {
             level = 2,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("John"),
+            value = "John",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -1106,7 +1127,8 @@ public class JsonTreeDifferTest {
             level = 2,
             isLastItem = true,
             key = "name",
-            value = JsonPrimitive("John"),
+            value = "John",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 

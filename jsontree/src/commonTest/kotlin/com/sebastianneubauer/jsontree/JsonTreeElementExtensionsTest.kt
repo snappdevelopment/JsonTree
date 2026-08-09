@@ -2,6 +2,7 @@ package com.sebastianneubauer.jsontree
 
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
+import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive.Type
 import com.sebastianneubauer.jsontree.util.Expansion
 import com.sebastianneubauer.jsontree.util.collapse
 import com.sebastianneubauer.jsontree.util.expand
@@ -252,7 +253,8 @@ public class JsonTreeElementExtensionsTest {
             level = 0,
             isLastItem = false,
             key = "myProp",
-            value = JsonPrimitive("test"),
+            value = "test",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -271,7 +273,8 @@ public class JsonTreeElementExtensionsTest {
             level = 0,
             isLastItem = true,
             key = "myProp",
-            value = JsonPrimitive("test"),
+            value = "test",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -290,7 +293,8 @@ public class JsonTreeElementExtensionsTest {
             level = 0,
             isLastItem = false,
             key = "0",
-            value = JsonPrimitive(42),
+            value = "42",
+            type = Type.NUMBER,
             parentType = JsonTreeElement.ParentType.ARRAY
         )
 
@@ -309,7 +313,8 @@ public class JsonTreeElementExtensionsTest {
             level = 0,
             isLastItem = true,
             key = "0",
-            value = JsonPrimitive(42),
+            value = "42",
+            type = Type.NUMBER,
             parentType = JsonTreeElement.ParentType.ARRAY
         )
 
@@ -328,7 +333,8 @@ public class JsonTreeElementExtensionsTest {
             level = 0,
             isLastItem = false,
             key = null,
-            value = JsonPrimitive(true),
+            value = "true",
+            type = Type.BOOLEAN,
             parentType = JsonTreeElement.ParentType.NONE
         )
 
@@ -347,7 +353,8 @@ public class JsonTreeElementExtensionsTest {
             level = 0,
             isLastItem = true,
             key = null,
-            value = JsonPrimitive(false),
+            value = "false",
+            type = Type.BOOLEAN,
             parentType = JsonTreeElement.ParentType.NONE
         )
 
@@ -433,7 +440,8 @@ public class JsonTreeElementExtensionsTest {
             level = 2,
             isLastItem = false,
             key = "0",
-            value = JsonPrimitive("value1"),
+            value = "value1",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.ARRAY
         )
 
@@ -442,7 +450,8 @@ public class JsonTreeElementExtensionsTest {
             level = 3,
             isLastItem = true,
             key = "primitive2",
-            value = JsonPrimitive("value2"),
+            value = "value2",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
@@ -488,7 +497,8 @@ public class JsonTreeElementExtensionsTest {
             level = 2,
             isLastItem = false,
             key = "0",
-            value = JsonPrimitive("value1"),
+            value = "value1",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.ARRAY
         )
 
@@ -497,7 +507,8 @@ public class JsonTreeElementExtensionsTest {
             level = 3,
             isLastItem = true,
             key = "primitive2",
-            value = JsonPrimitive("value2"),
+            value = "value2",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 
