@@ -7,18 +7,13 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import com.sebastianneubauer.jsontree.CollapsableType
+import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive.Type
 import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
 import com.sebastianneubauer.jsontree.TreeColors
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.search.SearchOccurrence
 import jsontree.jsontree.generated.resources.Res
 import jsontree.jsontree.generated.resources.jsontree_collapsable_items
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.doubleOrNull
-import kotlinx.serialization.json.floatOrNull
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.longOrNull
 import org.jetbrains.compose.resources.pluralStringResource
 
 @Composable
@@ -115,7 +110,8 @@ internal fun rememberCollapsableText(
 @Composable
 internal fun rememberPrimitiveText(
     key: String?,
-    value: JsonPrimitive,
+    value: String,
+    type: Type,
     colors: TreeColors,
     isLastItem: Boolean,
     searchOccurrence: SearchOccurrence?,
@@ -123,22 +119,11 @@ internal fun rememberPrimitiveText(
     showIndices: Boolean,
     parentType: ParentType,
 ): AnnotatedString {
-    val valueColor = remember(value) {
-        when {
-            value.isString -> colors.stringValueColor
-            value.booleanOrNull != null -> colors.booleanValueColor
-            value.doubleOrNull != null ||
-                value.intOrNull != null ||
-                value.floatOrNull != null ||
-                value.longOrNull != null -> colors.numberValueColor
-            else -> colors.nullValueColor
-        }
-    }
-
     return remember(
         key,
         value,
         colors,
+        type,
         isLastItem,
         showIndices,
         searchOccurrence,
@@ -182,9 +167,15 @@ internal fun rememberPrimitiveText(
             }
 
             val keyOffset = this.length
+            val valueColor = when(type) {
+                Type.STRING -> colors.stringValueColor
+                Type.BOOLEAN -> colors.booleanValueColor
+                Type.NUMBER -> colors.numberValueColor
+                Type.OTHER -> colors.nullValueColor
+            }
 
             withStyle(SpanStyle(color = valueColor)) {
-                append(value.toString())
+                append(value)
             }
 
             searchOccurrence
@@ -199,7 +190,7 @@ internal fun rememberPrimitiveText(
                     // add an offset for the key which is already appended to the string
                     // add 1 to the range if the value is a string because it has quotes around it
                     // add 1 to the end because it is exclusive
-                    val stringQuoteOffset = if (value.isString) 1 else 0
+                    val stringQuoteOffset = if (type == Type.STRING) 1 else 0
                     addStyle(
                         style = SpanStyle(background = color),
                         start = keyOffset + valueRange.range.first + stringQuoteOffset,

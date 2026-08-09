@@ -6,14 +6,20 @@ import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
 import com.sebastianneubauer.jsontree.JsonTreeElement.EndBracket
 import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
 import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive
+import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive.Type
 import com.sebastianneubauer.jsontree.TreeState
 import com.sebastianneubauer.jsontree.endBracket
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.floatOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.longOrNull
 
 internal enum class Expansion {
     /**
@@ -204,9 +210,18 @@ internal fun JsonElement.toJsonTreeElement(
                 id = idGenerator.incrementAndGet().toString(),
                 level = level,
                 key = key,
-                value = this,
+                value = content,
                 isLastItem = isLastItem,
                 parentType = parentType,
+                type = when {
+                    isString -> Type.STRING
+                    booleanOrNull != null -> Type.BOOLEAN
+                    doubleOrNull != null ||
+                            intOrNull != null ||
+                            floatOrNull != null ||
+                            longOrNull != null -> Type.NUMBER
+                    else -> Type.OTHER
+                },
             )
         }
         is JsonArray -> {
@@ -281,7 +296,7 @@ internal fun JsonTreeElement.toRenderString(): String {
         is Primitive -> if (key != null && parentType != ParentType.ARRAY) {
             "\"$key\": $value" + if (isLastItem) "" else ","
         } else {
-            "$value" + if (isLastItem) "" else ","
+            value + if (isLastItem) "" else ","
         }
         is EndBracket -> when (type) {
             EndBracket.Type.ARRAY -> if (!isLastItem) "]," else "]"

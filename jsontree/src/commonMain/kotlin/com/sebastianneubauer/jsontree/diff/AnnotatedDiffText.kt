@@ -9,13 +9,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import com.sebastianneubauer.jsontree.CollapsableType
 import com.sebastianneubauer.jsontree.JsonTreeElement
+import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive.Type
 import com.sebastianneubauer.jsontree.JsonTreeElement.ParentType
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.doubleOrNull
-import kotlinx.serialization.json.floatOrNull
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.longOrNull
 
 @Composable
 internal fun rememberCollapsableDiffText(
@@ -59,25 +54,14 @@ internal fun rememberCollapsableDiffText(
 @Composable
 internal fun rememberPrimitiveDiffText(
     key: String?,
-    value: JsonPrimitive,
+    value: String,
+    type: Type,
     colors: JsonTreeDiffColors,
     highlightColor: Color,
     isLastItem: Boolean,
     parentType: ParentType,
     diffIndices: List<Pair<Int, Int>>?,
 ): AnnotatedString {
-    val valueColor = remember(value) {
-        when {
-            value.isString -> colors.stringValueColor
-            value.booleanOrNull != null -> colors.booleanValueColor
-            value.doubleOrNull != null ||
-                value.intOrNull != null ||
-                value.floatOrNull != null ||
-                value.longOrNull != null -> colors.numberValueColor
-            else -> colors.nullValueColor
-        }
-    }
-
     return remember(colors) {
         buildAnnotatedString {
             key?.let { key ->
@@ -92,8 +76,15 @@ internal fun rememberPrimitiveDiffText(
                 }
             }
 
+            val valueColor = when(type) {
+                Type.STRING -> colors.stringValueColor
+                Type.BOOLEAN -> colors.booleanValueColor
+                Type.NUMBER -> colors.numberValueColor
+                Type.OTHER -> colors.nullValueColor
+            }
+
             withStyle(SpanStyle(color = valueColor)) {
-                append(value.toString())
+                append(value)
             }
 
             if (!isLastItem) {

@@ -1,7 +1,5 @@
 package com.sebastianneubauer.jsontree
 
-import kotlinx.serialization.json.JsonPrimitive
-
 internal sealed interface JsonTreeElement {
     val id: String
     val level: Int
@@ -14,9 +12,12 @@ internal sealed interface JsonTreeElement {
         override val level: Int,
         override val isLastItem: Boolean,
         val key: String?,
-        val value: JsonPrimitive,
+        val type: Type,
+        val value: String,
         val parentType: ParentType,
-    ) : JsonTreeElement
+    ) : JsonTreeElement {
+        enum class Type { STRING, BOOLEAN, NUMBER, OTHER }
+    }
 
     sealed interface Collapsable : JsonTreeElement {
         val state: TreeState
