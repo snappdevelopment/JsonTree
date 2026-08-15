@@ -1,5 +1,6 @@
 package com.sebastianneubauer.jsontree
 
+import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive.Type
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Parsing.Error
 import com.sebastianneubauer.jsontree.JsonTreeParserState.Ready
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -115,7 +116,8 @@ public class JsonTreeParserTest {
                         level = 0,
                         isLastItem = true,
                         key = null,
-                        value = JsonPrimitive("stringValue"),
+                        value = "stringValue",
+                        type = Type.STRING,
                         parentType = JsonTreeElement.ParentType.NONE
                     )
                 )
@@ -135,7 +137,8 @@ public class JsonTreeParserTest {
                         level = 0,
                         isLastItem = true,
                         key = null,
-                        value = JsonPrimitive("stringValue"),
+                        value = "stringValue",
+                        type = Type.STRING,
                         parentType = JsonTreeElement.ParentType.NONE
                     )
                 )
@@ -155,7 +158,8 @@ public class JsonTreeParserTest {
                         level = 0,
                         isLastItem = true,
                         key = null,
-                        value = JsonPrimitive("stringValue"),
+                        value = "stringValue",
+                        type = Type.STRING,
                         parentType = JsonTreeElement.ParentType.NONE
                     )
                 )
@@ -183,7 +187,8 @@ public class JsonTreeParserTest {
                                 level = 1,
                                 isLastItem = true,
                                 key = "0",
-                                value = JsonPrimitive("stringValue"),
+                                value = "stringValue",
+                                type = Type.STRING,
                                 parentType = JsonTreeElement.ParentType.ARRAY,
                             )
                         )
@@ -213,7 +218,8 @@ public class JsonTreeParserTest {
                                 level = 1,
                                 isLastItem = true,
                                 key = "0",
-                                value = JsonPrimitive("stringValue"),
+                                value = "stringValue",
+                                type = Type.STRING,
                                 parentType = JsonTreeElement.ParentType.ARRAY,
                             )
                         )
@@ -223,7 +229,8 @@ public class JsonTreeParserTest {
                         level = 1,
                         isLastItem = true,
                         key = "0",
-                        value = JsonPrimitive("stringValue"),
+                        value = "stringValue",
+                        type = Type.STRING,
                         parentType = JsonTreeElement.ParentType.ARRAY,
                     ),
                     JsonTreeElement.EndBracket(
@@ -257,7 +264,8 @@ public class JsonTreeParserTest {
                                 level = 1,
                                 isLastItem = true,
                                 key = "0",
-                                value = JsonPrimitive("stringValue"),
+                                value = "stringValue",
+                                type = Type.STRING,
                                 parentType = JsonTreeElement.ParentType.ARRAY,
                             )
                         )
@@ -267,7 +275,8 @@ public class JsonTreeParserTest {
                         level = 1,
                         isLastItem = true,
                         key = "0",
-                        value = JsonPrimitive("stringValue"),
+                        value = "stringValue",
+                        type = Type.STRING,
                         parentType = JsonTreeElement.ParentType.ARRAY,
                     ),
                     JsonTreeElement.EndBracket(
@@ -687,7 +696,8 @@ public class JsonTreeParserTest {
         level = 4,
         isLastItem = true,
         key = "string",
-        value = JsonPrimitive("aString"),
+        value = "aString",
+        type = Type.STRING,
         parentType = JsonTreeElement.ParentType.OBJECT,
     )
 
@@ -696,7 +706,8 @@ public class JsonTreeParserTest {
         level = 3,
         isLastItem = false,
         key = "0",
-        value = JsonPrimitive(42),
+        value = "42",
+        type = Type.NUMBER,
         parentType = JsonTreeElement.ParentType.ARRAY
     )
 
@@ -705,7 +716,8 @@ public class JsonTreeParserTest {
         level = 3,
         isLastItem = true,
         key = "1",
-        value = JsonPrimitive(52),
+        value = "52",
+        type = Type.NUMBER,
         parentType = JsonTreeElement.ParentType.ARRAY
     )
 

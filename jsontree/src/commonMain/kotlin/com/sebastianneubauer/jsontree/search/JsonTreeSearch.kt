@@ -81,9 +81,9 @@ internal class JsonTreeSearch(
         return when (this) {
             is JsonTreeElement.Primitive -> {
                 if (parentType != JsonTreeElement.ParentType.ARRAY) {
-                    searchRegex.findRanges(key) + searchRegex.findRanges(value.content, isKey = false)
+                    searchRegex.findRanges(key) + searchRegex.findRanges(value, isKey = false)
                 } else {
-                    searchRegex.findRanges(value.content, isKey = false)
+                    searchRegex.findRanges(value, isKey = false)
                 }
             }
             is JsonTreeElement.Collapsable.Array -> {

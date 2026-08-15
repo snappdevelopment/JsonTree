@@ -253,6 +253,7 @@ private fun JsonTreeList(
                     val coloredText = rememberPrimitiveText(
                         key = item.key,
                         value = item.value,
+                        type = item.type,
                         colors = colors,
                         isLastItem = item.isLastItem,
                         searchOccurrence = searchOccurrence,

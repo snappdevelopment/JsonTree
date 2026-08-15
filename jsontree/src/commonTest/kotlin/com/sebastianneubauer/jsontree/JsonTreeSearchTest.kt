@@ -2,6 +2,7 @@ package com.sebastianneubauer.jsontree
 
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
+import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive.Type
 import com.sebastianneubauer.jsontree.search.JsonTreeSearch
 import com.sebastianneubauer.jsontree.search.SearchOccurrence
 import com.sebastianneubauer.jsontree.search.SearchState.SearchResult
@@ -155,7 +156,8 @@ public class JsonTreeSearchTest {
             level = 2,
             isLastItem = false,
             key = "0",
-            value = JsonPrimitive("value1"),
+            value = "value1",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.ARRAY
         )
 
@@ -164,7 +166,8 @@ public class JsonTreeSearchTest {
             level = 3,
             isLastItem = true,
             key = "primitive2",
-            value = JsonPrimitive("secondSecond"),
+            value = "secondSecond",
+            type = Type.STRING,
             parentType = JsonTreeElement.ParentType.OBJECT
         )
 

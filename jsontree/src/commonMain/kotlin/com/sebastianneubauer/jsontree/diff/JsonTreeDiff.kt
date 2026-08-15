@@ -247,6 +247,7 @@ private fun rememberText(
         is JsonTreeElement.Primitive -> rememberPrimitiveDiffText(
             key = jsonTreeElement.key,
             value = jsonTreeElement.value,
+            type = jsonTreeElement.type,
             isLastItem = jsonTreeElement.isLastItem,
             parentType = jsonTreeElement.parentType,
             colors = colors,
