@@ -115,15 +115,6 @@ JsonTree can be searched for keys and values by using the `searchState` paramete
 - Android compileSdk 36
 - JDK 17
 
-## Tech Stack
-
-- Compose Multiplatform UI
-- Kotlinx Serialization
-- Detekt (Linting)
-- API validation
-- GitHub Actions
-- Gradle version catalog
-
 ## Contributing
 
 This repository is open for contributions. However, PRs might get rejected if they don't fit the current structure or goals of the project. If you want to contribute, it might be a good idea to open a issue to describe your idea before spending a lot of time implementing it.
