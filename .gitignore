@@ -66,6 +66,7 @@ captures/
 .idea/appInsightsSettings.xml
 .idea/ktlint-plugin.xml
 .idea/markdown.xml
+.idea/codeStyles/
 
 .kotlin
 
