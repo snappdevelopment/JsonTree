@@ -33,12 +33,8 @@ internal fun rememberCollapsableText(
     val itemCount = pluralStringResource(Res.plurals.jsontree_collapsable_items, childItemCount, childItemCount)
 
     return remember(
-        key,
         state,
         colors,
-        isLastItem,
-        itemCount,
-        type,
         showIndices,
         showItemCount,
         searchOccurrence,
@@ -120,11 +116,7 @@ internal fun rememberPrimitiveText(
     parentType: ParentType,
 ): AnnotatedString {
     return remember(
-        key,
-        value,
         colors,
-        type,
-        isLastItem,
         showIndices,
         searchOccurrence,
         searchOccurrenceSelectedRange
