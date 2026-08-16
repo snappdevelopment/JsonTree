@@ -1,5 +1,8 @@
 package com.sebastianneubauer.jsontree
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 internal sealed interface JsonTreeElement {
     val id: String
     val level: Int
@@ -19,6 +22,7 @@ internal sealed interface JsonTreeElement {
         enum class Type { STRING, BOOLEAN, NUMBER, OTHER }
     }
 
+    @Immutable
     sealed interface Collapsable : JsonTreeElement {
         val state: TreeState
         val children: Map<String, JsonTreeElement>
