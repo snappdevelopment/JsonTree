@@ -157,12 +157,14 @@ public final class com/sebastianneubauer/jsontree/diff/JsonTreeDiffSuccess {
 
 public final class com/sebastianneubauer/jsontree/search/SearchState {
 	public static final field $stable I
+	public final fun getCaseSensitive ()Z
 	public final fun getQuery ()Ljava/lang/String;
 	public final fun getSelectedResultIndex ()Ljava/lang/Integer;
 	public final fun getSelectedResultListIndex ()Ljava/lang/Integer;
 	public final fun getTotalResults ()I
 	public final fun selectNext (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun selectPrevious (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setCaseSensitive (Z)V
 	public final fun setQuery (Ljava/lang/String;)V
 }
 

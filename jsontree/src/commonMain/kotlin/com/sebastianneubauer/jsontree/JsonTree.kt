@@ -126,13 +126,15 @@ public fun JsonTree(
                 )
 
                 val searchQuery = searchState.state.query
-                LaunchedEffect(searchQuery) {
+                val caseSensitive = searchState.state.caseSensitive
+                LaunchedEffect(searchQuery, caseSensitive) {
                     if (searchQuery == null) {
                         searchState.reset()
                     } else {
                         val expandedList = jsonParser.expandAllItems()
                         val searchResult = jsonSearch.search(
                             searchQuery = searchQuery,
+                            caseSensitive = caseSensitive,
                             jsonTreeList = expandedList,
                         )
                         searchState.state = searchResult

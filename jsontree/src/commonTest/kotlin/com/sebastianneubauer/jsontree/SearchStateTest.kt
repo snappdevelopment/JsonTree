@@ -32,6 +32,15 @@ public class SearchStateTest {
     }
 
     @Test
+    public fun updating_the_case_sensitivity_in_the_state_should_update_the_caseSensitive_variable(): TestResult = runTest {
+        val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
+        assertEquals(actual = searchState.caseSensitive, expected = false)
+
+        searchState.state = searchState.state.copy(caseSensitive = true)
+        assertEquals(actual = searchState.caseSensitive, expected = true)
+    }
+
+    @Test
     public fun updating_the_resultCount_in_the_state_should_update_the_resultCount_variable(): TestResult = runTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         assertEquals(actual = searchState.totalResults, expected = 0)
@@ -54,6 +63,7 @@ public class SearchStateTest {
         val searchState = SearchState(defaultDispatcher = dispatcher, mainDispatcher = dispatcher)
         val searchResult = SearchResult(
             query = "test",
+            caseSensitive = true,
             occurrences = mapOf(0 to SearchOccurrence(0, emptyList())),
             selectedOccurrence = SelectedSearchOccurrence(
                 occurrence = SearchOccurrence(0, emptyList()),
@@ -219,6 +229,7 @@ public class SearchStateTest {
 
     private val initialSearchResult = SearchResult(
         query = null,
+        caseSensitive = false,
         occurrences = emptyMap(),
         selectedOccurrence = null,
         selectedResultIndex = null,
@@ -239,6 +250,7 @@ public class SearchStateTest {
 
     private val resultWithOccurrences = SearchResult(
         query = "t",
+        caseSensitive = false,
         occurrences = mapOf(0 to searchOccurrence, 1 to searchOccurrence2),
         selectedOccurrence = SelectedSearchOccurrence(
             occurrence = searchOccurrence,

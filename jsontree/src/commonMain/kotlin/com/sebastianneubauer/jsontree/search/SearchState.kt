@@ -34,6 +34,7 @@ public class SearchState internal constructor(
     internal var state: SearchResult by mutableStateOf(
         SearchResult(
             query = null,
+            caseSensitive = false,
             occurrences = emptyMap(),
             selectedOccurrence = null,
             totalResults = 0,
@@ -47,6 +48,14 @@ public class SearchState internal constructor(
     public var query: String?
         set(value) { state = state.copy(query = value) }
         get() = state.query
+
+    /**
+     * Set to true if the result should be case-sensitive.
+     * Returns true if the result is case-sensitive.
+     */
+    public var caseSensitive: Boolean
+        set(value) { state = state.copy(caseSensitive = value) }
+        get() = state.caseSensitive
 
     /**
      * The total amount of results found for the [query].
@@ -172,6 +181,7 @@ public class SearchState internal constructor(
     internal fun reset() {
         state = SearchResult(
             query = null,
+            caseSensitive = false,
             occurrences = emptyMap(),
             selectedOccurrence = null,
             totalResults = 0,
@@ -182,6 +192,7 @@ public class SearchState internal constructor(
     @Immutable
     internal data class SearchResult(
         val query: String?,
+        val caseSensitive: Boolean,
         val occurrences: Map<Int, SearchOccurrence>,
         val selectedOccurrence: SelectedSearchOccurrence?,
         val totalResults: Int,

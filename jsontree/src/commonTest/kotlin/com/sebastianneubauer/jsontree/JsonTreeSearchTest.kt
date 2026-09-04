@@ -1,5 +1,6 @@
 package com.sebastianneubauer.jsontree
 
+import androidx.compose.runtime.key
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
 import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive.Type
@@ -24,7 +25,11 @@ public class JsonTreeSearchTest {
 
     @Test
     public fun query_with_one_occurrence_in_key_should_return_result_with_one_occurrence_in_key(): TestResult = runTest {
-        val result = underTest.search(searchQuery = "array1", jsonTreeList = TestData.expandedList)
+        val result = underTest.search(
+            searchQuery = "array1",
+            caseSensitive = false,
+            jsonTreeList = TestData.expandedList
+        )
 
         val range = SearchOccurrence.Range.Key(range = IntRange(0, 5))
         val occurrence = SearchOccurrence(
@@ -35,6 +40,7 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "array1",
+                caseSensitive = false,
                 occurrences = mapOf(1 to occurrence),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -48,7 +54,11 @@ public class JsonTreeSearchTest {
 
     @Test
     public fun query_with_multiple_occurrences_in_key_should_return_result_with_multiple_occurrence_in_key(): TestResult = runTest {
-        val result = underTest.search(searchQuery = "i", jsonTreeList = TestData.expandedList)
+        val result = underTest.search(
+            searchQuery = "i",
+            caseSensitive = false,
+            jsonTreeList = TestData.expandedList
+        )
 
         val range1 = SearchOccurrence.Range.Key(range = IntRange(2, 2))
         val range2 = SearchOccurrence.Range.Key(range = IntRange(4, 4))
@@ -61,6 +71,7 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "i",
+                caseSensitive = false,
                 occurrences = mapOf(4 to occurrence),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -74,7 +85,11 @@ public class JsonTreeSearchTest {
 
     @Test
     public fun query_with_one_occurrence_in_value_should_return_result_with_one_occurrence_in_value(): TestResult = runTest {
-        val result = underTest.search(searchQuery = "value1", jsonTreeList = TestData.expandedList)
+        val result = underTest.search(
+            searchQuery = "value1",
+            caseSensitive = false,
+            jsonTreeList = TestData.expandedList
+        )
 
         val range = SearchOccurrence.Range.Value(range = IntRange(0, 5))
         val occurrence = SearchOccurrence(
@@ -85,6 +100,7 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "value1",
+                caseSensitive = false,
                 occurrences = mapOf(2 to occurrence),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -98,7 +114,11 @@ public class JsonTreeSearchTest {
 
     @Test
     public fun query_with_multiple_occurrences_in_value_should_return_result_with_multiple_occurrence_in_value(): TestResult = runTest {
-        val result = underTest.search(searchQuery = "second", jsonTreeList = TestData.expandedList)
+        val result = underTest.search(
+            searchQuery = "second",
+            caseSensitive = false,
+            jsonTreeList = TestData.expandedList
+        )
 
         val range1 = SearchOccurrence.Range.Value(range = IntRange(0, 5))
         val range2 = SearchOccurrence.Range.Value(range = IntRange(6, 11))
@@ -110,6 +130,7 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "second",
+                caseSensitive = false,
                 occurrences = mapOf(4 to occurrence),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -123,7 +144,11 @@ public class JsonTreeSearchTest {
 
     @Test
     public fun query_with_occurrences_in_key_and_value_should_return_result_with_occurrences_in_key_and_value(): TestResult = runTest {
-        val result = underTest.search(searchQuery = "r", jsonTreeList = TestData.expandedList)
+        val result = underTest.search(
+            searchQuery = "r",
+            caseSensitive = false,
+            jsonTreeList = TestData.expandedList
+        )
 
         val range1 = SearchOccurrence.Range.Key(range = IntRange(1, 1))
         val range2 = SearchOccurrence.Range.Key(range = IntRange(2, 2))
@@ -139,6 +164,7 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "r",
+                caseSensitive = false,
                 occurrences = mapOf(1 to occurrence, 4 to occurrence2),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -146,6 +172,65 @@ public class JsonTreeSearchTest {
                 ),
                 selectedResultIndex = 0,
                 totalResults = 3
+            )
+        )
+    }
+
+    @Test
+    public fun case_sensitive_search_should_return_only_case_matching_results(): TestResult = runTest {
+        val result = underTest.search(
+            searchQuery = "A",
+            caseSensitive = true,
+            jsonTreeList = listOf(TestData.array1.copy(key = "Array1"))
+        )
+
+        val range = SearchOccurrence.Range.Key(range = IntRange(0, 0))
+        val occurrence = SearchOccurrence(
+            listIndex = 0,
+            ranges = listOf(range)
+        )
+        assertEquals(
+            actual = result,
+            expected = SearchResult(
+                query = "A",
+                caseSensitive = true,
+                occurrences = mapOf(0 to occurrence),
+                selectedOccurrence = SelectedSearchOccurrence(
+                    occurrence = occurrence,
+                    range = range
+                ),
+                selectedResultIndex = 0,
+                totalResults = 1
+            )
+        )
+    }
+
+    @Test
+    public fun case_insensitive_search_should_return_all_matching_results(): TestResult = runTest {
+        val result = underTest.search(
+            searchQuery = "A",
+            caseSensitive = false,
+            jsonTreeList = listOf(TestData.array1.copy(key = "Array1"))
+        )
+
+        val range = SearchOccurrence.Range.Key(range = IntRange(0, 0))
+        val range2 = SearchOccurrence.Range.Key(range = IntRange(3, 3))
+        val occurrence = SearchOccurrence(
+            listIndex = 0,
+            ranges = listOf(range, range2)
+        )
+        assertEquals(
+            actual = result,
+            expected = SearchResult(
+                query = "A",
+                caseSensitive = false,
+                occurrences = mapOf(0 to occurrence),
+                selectedOccurrence = SelectedSearchOccurrence(
+                    occurrence = occurrence,
+                    range = range
+                ),
+                selectedResultIndex = 0,
+                totalResults = 2
             )
         )
     }
