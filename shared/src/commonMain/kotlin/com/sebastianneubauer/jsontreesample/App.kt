@@ -57,6 +57,7 @@ import com.sebastianneubauer.jsontree.search.rememberSearchState
 import com.sebastianneubauer.jsontreesample.shared.generated.resources.Res
 import com.sebastianneubauer.jsontreesample.shared.generated.resources.arrow_down
 import com.sebastianneubauer.jsontreesample.shared.generated.resources.arrow_up
+import com.sebastianneubauer.jsontreesample.shared.generated.resources.match_case
 import com.sebastianneubauer.jsontreesample.ui.theme.JsonTreeTheme
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -252,6 +253,17 @@ private fun MainScreen() {
                     modifier = Modifier.padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch { searchState.caseSensitive = !searchState.caseSensitive }
+                        },
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.match_case),
+                            contentDescription = "case-sensitive",
+                        )
+                    }
+
                     IconButton(
                         onClick = {
                             coroutineScope.launch { searchState.selectNext() }

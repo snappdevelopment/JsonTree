@@ -37,10 +37,15 @@ internal class JsonTreeSearch(
 ) {
     suspend fun search(
         searchQuery: String,
+        caseSensitive: Boolean,
         jsonTreeList: List<JsonTreeElement>,
     ): SearchResult = withContext(defaultDispatcher) {
         // create Regex here for better performance
-        val searchRegex = Regex("(?i)${Regex.escape(searchQuery)}")
+        val searchRegex = if(caseSensitive) {
+            Regex("(?)${Regex.escape(searchQuery)}")
+        } else {
+            Regex("(?i)${Regex.escape(searchQuery)}")
+        }
 
         val searchOccurrences = buildMap {
             jsonTreeList.forEachIndexed { index, jsonTreeElement ->
@@ -61,6 +66,7 @@ internal class JsonTreeSearch(
 
         SearchResult(
             query = searchQuery,
+            caseSensitive = caseSensitive,
             occurrences = searchOccurrences,
             totalResults = searchOccurrences.values.sumOf { it.ranges.size },
             selectedResultIndex = if (searchOccurrences.isNotEmpty()) 0 else null,
