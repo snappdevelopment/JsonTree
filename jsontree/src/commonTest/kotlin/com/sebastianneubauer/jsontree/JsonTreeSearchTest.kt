@@ -1,6 +1,5 @@
 package com.sebastianneubauer.jsontree
 
-import androidx.compose.runtime.key
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Array
 import com.sebastianneubauer.jsontree.JsonTreeElement.Collapsable.Object
 import com.sebastianneubauer.jsontree.JsonTreeElement.Primitive.Type
@@ -12,7 +11,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -40,7 +38,6 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "array1",
-                caseSensitive = false,
                 occurrences = mapOf(1 to occurrence),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -71,7 +68,6 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "i",
-                caseSensitive = false,
                 occurrences = mapOf(4 to occurrence),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -100,7 +96,6 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "value1",
-                caseSensitive = false,
                 occurrences = mapOf(2 to occurrence),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -130,7 +125,6 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "second",
-                caseSensitive = false,
                 occurrences = mapOf(4 to occurrence),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -164,7 +158,6 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "r",
-                caseSensitive = false,
                 occurrences = mapOf(1 to occurrence, 4 to occurrence2),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -193,7 +186,6 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "A",
-                caseSensitive = true,
                 occurrences = mapOf(0 to occurrence),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
@@ -223,7 +215,6 @@ public class JsonTreeSearchTest {
             actual = result,
             expected = SearchResult(
                 query = "A",
-                caseSensitive = false,
                 occurrences = mapOf(0 to occurrence),
                 selectedOccurrence = SelectedSearchOccurrence(
                     occurrence = occurrence,
