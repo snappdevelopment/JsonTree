@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.sebastianneubauer.jsontreesample"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.sebastianneubauer.jsontreesample"
         minSdk = 23
-        targetSdk = 36
+        targetSdk = 37
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

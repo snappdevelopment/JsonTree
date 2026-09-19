@@ -13,7 +13,7 @@ version = "1.0"
 kotlin {
     android {
         namespace = "com.sebastianneubauer.jsontreesample.shared"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 23
 
         androidResources.enable = true
