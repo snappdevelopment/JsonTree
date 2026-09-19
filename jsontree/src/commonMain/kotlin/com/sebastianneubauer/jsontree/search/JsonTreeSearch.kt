@@ -66,7 +66,6 @@ internal class JsonTreeSearch(
 
         SearchResult(
             query = searchQuery,
-            caseSensitive = caseSensitive,
             occurrences = searchOccurrences,
             totalResults = searchOccurrences.values.sumOf { it.ranges.size },
             selectedResultIndex = if (searchOccurrences.isNotEmpty()) 0 else null,

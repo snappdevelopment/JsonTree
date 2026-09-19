@@ -126,7 +126,7 @@ public fun JsonTree(
                 )
 
                 val searchQuery = searchState.state.query
-                val caseSensitive = searchState.state.caseSensitive
+                val caseSensitive = searchState.config.caseSensitive
                 LaunchedEffect(searchQuery, caseSensitive) {
                     if (searchQuery == null) {
                         searchState.reset()
