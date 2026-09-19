@@ -260,6 +260,7 @@ private fun MainScreen() {
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.match_case),
+                            tint = if(searchState.caseSensitive) Color.Red else Color.Black,
                             contentDescription = "case-sensitive",
                         )
                     }
