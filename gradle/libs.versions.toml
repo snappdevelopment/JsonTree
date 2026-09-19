@@ -1,6 +1,6 @@
 [versions]
 android-minSdk = "21"
-android-compileSdk = "36"
+android-compileSdk = "37"
 
 java-toolchain = "17"
 
